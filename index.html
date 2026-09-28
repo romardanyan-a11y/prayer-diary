@@ -968,7 +968,7 @@ const CS=(()=>{if(!TG||!TG.CloudStorage||!TG.isVersionAtLeast||!TG.isVersionAtLe
       async delete(){const ks=[id].concat(await this._old());await cb("removeItems",ks)},
       async _old(){return(await CS.keys()).filter(k=>{const m=chunk(k);return m&&m[1]===id})}}}}})();
 async function connect(){
-  if(!CS){setSync("local");return}
+  if(!CS){setSync("local");maybeWelcome();return}
   try{
     setSync("syncing");
     const docs=await CS.getAll();
@@ -979,6 +979,7 @@ async function connect(){
     [...pending].forEach(write);
     if(!pending.size)setSync("ok");
   }catch(e){setSync(col?"err":"local")}
+  maybeWelcome();
 }
 if(TG){try{TG.ready();TG.expand();TG.setHeaderColor&&TG.setHeaderColor(getComputedStyle(document.body).backgroundColor||"#07080E");TG.setBackgroundColor&&TG.setBackgroundColor(getComputedStyle(document.body).backgroundColor||"#07080E");TG.disableVerticalSwipes&&TG.disableVerticalSwipes()}catch(e){}}
 
@@ -1597,7 +1598,7 @@ function churchHome(){if(!TG||API.startsWith("__"))return `<button class="jbtn" 
   return `<button class="chc" data-a="tab" data-v="church"><span class="be">⛪</span><span><b>Церковь</b><small>${CH.loaded?`${open} ${plural(open,"просьба","просьбы","просьб")} о молитве${pl?` · ${esc(pl.title)}: ${refsTxt(planToday(pl))}${pl.myDone.includes(pl.today)?" ✓":""}`:""}`:"Молитвенная стена и чтение вместе"}</small></span>${ic("right")}</button>
   <button class="jbtn" style="width:100%;margin:0 0 12px" data-a="tab" data-v="stats"><span class="ti c-blue">${ic("chart")}</span>Мои итоги</button>`}
 function vChurch(){
-  const head=`<header class="top"><div class="date">Вместе с церковью</div>${CH.me&&CH.me.admin?`<button class="sync" data-a="statsOpen">📊 Статистика</button>`:""}</header><h1>Церковь</h1>`;
+  const head=`<header class="top"><div class="date">Вместе с церковью</div></header><h1>Церковь</h1>`;
   if(API.startsWith("__"))return head+`<div class="empty"><div class="ei">⛪</div><b>Скоро здесь</b>Молитвенная стена церкви, общие планы чтения и утренние сообщения от бота. Подключаем сервер 🙏</div>`;
   if(!TG)return head+`<div class="empty"><div class="ei">⛪</div><b>Открой через Telegram</b>Молитвенная стена и общие планы чтения работают в боте — там тебя узнают без регистрации.<br><br><a class="btn" href="${BOT_URL}" target="_blank" rel="noopener">Открыть @PrayerDiary_bot</a></div>`;
   if(!CH.loaded)return head+(CH.err?`<div class="empty"><b>Не получилось загрузить</b>${esc(CH.err)}<br><br><button class="btn sm" data-a="chReload">Повторить</button></div>`:`<div class="empty">Загружаю…</div>`);
@@ -1648,23 +1649,18 @@ function planNewSheet(){ui.pn={b:42,per:1};const o=BOOKS.map((x,i)=>`<option val
   <label class="l" for="pnC">Ссылка на чат для обсуждения (необязательно)</label><input class="in" id="pnC" placeholder="https://t.me/…">
   <div class="set mt"><div><b>Сообщить всем</b><span>Бот напишет каждому о новом плане</span></div><button class="pill" id="pnA" data-a="pnA">Нет</button></div>`,"plan")}
 function ping(kind){if(!TG||API.startsWith("__"))return;call("event",{kind}).catch(()=>{})}
-async function statsSheet(){openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Статистика церкви</h2><span style="width:40px"></span></div><div class="empty">Считаю…</div>`,"stats");
-  let s;try{s=await call("admin/stats")}catch(e){redrawSheet(`<div class="empty">${esc(e.message)}</div>`);return}
-  const T=s.totals,max=Math.max(1,...s.series.map(x=>x.active)),tile=(n,l,c)=>`<div class="tile"><b style="color:${c||"inherit"}">${n}</b><span>${l}</span></div>`;
-  const wd=d=>WD[(parseDk(d).getDay()+6)%7];
-  redrawSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Статистика церкви</h2><span style="width:40px"></span></div>
-  <div class="trio">${tile(s.users,"всего людей")}${tile(s.active.today,"сегодня","var(--green)")}${tile(s.newWeek,"новых за неделю","var(--gold)")}</div>
-  <div class="trio">${tile(s.active.week,"за неделю")}${tile(s.active.month,"за месяц")}${tile(s.remind,"с утренним ботом")}</div>
-  <section class="card"><h2>Активность за 14 дней</h2><div class="small">Сколько человек открывали дневник</div>
-    <div class="chart">${s.series.map((x,i)=>`<div class="cb ${x.active?"on":""} ${i===13?"t":""}"><i style="height:${Math.max(4,x.active/max*100)}%" title="${x.active}"></i><span>${i===13?"сег":wd(x.day)}</span></div>`).join("")}</div></section>
-  <section class="card"><h2>Чем занимались за 14 дней</h2><div class="small">Обезличенные счётчики: кто именно — не видно</div>
-    ${[["read","📖 Прочитано глав"],["quiz","🧩 Пройдено викторин"],["comment","✦ Открыто комментариев"],["prayer","🕯 Молитвенных сессий"],["exp","✨ Записано опытов"]].map(([k,l])=>`<div class="thx"><span>${l}</span><b>${T[k]||0}</b></div>`).join("")}</section>
-  <section class="card"><h2>Молитвенная стена</h2>
-    <div class="thx"><span>🙏 Ждут молитвы</span><b>${s.wall.open}</b></div><div class="thx"><span>🙌 Отвечено</span><b>${s.wall.answered}</b></div><div class="thx"><span>Молитв за неделю</span><b>${s.wall.praysWeek}</b></div><div class="thx"><span>Молитв всего</span><b>${s.wall.prays}</b></div></section>
-  ${s.plans.length?`<section class="card"><h2>Планы чтения</h2>${s.plans.map(p=>`<div class="bar" style="grid-template-columns:1fr 90px 44px"><span>${esc(p.title)}<br><small class="small">${p.members} чел. · день ${p.today}/${p.days}</small></span><div class="tr"><i style="width:${p.pct}%"></i></div><span class="n">${p.pct}%</span></div>`).join("")}<div class="small">% — сколько дней прочитано от возможного на сегодня</div></section>`:""}
-  <section class="card"><h2>Люди</h2><div class="small" style="margin-bottom:6px">Последний вход · дней за неделю · молитв на стене</div>
-    ${s.people.map(u=>`<div class="thx"><span>${esc(u.name)}${u.username?` <span class="small">@${esc(u.username)}</span>`:""}${u.chat_ok?"":" <span class=\"small\">· бот выкл.</span>"}</span><span class="small" style="flex:none">${ago(u.seen)} · ${u.days7}/7 · 🙏${u.prays}</span></div>`).join("")}</section>
-  <p class="small" style="text-align:center">Личные молитвы, дневник и опыты хранятся в Telegram каждого человека — их не видит никто, включая администратора.</p>`)}
+const WELCOME=[
+  ["🕊️","Мир тебе!","Это молитвенный дневник нашей церкви — место, чтобы каждый день побыть с Богом.<br><br>Всё личное — молитвы, дневник, покаяние — видишь <b>только ты</b>. Оно хранится в твоём Telegram и не теряется при смене телефона."],
+  ["🙏","Мои молитвы","Записывай нужды: за кого и о чём молишься. Отмечай «помолился», а когда Бог ответит — нажми <b>«Бог ответил»</b>. Так соберутся твои свидетельства.<br><br>Кнопка <b>«Начать молитву»</b> на главном экране — спокойное время с Богом: стих, благодарность, нужды, тихая музыка."],
+  ["📖","Библия","Синодальный перевод прямо в приложении. Значки у стихов — короткие интересные комментарии: история, значения слов, места. <b>🕊️</b> — взгляд адвентистов.<br><br>В конце главы — вопросы для размышления и <b>викторина 🧩</b>. Нажми на стих, чтобы выделить его, написать заметку или сделать картинку."],
+  ["⛪","Церковь","<b>Молитвенная стена:</b> попроси о молитве (можно анонимно) и помолись за других — автор узнает, что за него молятся.<br><br><b>Читаем вместе:</b> общие планы чтения Библии. А ещё бот может присылать тебе <b>утреннее сообщение</b> со стихом дня."],
+  ["✨","Дневник и опыты","Записывай мысли, благодарности, проповеди и <b>опыты</b> — как Бог действовал в твоей жизни. Потом так радостно их перечитывать!<br><br>Опытом или стихом можно поделиться с друзьями в Telegram одной кнопкой."]];
+function welcomeSheet(i){ui.wi=i=Math.max(0,Math.min(WELCOME.length-1,i||0));const [e,t,x]=WELCOME[i],last=i===WELCOME.length-1;
+  const html=`<div class="sh-top"><span style="width:40px"></span><div class="qz-dots" style="margin:0">${WELCOME.map((_,k)=>`<i class="${k<=i?"on":""}" style="width:22px"></i>`).join("")}</div>${last?`<span style="width:40px"></span>`:`<button class="pill" data-a="welcomeDone">Пропустить</button>`}</div>
+  <div style="text-align:center;padding:6px 4px 0"><div style="font-size:64px;line-height:1.1">${e}</div><h3 style="font-size:26px;font-weight:800;letter-spacing:-.03em;margin:12px 0 10px">${t}</h3><p style="font-size:16.5px;line-height:1.55;margin:0;color:var(--text)">${x}</p></div>
+  <div class="row2 mt" style="margin-top:22px">${i?`<button class="btn ghost" data-a="welcomeGo" data-v="${i-1}">${ic("left")}Назад</button>`:`<span></span>`}${last?`<button class="btn" data-a="welcomeDone">Начать 🙏</button>`:`<button class="btn" data-a="welcomeGo" data-v="${i+1}">Дальше${ic("right")}</button>`}</div>`;
+  if(ui.sheetKind==="welcome")redrawSheet(html);else openSheet(html,"welcome")}
+function maybeWelcome(){if(S.meta.welcomed||ui.welcomeShown)return;ui.welcomeShown=true;setTimeout(()=>{if(!S.meta.welcomed&&!PM&&$("#sheet").classList.contains("hidden"))welcomeSheet(0)},600)}
 async function chDo(fn,ok){try{await fn();if(ok)toast(ok);await chLoad(true)}catch(e){toast(e.message)}}
 
 const CMT={};
@@ -2140,6 +2136,7 @@ function settingsSheet(redraw){
   <div class="set"><div><b>Часы молитвы</b><span>Утро, день, вечер — как Даниил</span></div><button class="pill ${S.meta.hoursOff?"":"on"}" data-a="hoursTog">${S.meta.hoursOff?"Выкл":"Вкл"}</button></div>
   <div class="set"><div><b>Код для покаяния</b><span>Защищает от случайного взгляда</span></div><button class="pill ${S.meta.pin?"on":""}" data-a="pinSheet">${S.meta.pin?"Вкл":"Выкл"}</button></div>
   <div class="set"><div><b>Оформление</b></div><div class="pick">${[["auto","Авто"],["dark","Тёмное"],["light","Светлое"]].map(([k,l])=>`<button class="${th===k?"on":""}" data-a="theme" data-v="${k}">${l}</button>`).join("")}</div></div>
+  <button class="set" style="width:100%;text-align:left" data-a="welcomeOpen"><div><b>Как пользоваться дневником</b><span>Короткое знакомство с разделами</span></div>${ic("right")}</button>
   <label class="l">Сохранность</label>
   <div class="set"><div><b>${ui.sync==="local"?"На этом устройстве":"В твоём Telegram"}</b><span>${ui.sync==="local"?"Открой дневник через бота в Telegram — записи будут сохраняться в твоём аккаунте и не потеряются при смене телефона":"Записи видны только тебе и доступны на всех твоих устройствах"}</span></div><span data-sync class="sync ${ui.sync}">${syncInner()}</span></div>
   <p class="small" style="margin:2px 6px 12px">Версия ${APPV} · ожидают сохранения: ${pending.size}${ui.lastErr?" · ошибка: "+esc(ui.lastErr):""}${pending.size&&col?` · <button class="textbtn" data-a="syncNow" style="padding:0">Сохранить сейчас</button>`:""}</p>
@@ -2291,7 +2288,9 @@ const act={
   rpCh:d=>openReader(ui.rp.book,+d.v),
   rSearch:()=>rSearchSheet(),
   rSettings:()=>rSettingsSheet(),
-  statsOpen:()=>statsSheet(),
+  welcomeGo:d=>welcomeSheet(+d.v),
+  welcomeDone:()=>{if(!S.meta.welcomed){S.meta.welcomed=Date.now();persist("meta")}closeSheet()},
+  welcomeOpen:()=>{closeSheet();setTimeout(()=>welcomeSheet(0),350)},
   chSeg:d=>{CH.seg=d.v;render()},
   chReload:()=>{CH.err="";chLoad()},
   wallNew:()=>wallNewSheet(),

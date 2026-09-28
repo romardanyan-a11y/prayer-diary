@@ -1581,7 +1581,7 @@ const RP=()=>{let o={};try{o=JSON.parse(localStorage.getItem("pj-reader")||"{}")
 function setRP(k,v){const o=RP();o[k]=v;try{localStorage.setItem("pj-reader",JSON.stringify(o))}catch(e){}}
 
 /* ---------- church (server) ---------- */
-const API="__API_URL__";
+const API="https://prayer-diary-api.romardanyan.workers.dev";
 const CH={loaded:false,loading:false,err:"",me:null,wall:[],plans:[],seg:"wall"};
 async function call(path,body){if(!TG)throw new Error("Открой дневник через Telegram");
   const r=await fetch(API+"/api/"+path,{method:"POST",headers:{"content-type":"application/json","x-init-data":TG.initData},body:JSON.stringify(Object.assign({tz:new Date().getTimezoneOffset()},body||{}))});

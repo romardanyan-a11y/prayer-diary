@@ -578,6 +578,16 @@ p.reader .vs{font-size:var(--rs);line-height:1.7}
 .pin p{margin:8px 0 0;font-size:15.5px;white-space:pre-wrap;word-break:break-word}.pin a{color:var(--gold);font-weight:700}
 .forme{display:flex;align-items:center;gap:13px;width:100%;text-align:left;padding:14px 16px;border-radius:24px;margin-bottom:12px;color:#3A2400;background:linear-gradient(135deg,#FFF1C4,#FFD27A 55%,#FFB86B)}
 .forme small{display:block;font-size:12.5px;font-weight:700;opacity:.7}.forme b{display:block;font-size:17px;font-weight:800}.forme span span{display:block;font-size:13px;opacity:.8;font-weight:600}.forme .fm-h{font-size:32px}.forme>svg.i{margin-left:auto;opacity:.6}
+.duec{border-radius:24px;padding:14px 16px;margin-bottom:12px;background:linear-gradient(135deg,color-mix(in srgb,#43C985 18%,transparent),color-mix(in srgb,#5AA9F0 10%,transparent)),var(--card);border:1px solid var(--stroke)}.duec p{margin:8px 0 12px;font-size:15.5px}
+.wcard{display:flex;align-items:center;gap:13px;width:100%;text-align:left;padding:14px 16px;border-radius:24px;margin-bottom:12px;background:linear-gradient(135deg,color-mix(in srgb,#5AA9F0 22%,transparent),color-mix(in srgb,#43C985 12%,transparent)),var(--card);border:1px solid var(--stroke)}
+.wcard small{display:block;font-size:12.5px;font-weight:700;color:var(--muted)}.wcard b{display:block;font-size:18px;font-weight:800}.wcard span span{display:block;font-size:13px;color:var(--muted);font-weight:600}.wcard .be{font-size:38px}.wcard>svg.i{margin-left:auto;opacity:.5}
+.live-l{margin-top:10px;padding:8px 12px;border-radius:14px;background:color-mix(in srgb,#FF9E4D 16%,transparent);font-size:13.5px;font-weight:600}.live-l .textbtn{padding:0 0 0 6px}
+.pcard.sw{position:relative;touch-action:pan-y;user-select:none;-webkit-user-select:none;transition:transform .25s ease}
+.sw-st{position:absolute;top:18px;padding:6px 12px;border-radius:12px;font-weight:800;font-size:14px;letter-spacing:.06em;opacity:0;pointer-events:none}
+.sw-l{left:16px;border:2px solid var(--muted);color:var(--muted);transform:rotate(-8deg)}.sw-r{right:16px;border:2px solid #43C985;color:#2BB56F;transform:rotate(8deg)}
+.cd-t{height:4px;border-radius:9px;background:var(--card2);overflow:hidden;margin:14px 4px 6px}.cd-t i{display:block;height:100%;width:0;background:var(--grad);animation:cdfill 60s linear forwards}
+@keyframes cdfill{to{width:100%}}
+.sw-hint{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;font-weight:600;color:var(--muted);margin:0 4px}
 .qs{margin:12px 0 4px;padding:0;list-style:none;counter-reset:q}
 .qs li{counter-increment:q;position:relative;padding:10px 0 10px 36px;font-size:15.5px;border-top:1px solid var(--stroke)}
 .qs li::before{content:counter(q);position:absolute;left:0;top:9px;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-size:12.5px;font-weight:800;background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--gold)}
@@ -1196,12 +1206,12 @@ function vHome(){
   return `<section class="sky" aria-label="Твоё небо молитв"><canvas id="skyC" aria-hidden="true"></canvas>
     <div class="sky-top"><div><div class="sky-date">${cap(fLong.format(new Date()))}</div><div class="sky-greet">${greet()}</div>
     <div class="sky-cap">${tt?`<b>${tt}</b> ${plural(tt,"звезда","звезды","звёзд")} на твоём небе — по одной за каждую молитву`:"Каждая молитва зажжёт здесь звезду"}</div>
-    <div class="sky-chips">${s?`<span>🔥 ${s} ${plural(s,"день","дня","дней")} в молитве</span>`:""}${bs?`<span>📖 ${bs} ${plural(bs,"день","дня","дней")} в Слове</span>`:""}${an?`<span>✨ ${an} ${plural(an,"ответ","ответа","ответов")}</span>`:""}</div></div>
+    <div class="sky-chips">${s?`<span>🔥 ${s} ${plural(s,"день","дня","дней")} в молитве</span>`:""}${bs?`<span>📖 ${bs} ${plural(bs,"день","дня","дней")} в Слове</span>`:""}${an?`<span>✨ ${an} ${plural(an,"ответ","ответа","ответов")}</span>`:""}${CH.live&&CH.live.global?`<span>🔥 сейчас молятся: ${CH.live.global}</span>`:""}</div></div>
     <button class="gl" data-a="settings" aria-label="Настройки">${ic("gear")}</button></div>
     ${weekStrip()}</section>
   ${ringsCard()}
   <button class="cta" data-a="startPrayer"><span class="orb">${ic("flame")}</span><span><b>Начать молитву</b><small>Молитва, покаяние или пост</small></span><span class="go">${ic("play")}</span></button>
-  ${fastCard()}${capsuleHome()}${bdayCard()}${todayCard()}${hoursCard()}${srsCard()}${forMeCard()}${churchHome()}
+  ${fastCard()}${capsuleHome()}${bdayCard()}${todayCard()}${dueCard()}${hoursCard()}${srsCard()}${forMeCard()}${worldCard()}${churchHome()}
   ${(new Date().getMonth()===11&&new Date().getDate()>=15)||(new Date().getMonth()===0&&new Date().getDate()<=15)?`<button class="weekc" data-a="yearOpen" style="background:radial-gradient(100% 120% at 0% 0%,#FFB35C,transparent 60%),radial-gradient(100% 120% at 100% 100%,#6B5CF0,transparent 60%),#2A1030"><span class="wk-orb">🎆</span><span><small>Итоги года</small><b>Твой год с Богом</b></span>${ic("right")}</button>`:""}
   ${(wd===0||wd===1)?`<button class="weekc" data-a="storyOpen"><span class="wk-orb">✨</span><span><small>${wd===0?"Неделя подходит к концу":"Новая неделя"}</small><b>Твоя неделя с Богом</b></span>${ic("right")}</button>`:""}
   ${h>=17&&!confDone?`<button class="confc" data-a="confStart"><span class="cf-orb">🤍</span><span><small>Вечерний разбор</small><b>Посмотри на день с Богом</b><span>Покайся — и засыпай прощённым</span></span>${ic("right")}</button>`:""}
@@ -1631,6 +1641,7 @@ async function call(path,body){if(!TG)throw new Error("Открой дневни
   const o=await r.json().catch(()=>({error:"Нет связи с сервером"}));if(!r.ok||o.error)throw new Error(o.error||"Ошибка");return o}
 async function chLoad(quiet){if(!TG||CH.loading)return;CH.loading=true;CH.tried=true;if(!quiet&&!CH.loaded&&ui.tab==="church")render();
   call("forme/get").then(f=>{CH.forme=f;if(ui.tab==="home"&&$("#sheet").classList.contains("hidden"))render()}).catch(()=>{});
+  liveLoad();worldLoad();
   const get=async()=>{const sc=CH.scope;const [me,w,p]=await Promise.all([call("me"),call("wall/list",{scope:sc}).catch(()=>null),call("plan/list")]);
     let wall=w;if(sc!=="global"&&!(me.churches||[]).some(c=>c.id===sc)){setScope("global");wall=null}
     if(!wall||CH.scope!==sc)wall=await call("wall/list",{scope:CH.scope});return [me,wall,p]};
@@ -1654,6 +1665,8 @@ function vChurch(){
   const g=CH.scope==="global",cc=curCh(),adm=chAdm(cc);
   const scopes=`<div class="filters scopes"><button class="${g?"on":""}" data-a="chScope" data-v="global">🌍 Все христиане</button>${myCh().map(c=>`<button class="${CH.scope===c.id?"on":""}" data-a="chScope" data-v="${c.id}">${c.emoji} ${esc(c.name)}</button>`).join("")}<button data-a="chAdd">${ic("plus")} Церковь</button></div>`;
   const card=cc?`<section class="chcard"><div class="chc-h"><span class="che">${cc.emoji}</span><div><b>${esc(cc.name)}</b><span>${cc.city?esc(cc.city)+" · ":""}👥 ${cc.members} ${plural(cc.members,"участник","участника","участников")} · ${(CH_MODES[cc.mode]||CH_MODES.private)[0]}${cc.role==="owner"?" · 👑 ты хозяин":cc.role==="admin"?" · ⭐ ты помощник":""}</span></div><button class="rb" data-a="chMenu" aria-label="Настройки церкви">⋯</button></div>${cc.about?`<p>${esc(cc.about)}</p>`:""}
+    ${(()=>{const L=CH.live&&CH.live.churches&&CH.live.churches[cc.id];return L&&L.n?`<div class="live-l">🔥 Сейчас молятся: ${L.names.map(esc).join(", ")}${L.n>L.names.length?" и ещё "+(L.n-L.names.length):""} <button class="textbtn" data-a="startPrayer">Присоединиться</button></div>`:""})()}
+    ${cc.liveWd!=null&&cc.liveTime?`<div class="small" style="margin-top:8px">🔥 Общая молитва: ${LIVE_WD[cc.liveWd].toLowerCase()} в ${esc(cc.liveTime)} — бот позовёт</div>`:""}
     ${adm&&cc.pending?`<button class="btn sm green wide" style="margin-top:12px" data-a="chReqs">📥 Заявки на вступление: ${cc.pending}</button>`:""}
     <div class="row2"><button class="btn sm" data-a="chInvite">${ic("share")}Пригласить</button><button class="btn sm ghost" data-a="chMembers">${ic("users")}Участники</button></div></section>`
     :(!myCh().length?`<button class="chc" data-a="chAdd"><span class="be">⛪</span><span><b>Найди свою церковь</b><small>Поиск по названию и городу, вступление по коду — или создай свою: у вас будет своя стена молитв и планы чтения</small></span>${ic("plus")}</button>`:"");
@@ -1716,6 +1729,44 @@ async function pfCandidates(){const box=$("#pfCands");if(!box)return;box.innerHT
 async function inviteSuggest(x){const r=await choose("@"+x.tg+" ещё не пользуется дневником. Пригласить? Когда придёт — увидит все молитвы за себя, даже прошлые.",[["inv","📨 Пригласить"],["no","Позже","ghost"]]);
   if(r==="inv")tgShare("Я молюсь за тебя 🙏 Загляни в «Молитвенный дневник» — там видно, сколько людей за тебя молятся, и можно вести свои молитвы и читать Библию.")}
 function pfTgLabel(){const f=ui.pform;return f.tgId?"✓ "+esc(f.tgName||"")+(f.tg?" · @"+esc(f.tg):" (из церкви)"):""}
+/* ---------- молимся сейчас ---------- */
+function liveLoad(){if(!tgOn())return;call("live/get").then(r=>{CH.live=r;if((ui.tab==="home"||ui.tab==="church")&&$("#sheet").classList.contains("hidden")&&!PM)render()}).catch(()=>{})}
+setInterval(()=>{if(tgOn()&&!document.hidden&&!PM&&(ui.tab==="home"||ui.tab==="church"))liveLoad()},60000);
+const LIVE_WD=["По понедельникам","По вторникам","По средам","По четвергам","По пятницам","По субботам","По воскресеньям","Каждый день"];
+/* ---------- страна дня ---------- */
+let WORLD=null;
+function worldToday(){if(!WORLD||!WORLD.length)return null;return WORLD[Math.floor(Date.parse(today()+"T00:00:00Z")/864e5)%WORLD.length]}
+function worldJson(){if(WORLD||ui.worldTry)return;ui.worldTry=true;fetch("world.json").then(r=>r.json()).then(j=>{WORLD=j;if(ui.tab==="home"&&$("#sheet").classList.contains("hidden")&&!PM)render()}).catch(()=>{setTimeout(()=>{ui.worldTry=false},60000)})}
+function worldLoad(){worldJson();
+  if(tgOn())call("world/get",{day:today()}).then(r=>{CH.world=Object.assign({day:today()},r);if(ui.tab==="home"&&$("#sheet").classList.contains("hidden")&&!PM)render()}).catch(()=>{})}
+function worldCard(){if(!WORLD){worldJson();return ""}const c=worldToday();if(!c)return "";const W=CH.world&&CH.world.day===today()?CH.world:null,mine=(S.meta.world||{})[today()]||(W&&W.mine);
+  return `<button class="wcard" data-a="worldOpen"><span class="be">${c.f}</span><span><small>🌍 Сегодня весь дневник молится за</small><b>${esc(c.n)}</b><span>${W&&W.n?W.n+" "+plural(W.n,"человек уже помолился","человека уже помолились","человек уже помолились"):"Помолись вместе со всеми"}${mine?" · ✓ ты тоже":""}</span></span>${ic("right")}</button>`}
+function worldSheet(){const c=worldToday();if(!c)return;const W=CH.world&&CH.world.day===today()?CH.world:null,mine=(S.meta.world||{})[today()]||(W&&W.mine);
+  const html=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Страна дня</h2><span style="width:40px"></span></div>
+  <div style="text-align:center;margin:0 0 14px"><div style="font-size:72px;line-height:1.05">${c.f}</div><h3 style="font-size:28px;font-weight:800;margin:8px 0 4px">${esc(c.n)}</h3><div class="small">${esc([c.cap,c.reg].filter(Boolean).join(" · "))}</div></div>
+  <p class="note">${esc(c.about)}</p>
+  <div class="card"><h2>Помолимся</h2><ol class="qs">${c.pray.map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>
+  <button class="btn wide ${mine?"ghost":""}" data-a="worldPray" ${mine?"disabled":""}>${mine?"✓ Ты помолился сегодня":"🙏 Помолился за "+esc(c.n)}</button>
+  <p class="small" style="text-align:center;margin-top:10px">${W&&W.n?"Сегодня уже помолились: "+W.n+" "+plural(W.n,"человек","человека","человек")+". ":""}Завтра — другая страна. За 103 дня обойдём весь мир 🌍</p>`;
+  if(ui.sheetKind==="world")redrawSheet(html);else openSheet(html,"world")}
+/* ---------- сторис-свидетельство ---------- */
+async function makeTestStory(o){const W=1080,H=1920,cv=document.createElement("canvas");cv.width=W;cv.height=H;const ctx=cv.getContext("2d");
+  try{await Promise.race([Promise.all([document.fonts.load('italic 500 60px "Cormorant Garamond"'),document.fonts.load('800 60px "Onest"')]),new Promise(r=>setTimeout(r,1500))])}catch(e){}
+  const st=makeStars(160,[{id:"t1"},{id:"t2"},{id:"t3"}]).map(x=>Object.assign({},x,{y:x.y*.5}));paintSky(ctx,W,H,0,{stars:st,scale:2.6,hillY:.88,crossS:30});
+  ctx.fillStyle="rgba(0,0,0,.22)";ctx.fillRect(0,0,W,H);ctx.textAlign="center";
+  ctx.font='800 64px "Onest", Arial, sans-serif';ctx.fillStyle="#FFD58A";ctx.fillText(o.head||"🙌 Бог ответил!",W/2,300);
+  let y=420;if(o.title){ctx.font='800 58px "Onest", Arial, sans-serif';ctx.fillStyle="#FFF7EA";wrapText(ctx,o.title,W-180).slice(0,4).forEach(l=>{ctx.fillText(l,W/2,y);y+=72});y+=30}
+  let size=o.text.length>500?44:o.text.length>250?52:60;ctx.font=`italic 500 ${size}px "Cormorant Garamond", Georgia, serif`;let lines=wrapText(ctx,o.text.replace(/\s+/g," "),W-200);
+  const maxL=Math.floor((H-y-360)/(size*1.3));if(lines.length>maxL){lines=lines.slice(0,maxL);lines[maxL-1]=lines[maxL-1].replace(/\s*\S*$/,"")+"…"}
+  ctx.fillStyle="#FFF7EA";ctx.shadowColor="rgba(0,0,0,.35)";ctx.shadowBlur=20;lines.forEach((l,i)=>ctx.fillText(l,W/2,y+i*size*1.3+size));ctx.shadowBlur=0;
+  if(o.name){ctx.font='700 38px "Onest", Arial, sans-serif';ctx.fillStyle="#FFD58A";ctx.fillText("— "+o.name,W/2,y+lines.length*size*1.3+size+60)}
+  ctx.font='600 30px "Onest", Arial, sans-serif';ctx.fillStyle="rgba(255,247,234,.65)";ctx.fillText("Молитвенный дневник · @PrayerDiary_bot",W/2,H-110);return cv}
+async function testStorySheet(o){openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Сторис</h2><span style="width:40px"></span></div><div class="small" style="text-align:center;padding:40px 0">Рисую…</div>`,"story");
+  const cv=await makeTestStory(o);ui.story=cv;const url=cv.toDataURL("image/png");
+  redrawSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Сторис</h2><span style="width:40px"></span></div>
+  <img class="story" src="${url}" alt="Свидетельство">
+  <button class="btn wide" data-a="saveStory" data-v="svidetelstvo">${ic("down")}Сохранить картинку</button>
+  <p class="small" style="text-align:center;margin-top:10px">Или нажми на картинку и удерживай. Выложи в сторис Telegram или Instagram — пусть люди увидят, что Бог отвечает 🙌</p>`)}
 const inMine=wid=>Object.values(S.prayers).some(p=>p.wallId===wid);
 function addWallToMine(w){if(!w||inMine(w.id))return;const id=rid("p_"),t=w.text.replace(/\s+/g," ").trim();
   S.prayers[id]={kind:"prayer",id,title:t.length>60?t.slice(0,57)+"…":t,who:w.name||"",note:w.text,cat:"Другое",icon:"⛪",color:COLORS[Object.keys(S.prayers).length%COLORS.length],createdAt:Date.now(),status:"active",log:{},answer:"",answeredAt:null,wallId:w.id};persist(id)}
@@ -1824,6 +1875,7 @@ function churchFormSheet(c){ui.cf={emoji:c?c.emoji:"⛪",id:c?c.id:null,mode:c?(
   <label class="l">Значок</label><div class="icons" id="cfE">${CH_EMOJI.map(e=>`<button class="${e===ui.cf.emoji?"on":""}" data-a="cfEmoji" data-v="${e}">${e}</button>`).join("")}</div>
   <label class="l" for="cfC">Город (необязательно)</label><input class="in" id="cfC" maxlength="40" value="${esc(c&&c.city||"")}" placeholder="Чтобы тебя было легче найти">
   <label class="l">Кто может вступить</label><div id="cfM">${Object.entries(CH_MODES).map(([k,[e,t,x]])=>`<button class="set cfm ${ui.cf.mode===k?"on":""}" style="width:100%;text-align:left" data-a="cfMode" data-v="${k}"><div><b>${e} ${t}</b><span>${x}</span></div><i class="rad"></i></button>`).join("")}</div>
+  ${c?`<label class="l">🔥 Общая молитва — бот позовёт всех за 15 минут</label><div class="row2"><select class="in" id="cfLW"><option value="">Нет</option>${LIVE_WD.map((w,i)=>`<option value="${i}" ${c.liveWd===i?"selected":""}>${w}</option>`).join("")}</select><input type="time" class="in" id="cfLT" value="${esc(c.liveTime||"21:00")}"></div>`:""}
   <label class="l" for="cfA">Пара слов о церкви (необязательно)</label><textarea class="in" id="cfA" maxlength="300" style="min-height:80px" placeholder="Где собираетесь, кто вы">${esc(c&&c.about||"")}</textarea>
   ${c?"":`<p class="small" style="margin:12px 4px 0">Ты станешь хозяином: сможешь приглашать людей по ссылке или коду, назначать помощников и создавать планы чтения.</p>`}`,"chform");if(!c)setTimeout(()=>$("#cfN").focus(),350)}
 function inviteSheet(c){if(!c)return;ui.inv=c;
@@ -2053,20 +2105,38 @@ const AVA=["👩","👨","👧","👦","👵","👴","🧑","👱‍♀️","�
 const MON=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
 function bdayIn(p){if(!p.bd)return null;const [m,d]=p.bd.split("-").map(Number);const t=new Date();t.setHours(0,0,0,0);let x=new Date(t.getFullYear(),m-1,d);if(x<t)x=new Date(t.getFullYear()+1,m-1,d);return Math.round((x-t)/864e5)}
 const personNeeds=id=>active().filter(p=>p.personId===id);
+/* ---------- даты нужд, обетования по темам ---------- */
+const PROMISES={"Семья": [{"t": "Они же сказали: веруй в Господа Иисуса Христа, и спасешься ты и весь дом твой.", "r": "Деян 16:31"}, {"t": "И все сыновья твои будут научены Господом, и великий мир будет у сыновей твоих.", "r": "Ис 54:13"}, {"t": "Наставь юношу при начале пути его: он не уклонится от него, когда и состарится.", "r": "Притч 22:6"}, {"t": "Если Господь не созиждет дома, напрасно трудятся строящие его; если Господь не охранит города, напрасно бодрствует страж.", "r": "Пс 126:1"}], "Здоровье": [{"t": "Благослови, душа моя, Господа и не забывай всех благодеяний Его. Он прощает все беззакония твои, исцеляет все недуги твои…", "r": "Пс 102:2–3"}, {"t": "Но Он изъязвлен был за грехи наши и мучим за беззакония наши; наказание мира нашего было на Нем, и ранами Его мы исцелились.", "r": "Ис 53:5"}, {"t": "И молитва веры исцелит болящего, и восставит его Господь; и если он соделал грехи, простятся ему.", "r": "Иак 5:15"}, {"t": "Возлюбленный! молюсь, чтобы ты здравствовал и преуспевал во всем, как преуспевает душа твоя.", "r": "3 Ин 1:2"}], "Друзья": [{"t": "Друг любит во всякое время и, как брат, явится во время несчастья.", "r": "Притч 17:17"}, {"t": "Двоим лучше, нежели одному; потому что у них есть доброе вознаграждение в труде их: ибо если упадет один, то другой поднимет товарища своего. Но горе одному, когда упадет, а другого нет, который поднял бы его.", "r": "Еккл 4:9–10"}, {"t": "Нет больше той любви, как если кто положит душу свою за друзей своих.", "r": "Ин 15:13"}, {"t": "Посему увещавайте друг друга и назидайте один другого, как вы и делаете.", "r": "1 Фес 5:11"}, {"t": "Будьте братолюбивы друг к другу с нежностью; в почтительности друг друга предупреждайте…", "r": "Рим 12:10"}], "Работа": [{"t": "И все, что делаете, делайте от души, как для Господа, а не для человеков…", "r": "Кол 3:23"}, {"t": "Предай Господу дела твои, и предприятия твои совершатся.", "r": "Притч 16:3"}, {"t": "И да будет благоволение Господа Бога нашего на нас, и в деле рук наших споспешествуй нам, в деле рук наших споспешествуй.", "r": "Пс 89:17"}, {"t": "Бог мой да восполнит всякую нужду вашу, по богатству Своему в славе, Христом Иисусом.", "r": "Флп 4:19"}, {"t": "Ищите же прежде Царства Божия и правды Его, и это все приложится вам.", "r": "Мф 6:33"}], "Служение": [{"t": "Итак, братия мои возлюбленные, будьте тверды, непоколебимы, всегда преуспевайте в деле Господнем, зная, что труд ваш не тщетен пред Господом.", "r": "1 Кор 15:58"}, {"t": "Делая добро, да не унываем, ибо в свое время пожнем, если не ослабеем.", "r": "Гал 6:9"}, {"t": "И услышал я голос Господа, говорящего: кого Мне послать? и кто пойдет для Нас? И я сказал: вот я, пошли меня.", "r": "Ис 6:8"}, {"t": "Итак идите, научите все народы, крестя их во имя Отца и Сына и Святаго Духа, уча их соблюдать все, что Я повелел вам; и се, Я с вами во все дни до скончания века. Аминь.", "r": "Мф 28:19–20"}, {"t": "Так и слово Мое, которое исходит из уст Моих, - оно не возвращается ко Мне тщетным, но исполняет то, что Мне угодно, и совершает то, для чего Я послал его.", "r": "Ис 55:11"}], "Моя жизнь": [{"t": "Ибо только Я знаю намерения, какие имею о вас, говорит Господь, намерения во благо, а не на зло, чтобы дать вам будущность и надежду.", "r": "Иер 29:11"}, {"t": "Будучи уверен в том, что начавший в вас доброе дело будет совершать его даже до дня Иисуса Христа…", "r": "Флп 1:6"}, {"t": "Надейся на Господа всем сердцем твоим, и не полагайся на разум твой. Во всех путях твоих познавай Его, и Он направит стези твои.", "r": "Притч 3:5–6"}, {"t": "Вразумлю тебя, наставлю тебя на путь, по которому тебе идти; буду руководить тебя, око Мое над тобою\".", "r": "Пс 31:8"}, {"t": "Притом знаем, что любящим Бога, призванным по Его изволению, все содействует ко благу.", "r": "Рим 8:28"}, {"t": "Не бойся, ибо Я с тобою; не смущайся, ибо Я Бог твой; Я укреплю тебя, и помогу тебе, и поддержу тебя десницею правды Моей.", "r": "Ис 41:10"}], "Страна и мир": [{"t": "Итак прежде всего прошу совершать молитвы, прошения, моления, благодарения за всех человеков, за царей и за всех начальствующих, дабы проводить нам жизнь тихую и безмятежную во всяком благочестии и чистоте…", "r": "1 Тим 2:1–2"}, {"t": "И смирится народ Мой, который именуется именем Моим, и будут молиться, и взыщут лица Моего, и обратятся от худых путей своих, то Я услышу с неба и прощу грехи их и исцелю землю их.", "r": "2 Пар 7:14"}, {"t": "Блажен народ, у которого Господь есть Бог, - племя, которое Он избрал в наследие Себе.", "r": "Пс 32:12"}, {"t": "И заботьтесь о благосостоянии города, в который Я переселил вас, и молитесь за него Господу; ибо при благосостоянии его и вам будет мир.", "r": "Иер 29:7"}], "Другое": [{"t": "Не заботьтесь ни о чем, но всегда в молитве и прошении с благодарением открывайте свои желания пред Богом, и мир Божий, который превыше всякого ума, соблюдет сердца ваши и помышления ваши во Христе Иисусе.", "r": "Флп 4:6–7"}, {"t": "Просите, и дано будет вам; ищите, и найдете; стучите, и отворят вам…", "r": "Мф 7:7"}, {"t": "Воззови ко Мне - и Я отвечу тебе, покажу тебе великое и недоступное, чего ты не знаешь.", "r": "Иер 33:3"}, {"t": "Предай Господу путь твой и уповай на Него, и Он совершит…", "r": "Пс 36:5"}, {"t": "Все заботы ваши возложите на Него, ибо Он печется о вас.", "r": "1 Пет 5:7"}]};
+const ddiff=(a,b)=>Math.round((parseDk(b)-parseDk(a))/864e5);
+function autoPromise(p){const L=PROMISES[p.cat]||PROMISES["Другое"];return L[(hash(p.id)+dayNum())%L.length]}
+function dueLabel(p){if(!p.due)return "";const d=ddiff(today(),p.due);return d===0?"сегодня":d===1?"завтра":d===-1?"вчера":d>1?"через "+d+" "+plural(d,"день","дня","дней"):fDay.format(parseDk(p.due))}
+function dueSync(p){if(!p||!tgOn())return;const want=p.due&&p.status!=="answered"&&S.prayers[p.id]?p.due+"|"+p.title:"";if((p.dueSynced||"")===want)return;
+  (want?call("due/set",{key:p.id,day:p.due,title:p.title}):call("due/del",{key:p.id})).then(()=>{if(S.prayers[p.id]){S.prayers[p.id].dueSynced=want;persist(p.id)}}).catch(()=>{})}
+function dueCard(){const t=today(),L=active().filter(p=>p.due&&p.due<t&&ddiff(p.due,t)<=7&&p.dueAsked!==p.due);if(!L.length)return "";const p=L[0];
+  return `<section class="duec"><div class="lab">🕊 Как прошло?</div><p><b>${esc(p.title)}</b> — это было ${ddiff(p.due,t)===1?"вчера":fDay.format(parseDk(p.due))}.</p>
+  <div class="row2"><button class="btn sm green" data-a="answerForm" data-id="${p.id}">🙌 Бог ответил</button><button class="btn sm ghost" data-a="dueStill" data-id="${p.id}">Ещё молюсь</button></div></section>`}
 /* today's list (PrayerMate-style rotation) */
 const perDayN=()=>Math.max(1,S.meta.perDayNeeds||3);
 function todaysList(){
-  const a=active(),wd=(new Date().getDay()+6)%7,t=today();
-  const fixed=a.filter(p=>p.sched==="daily"||(p.sched==="week"&&(p.wd||[]).includes(wd)));
-  const rot=a.filter(p=>!p.sched||p.sched==="rot");
+  const a=active(),wd=(new Date().getDay()+6)%7,t=today(),why={},pick=[],has=new Set();
+  const add=(p,w)=>{if(has.has(p.id))return;has.add(p.id);pick.push(p);why[p.id]=w};
   const lp=p=>{const ks=Object.keys(p.log||{}).filter(k=>k<t).sort();return ks.length?ks[ks.length-1]:""};
+  a.filter(p=>p.due).map(p=>[p,ddiff(t,p.due)]).filter(([,d])=>d>=-1&&d<=2).sort((x,y)=>x[1]-y[1]).forEach(([p,d])=>add(p,d===-1?"📅 было вчера — как прошло?":"📅 "+dueLabel(p)));
+  a.filter(p=>p.sched==="daily").forEach(p=>add(p,"каждый день"));
+  a.filter(p=>p.sched==="week"&&(p.wd||[]).includes(wd)).forEach(p=>add(p,"по расписанию"));
+  a.filter(p=>{const x=p.personId&&S.people[p.personId];if(!x)return false;const d=bdayIn(x);return d!==null&&d<=1}).forEach(p=>add(p,"🎂 день рождения у "+S.people[p.personId].name));
+  const pr=new Set(((CH.forme&&CH.forme.named)||[]).map(x=>x.id));
+  if(pr.size)a.filter(p=>{const x=p.personId&&S.people[p.personId];return x&&x.tgId&&pr.has(x.tgId)}).forEach(p=>add(p,"💛 "+S.people[p.personId].name+" молится за тебя"));
+  const rot=a.filter(p=>(!p.sched||p.sched==="rot")&&!has.has(p.id));
   rot.sort((x,y)=>lp(x).localeCompare(lp(y))||(x.createdAt-y.createdAt));
-  return fixed.concat(rot.slice(0,Math.max(0,perDayN()-fixed.length)));
+  rot.slice(0,Math.max(0,perDayN()-pick.length)).forEach(p=>{const l=lp(p),n=l?ddiff(l,t):null;
+    add(p,p.wallId?"🌍 просьба со стены":n===null?"✨ ещё не молился":n>=7?"⏳ "+n+" "+plural(n,"день","дня","дней")+" без молитвы":"по кругу")});
+  ui.why=why;return pick;
 }
 function todayCard(){
   const L=todaysList();if(!L.length)return "";const t=today(),done=L.filter(p=>(p.log||{})[t]).length;
   return `<section class="todayc"><div class="tc-h"><div><small>Сегодня в молитве</small><b>${done===L.length?"Все нужды дня ✓":done+" из "+L.length}</b></div><button class="btn sm" data-a="pmStart" data-v="cards">🃏 По карточкам</button></div>
-  <div class="tc-list">${L.map(p=>{const n=(p.log||{})[t]||0;return `<div class="tc-row" data-a="openPrayer" data-id="${p.id}" role="button" tabindex="0" style="--c:${p.color}"><span class="ic">${p.icon}</span><span class="tx"><b>${esc(p.title)}</b><span>${p.sched==="daily"?"каждый день":p.sched==="week"?"по расписанию":"по кругу"}${p.promise&&p.promise.r?" · "+esc(p.promise.r):""}</span></span><span class="tap ${n?"done":""}" data-a="quick" data-id="${p.id}" role="button" aria-label="Помолился">${n?ic("check"):ic("plus")}</span></div>`}).join("")}</div></section>`}
+  <div class="tc-list">${L.map(p=>{const n=(p.log||{})[t]||0;return `<div class="tc-row" data-a="openPrayer" data-id="${p.id}" role="button" tabindex="0" style="--c:${p.color}"><span class="ic">${p.icon}</span><span class="tx"><b>${esc(p.title)}</b><span>${esc((ui.why||{})[p.id]||"по кругу")}${p.promise&&p.promise.r?" · "+esc(p.promise.r):""}</span></span><span class="tap ${n?"done":""}" data-a="quick" data-id="${p.id}" role="button" aria-label="Помолился">${n?ic("check"):ic("plus")}</span></div>`}).join("")}</div></section>`}
 function bdayCard(){const soon=peopleArr().map(p=>[p,bdayIn(p)]).filter(([,d])=>d!==null&&d<=3).sort((a,b)=>a[1]-b[1]);if(!soon.length)return "";const [p,d]=soon[0];
   return `<button class="bdc" data-a="openPerson" data-id="${p.id}"><span class="bd-e">🎂</span><span><small>${d===0?"Сегодня":d===1?"Завтра":"Через "+d+" "+plural(d,"день","дня","дней")}</small><b>День рождения · ${esc(p.name)}</b><span>Помолись и поблагодари Бога за этого человека</span></span>${ic("right")}</button>`}
 /* people views */
@@ -2079,6 +2149,7 @@ function personSheet(id){const p=S.people[id];if(!p){closeSheet();return}ui.pers
   <div class="hero" style="--c:${p.color||"#9486FF"}"><span class="ic pav big">${p.ava||esc(p.name.charAt(0))}</span><h3>${esc(p.name)}</h3><p>${[p.rel,p.bd?"🎂 "+(+p.bd.split("-")[1])+" "+MON[+p.bd.split("-")[0]-1]+(d!==null?" · через "+d+" "+plural(d,"день","дня","дней"):""):""].filter(Boolean).join(" · ")}</p></div>
   ${p.note?`<p class="note">${esc(p.note)}</p>`:""}
   ${(p.tg||p.tgId)&&tgOn()?`<p class="small" style="text-align:center;margin:-6px 0 12px">📨 ${p.tg?"@"+esc(p.tg):esc(p.tgName||"")} увидит, что ${p.tgShow===false?"кто-то молится":"ты молишься"} за него</p>`:""}
+  ${tgOn()&&CH.me&&CH.me.inline&&TG.switchInlineQuery?`<button class="btn ghost wide" data-a="inlineSend" style="margin-bottom:10px">💌 Отправить «Я молюсь за тебя»</button>`:""}
   <button class="btn wide" data-a="prayPerson" data-id="${id}" style="margin-bottom:14px">${ic("heart")}${prayedToday?"Помолился сегодня ✓ · ещё раз":"Помолился за "+esc(p.name)}</button>
   <div class="sec-h"><h2 style="font-size:17px">Нужды</h2><button class="textbtn" data-a="newPrayerFor" data-id="${id}">+ Добавить</button></div>
   ${needs.length?`<div class="list" style="margin-bottom:16px">${needs.map(x=>prayerRow(x)).join("")}</div>`:`<p class="small" style="margin:0 4px 16px">Пока нет нужд. Добавь, о чём молишься для этого человека.</p>`}
@@ -2154,10 +2225,20 @@ function drawCards(){
   $("#pmIn").innerHTML=`<div class="pm-top"><button class="pill icon" data-a="pmClose" aria-label="Выйти">${ic("x")}</button><div class="grow"><span class="timer" id="pmTimer">${elapsed()}</span></div>${musicBtn()}</div>
   <div class="steps">${L.map((_,k)=>`<i class="${k<=i?"on":""}"></i>`).join("")}</div>
   <div class="pm-step">Нужда ${i+1} из ${L.length}</div>
-  <div class="pcard" style="--c:${p.color}"><span class="ic">${p.icon}</span><h3>${esc(p.title)}</h3>${p.who?`<div class="pc-who">${esc(p.who)}</div>`:""}${p.note?`<p class="pc-note">${esc(p.note)}</p>`:""}
-  ${p.promise&&p.promise.t?`<div class="pc-prom"><small>Молись Словом</small><p>«${esc(p.promise.t)}»</p><span>${esc(p.promise.r||"")}</span></div>`:`<div class="pc-prom soft"><p>Расскажи Отцу об этом своими словами. Он слышит.</p></div>`}</div>
+  <div class="pcard sw" style="--c:${p.color}"><span class="ic">${p.icon}</span><h3>${esc(p.title)}</h3>${p.who?`<div class="pc-who">${esc(p.who)}</div>`:""}${p.note?`<p class="pc-note">${esc(p.note)}</p>`:""}
+  ${(()=>{const v=p.promise&&p.promise.t?p.promise:autoPromise(p);return `<div class="pc-prom"><small>Молись Словом</small><p>«${esc(v.t)}»</p><span>${esc(v.r||"")}</span></div>`})()}
+  ${(ui.why||{})[p.id]&&(ui.why||{})[p.id]!=="по кругу"?`<div class="small" style="margin-top:12px">${esc(ui.why[p.id])}</div>`:""}
+  <span class="sw-st sw-l" id="swL">ПОЗЖЕ</span><span class="sw-st sw-r" id="swR">🙏 АМИНЬ</span></div>
+  <div class="cd-t"><i></i></div><div class="sw-hint"><span>← позже</span><span>побудь минуту с этой нуждой</span><span>помолился →</span></div>
   <div class="pm-foot"><button class="btn ghost" data-a="cardSkip" aria-label="Пропустить" style="flex:0 0 auto;padding:0 18px">Пропустить</button><button class="btn" data-a="cardDone">🙏 Помолился</button></div>`;
-  $("#pm").scrollTop=0}
+  $("#pm").scrollTop=0;swipeCard()}
+function swipeCard(){const card=$("#pmIn .pcard.sw");if(!card)return;let x0=null,y0=0,dx=0,drag=false;
+  const set=()=>{card.style.transform=`translateX(${dx}px) rotate(${dx/20}deg)`;const r=$("#swR"),l=$("#swL");if(r)r.style.opacity=dx>0?Math.min(1,dx/90):0;if(l)l.style.opacity=dx<0?Math.min(1,-dx/90):0};
+  card.addEventListener("pointerdown",e=>{x0=e.clientX;y0=e.clientY;dx=0;drag=false;card.style.transition="none"});
+  card.addEventListener("pointermove",e=>{if(x0===null)return;const mx=e.clientX-x0,my=e.clientY-y0;if(!drag){if(Math.abs(mx)>12&&Math.abs(mx)>Math.abs(my)){drag=true;try{card.setPointerCapture(e.pointerId)}catch(_){}}else return}dx=mx;set()});
+  const end=()=>{if(x0===null)return;x0=null;card.style.transition="";if(!drag){dx=0;return}
+    if(dx>90){card.style.transform="translateX(130%) rotate(14deg)";buzz();setTimeout(()=>act.cardDone(),200)}else if(dx<-90){card.style.transform="translateX(-130%) rotate(-14deg)";setTimeout(()=>act.cardSkip(),200)}else{dx=0;set()}};
+  card.addEventListener("pointerup",end);card.addEventListener("pointercancel",end)}
 /* testimony book PDF */
 function loadScript(src){return new Promise((res,rej)=>{if(window.jspdf)return res();const s=document.createElement("script");s.src=src;s.onload=res;s.onerror=()=>rej(new Error("script"));document.head.appendChild(s)})}
 function wrapLines(ctx,text,maxW){const out=[];String(text||"").split(/\n+/).forEach(par=>{const L=wrapText(ctx,par,maxW);out.push(...(L.length?L:[""]))});return out}
@@ -2308,7 +2389,7 @@ function closeSheet(){const sh=$("#sheet"),sd=$("#shade");sh.classList.remove("s
 function redrawSheet(html){const y=$("#sheet").scrollTop;$("#sheetIn").innerHTML=`<div class="grab"></div>`+html;$("#sheet").scrollTop=y}
 
 function prayerForm(p){
-  ui.form=p?{id:p.id,title:p.title,who:p.who||"",note:p.note||"",cat:p.cat,icon:p.icon,color:p.color,sched:p.sched||"rot",wd:(p.wd||[]).slice(),personId:p.personId||"",pt:(p.promise&&p.promise.t)||"",pr:(p.promise&&p.promise.r)||""}:{id:null,title:"",who:"",note:"",cat:"Семья",icon:"🙏",color:COLORS[Object.keys(S.prayers).length%COLORS.length],sched:"rot",wd:[],personId:ui.prefPerson||"",pt:"",pr:""};ui.prefPerson="";
+  ui.form=p?{id:p.id,due:p.due||"",title:p.title,who:p.who||"",note:p.note||"",cat:p.cat,icon:p.icon,color:p.color,sched:p.sched||"rot",wd:(p.wd||[]).slice(),personId:p.personId||"",pt:(p.promise&&p.promise.t)||"",pr:(p.promise&&p.promise.r)||""}:{id:null,title:"",who:"",note:"",cat:"Семья",icon:"🙏",color:COLORS[Object.keys(S.prayers).length%COLORS.length],sched:"rot",wd:[],personId:ui.prefPerson||"",pt:"",pr:""};ui.prefPerson="";
   const f=ui.form;
   openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>${f.id?"Изменить нужду":"Новая нужда"}</h2><button class="pill pri" data-a="savePrayer" id="spBtn" ${f.title.trim()?"":"disabled"}>Готово</button></div>
   <div class="hero"><span class="ic" id="fIc" style="--c:${f.color}">${f.icon}</span></div>
@@ -2322,11 +2403,13 @@ function prayerForm(p){
   <label class="l">Как часто молиться</label><div class="pick" id="fSch">${[["rot","По кругу"],["daily","Каждый день"],["week","По дням недели"]].map(([k,l])=>`<button class="${f.sched===k?"on":""}" data-a="fSch" data-v="${k}">${l}</button>`).join("")}</div>
   <div id="fWdBox" class="${f.sched==="week"?"":"hidden"}" style="margin-top:8px"><div class="pick wdp" id="fWd">${WD.map((w,i)=>`<button class="${f.wd.includes(i)?"on":""}" data-a="fWd" data-v="${i}">${w}</button>`).join("")}</div></div>
   <p class="small" style="margin:8px 4px 0">«По кругу» — приложение само подставит нужду в «Сегодня в молитве», чтобы ты молился обо всех по очереди.</p>
+  <label class="l" for="fDue">📅 Когда это важно (необязательно)</label><input type="date" class="in" id="fDue" value="${esc(f.due||"")}">
+  <p class="small" style="margin:6px 4px 0">Например, операция или экзамен. В этот день нужда будет первой${tgOn()?", бот утром напомнит, а после — спросит, как прошло":""}.</p>
   <label class="l" for="fPt">Обетование — стих, которым молишься</label><textarea class="in" id="fPt" style="min-height:80px" placeholder="Например: «Не бойся, ибо Я с тобою…»">${esc(f.pt)}</textarea><input class="in" id="fPr" style="margin-top:8px" maxlength="40" placeholder="Ссылка, например Ис 41:10" value="${esc(f.pr)}">${promiseChips()}
   ${f.id?`<button class="btn danger wide mt" data-a="delPrayer" data-id="${f.id}">Удалить нужду</button>`:""}`,"form");
   $("#fPt").addEventListener("input",e=>f.pt=e.target.value);$("#fPr").addEventListener("input",e=>f.pr=e.target.value);
   const ti=$("#fTitle");ti.addEventListener("input",()=>{f.title=ti.value;$("#spBtn").disabled=!ti.value.trim()});
-  $("#fWho").addEventListener("input",e=>f.who=e.target.value);$("#fNote").addEventListener("input",e=>f.note=e.target.value);
+  $("#fWho").addEventListener("input",e=>f.who=e.target.value);$("#fNote").addEventListener("input",e=>f.note=e.target.value);$("#fDue").addEventListener("change",e=>f.due=e.target.value);
   if(!f.id)setTimeout(()=>ti.focus(),350);
 }
 function markPick(box,v){box.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.v===v))}
@@ -2338,8 +2421,9 @@ function sheetDetail(){
   const since=daysBetween(p.createdAt,p.answeredAt||Date.now());
   const html=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><span></span><button class="pill" data-a="editPrayer" data-id="${p.id}">${ic("pen")}Изменить</button></div>
   <div class="hero" style="--c:${p.color}"><span class="ic">${p.icon}</span><h3>${esc(p.title)}</h3><p>${esc([p.who,p.cat].filter(Boolean).join(" · "))} · с ${fDay.format(new Date(p.createdAt))}</p></div>
+  ${p.due&&p.status!=="answered"?`<p class="small" style="text-align:center;margin:-6px 0 12px">📅 ${esc(dueLabel(p))}${Math.abs(ddiff(today(),p.due))>1?" · "+fDay.format(parseDk(p.due)):""}</p>`:""}
   ${p.note?`<p class="note">${esc(p.note)}</p>`:""}
-  ${p.promise&&p.promise.t?`<div class="prom"><small>Обетование · молись Словом</small><p>«${esc(p.promise.t)}»</p><span>${esc(p.promise.r||"")}</span></div>`:""}
+  ${p.promise&&p.promise.t?`<div class="prom"><small>Обетование · молись Словом</small><p>«${esc(p.promise.t)}»</p><span>${esc(p.promise.r||"")}</span></div>`:p.status!=="answered"?(()=>{const v=autoPromise(p);return `<div class="prom"><small>Слово для молитвы · тема «${esc(p.cat||"Другое")}»</small><p>«${esc(v.t)}»</p><span>${esc(v.r)}</span></div>`})():""}
   ${p.personId&&S.people[p.personId]?`<button class="pc" data-a="openPerson" data-id="${p.personId}" style="--c:${S.people[p.personId].color};margin-bottom:14px"><span class="pav" style="width:40px;height:40px;font-size:20px">${S.people[p.personId].ava||""}</span><span class="tx"><b>${esc(S.people[p.personId].name)}</b><span>Открыть карточку человека</span></span>${ic("right")}</button>`:""}
   ${p.wait&&p.status!=="answered"?`<div class="answer-box gold"><div class="k">⏳ Бог сказал «подожди» · ${fDayY.format(new Date(p.wait.at))}</div>${p.wait.text?`<p>${esc(p.wait.text)}</p>`:""}</div>`:""}${p.status==="answered"?`<div class="answer-box"><div class="k">${ic("ok")}${ansLabel(p)} · ${fDayY.format(new Date(p.answeredAt))}</div><p>${esc(p.answer||"")}</p></div>`:""}
   <div class="trio"><div class="tile"><b>${t}</b><span>${plural(t,"раз","раза","раз")} молился</span></div><div class="tile"><b>${dn}</b><span>${plural(dn,"день","дня","дней")} в молитве</span></div><div class="tile"><b>${since}</b><span>${p.status==="answered"?"дней до ответа":plural(since,"день","дня","дней")+" жду"}</span></div></div>
@@ -2375,6 +2459,7 @@ function entryView(id){
   ${e.text?`<div class="full-text" style="padding:0 4px">${esc(e.text)}</div>`:""}
   ${names.length?`<label class="l">Молился за</label><div class="chips">${names.map(p=>`<span class="chip">${p.icon} ${esc(p.title)}</span>`).join("")}</div>`:""}
   ${["exp","answer"].includes(e.type)&&e.text&&TG&&!API.startsWith("__")?`<button class="btn wide mt" data-a="shareChurch" data-id="${id}">🙌 Поделиться свидетельством</button>`:""}
+  ${["exp","answer"].includes(e.type)&&e.text?`<button class="btn ghost wide mt" data-a="storyEntry" data-id="${id}">🖼 Сделать сторис</button>`:""}
   ${["exp","answer","thanks","word","sermon"].includes(e.type)&&e.text?`<button class="btn ghost wide mt" data-a="tgShare" data-v="${esc((e.type==="exp"?"✨ Мой опыт":e.type==="answer"?"🙌 Бог ответил на молитву":e.type==="thanks"?"🙏 Благодарю Бога":"📖")+(e.title?": "+e.title:"")+"\n\n"+e.text)}">${ic("share")}Поделиться в Telegram</button>`:""}
   <button class="btn danger wide mt" data-a="delEntry" data-id="${id}">Удалить запись</button>`,"view");
 }
@@ -2448,9 +2533,9 @@ function startPM(mode){closeSheet();$("#toast").classList.remove("show");cancelA
   PM={mode,steps:MODES[mode].steps,step:0,start:Date.now(),checked:new Set(),thanks:"",text:"",word:"",passage:null,done:false,list:mode==="cards"?(todaysList().length?todaysList():active()):[],ci:0};
   if(mode==="cards"&&!PM.list.length){PM=null;toast("Сначала добавь нужды");return}
   PM.vv=PM.steps.map(st=>st.v&&!st.lord?freshVerse(st.k,st.v):null);PM.endV=freshVerse("done",VERSES[5]);
-  $("#pm").classList.add("show");document.body.style.overflow="hidden";if(bgPref()!=="off")bgStart(bgPref());drawPM();tick=setInterval(()=>{const el=$("#pmTimer");if(el)el.textContent=elapsed()},1000)}
+  $("#pm").classList.add("show");document.body.style.overflow="hidden";if(bgPref()!=="off")bgStart(bgPref());drawPM();if(tgOn())call("live/start",{minutes:30}).catch(()=>{});tick=setInterval(()=>{const el=$("#pmTimer");if(el)el.textContent=elapsed()},1000)}
 function elapsed(){const s=Math.floor((Date.now()-PM.start)/1000);return pad(Math.floor(s/60))+":"+pad(s%60)}
-function closePM(){clearInterval(tick);bgStop();PM=null;$("#pm").classList.remove("show");document.body.style.overflow="";render();checkBadges()}
+function closePM(){clearInterval(tick);bgStop();if(PM&&tgOn())call("live/stop").catch(()=>{});PM=null;$("#pm").classList.remove("show");document.body.style.overflow="";render();checkBadges()}
 function musicBtn(){const k=bgNow(),b=BGS.find(x=>x[0]===k);return `<button class="music ${k!=="off"?"on":""}" data-a="pmMusic" aria-label="Фон">${k!=="off"?`<span class="eq"><i></i><i></i><i></i></span>${b[2]}`:ic("music")+"Фон"}</button>`}
 function drawPM(keep){
   if(PM.done)return drawPMDone();
@@ -2564,6 +2649,11 @@ const act={
   welcomeOpen:()=>{closeSheet();setTimeout(tourStart,350)},
   chSeg:d=>{CH.seg=d.v;if(d.v==="tog"&&(!CH.tog||CH.tog.scope!==CH.scope))togLoad();render()},
   chReload:()=>{CH.err="";chLoad()},
+  worldOpen:()=>{worldSheet();if(tgOn())worldLoad()},
+  worldPray:async()=>{const t=today();S.meta.world=Object.assign({},S.meta.world||{},{[t]:true});persist("meta");buzz();burst();
+    if(tgOn()){try{const r=await call("world/pray",{day:t});CH.world=Object.assign({day:t},r)}catch(e){}}worldSheet();render()},
+  inlineSend:()=>{try{TG.switchInlineQuery("",["users","groups","channels"])}catch(e){toast("Обнови Telegram, чтобы отправлять карточки")}},
+  storyEntry:d=>{const e=S.entries[d.id];if(!e)return;testStorySheet({head:e.type==="answer"?"🙌 Бог ответил!":"✨ Как Бог действовал",title:e.title||"",text:e.text||""})},
   formeOpen:()=>formeSheet(),
   formeThank:async(d,el)=>{if(el){el.disabled=true;el.textContent="Отправлено 💛"}try{await call("forme/thank",{id:+d.id});buzz()}catch(e){toast(e.message)}},
   pfPick:()=>pfCandidates(),
@@ -2599,7 +2689,7 @@ const act={
   wAnonT:()=>{const b=$("#tsA"),on=b.textContent==="Нет";b.textContent=on?"Да":"Нет";b.classList.toggle("on",on)},
   testSend:async()=>{const x=$("#tsX").value.trim();if(x.length<3){$("#tsX").focus();return}const sc=ui.tsc||"global";const body={scope:sc==="global"?null:sc,title:$("#tsT").value.trim(),text:x,anon:$("#tsA").textContent==="Да"};
     closeSheet();try{await call("testimony/add",body);burst();toast("Спасибо, что поделился! 🙌");if(String(sc)!==String(CH.scope)){setScope(sc);CH.wall=[];wallReload()}CH.seg="tog";ui.tab="church";CH.tog=null;togLoad();render()}catch(e){toast(e.message)}},
-  testMenu:async d=>{const r=await choose("Свидетельство",[["del","Удалить","dangerf"]]);if(r==="del"&&await ask("Удалить свидетельство?","Удалить",true)){try{await call("testimony/delete",{id:+d.id});togLoad()}catch(e){toast(e.message)}}},
+  testMenu:async d=>{const x=CH.tog&&CH.tog.feed.find(y=>y.kind==="t"&&y.id===+d.id);const r=await choose("Свидетельство",[["story","🖼 Сделать сторис"],["del","Удалить","dangerf"]]);if(r==="story"&&x){testStorySheet({title:x.title,text:x.text,name:x.name});return}if(r==="del"&&await ask("Удалить свидетельство?","Удалить",true)){try{await call("testimony/delete",{id:+d.id});togLoad()}catch(e){toast(e.message)}}},
   amen:async d=>{const T=CH.tog,x=T&&T.feed.find(y=>y.kind===d.k&&y.id===+d.id);if(x){x.amened=!x.amened;x.amens+=x.amened?1:-1;render()}buzz();try{const r=await call("amen",{kind:d.k,id:+d.id});if(x){x.amened=r.amened;x.amens=r.amens;render()}}catch(e){toast(e.message)}},
   shareChurch:d=>{const e=S.entries[d.id];if(!e)return;closeSheet();setTimeout(()=>testNewSheet({title:e.title||"",text:e.text||""}),300)},
   wallNew:()=>wallNewSheet(),
@@ -2633,7 +2723,7 @@ const act={
   chCreate:()=>{closeSheet();setTimeout(()=>churchFormSheet(null),300)},
   cfEmoji:d=>{ui.cf.emoji=d.v;markPick($("#cfE"),d.v)},
   chSave:async()=>{const name=$("#cfN").value.trim();if(name.length<2){$("#cfN").focus();return}const about=$("#cfA").value.trim(),city=$("#cfC").value.trim(),f=ui.cf,mode=f.mode;const b=document.querySelector('[data-a="chSave"]');if(b)b.disabled=true;
-    try{if(f.id){await call("church/update",{id:f.id,name,emoji:f.emoji,about,city,mode});closeSheet();await chLoad(true);toast("Сохранено")}
+    try{if(f.id){await call("church/update",Object.assign({id:f.id,name,emoji:f.emoji,about,city,mode},$("#cfLW")?{liveWd:$("#cfLW").value===""?null:+$("#cfLW").value,liveTime:$("#cfLT").value}:{}));closeSheet();await chLoad(true);toast("Сохранено")}
       else{const r=await call("church/create",{name,emoji:f.emoji,about,city,mode});setScope(r.id);CH.seg="wall";CH.wall=[];closeSheet();burst();await chLoad(true);render();toast("Церковь создана ⛪ Пригласи людей!");setTimeout(()=>inviteSheet(curCh()),600)}}
     catch(e){toast(e.message);if(b)b.disabled=false}},
   chInvite:()=>inviteSheet(curCh()),
@@ -2773,10 +2863,10 @@ const act={
   fColor:d=>{ui.form.color=d.v;markPick($("#fColors"),d.v);$("#fIc").style.setProperty("--c",d.v)},
   savePrayer:()=>{const f=ui.form;if(!f.title.trim())return;
     const id=f.id||rid("p_");const old=S.prayers[id]||{kind:"prayer",id,createdAt:Date.now(),status:"active",log:{},answer:"",answeredAt:null};
-    S.prayers[id]=Object.assign(old,{title:f.title.trim(),who:f.who.trim(),note:f.note.trim(),cat:f.cat,icon:f.icon,color:f.color,sched:f.sched,wd:f.sched==="week"?f.wd.slice().sort():[],personId:f.personId||"",promise:f.pt.trim()?{t:f.pt.trim(),r:f.pr.trim()}:null});
-    persist(id);render();if(f.id){ui.detail=id;ui.sheetKind="";sheetDetail()}else{closeSheet();toast("Нужда добавлена")}},
+    S.prayers[id]=Object.assign(old,{title:f.title.trim(),who:f.who.trim(),note:f.note.trim(),cat:f.cat,icon:f.icon,color:f.color,sched:f.sched,wd:f.sched==="week"?f.wd.slice().sort():[],personId:f.personId||"",promise:f.pt.trim()?{t:f.pt.trim(),r:f.pr.trim()}:null,due:f.due||""});
+    persist(id);dueSync(S.prayers[id]);render();if(f.id){ui.detail=id;ui.sheetKind="";sheetDetail()}else{closeSheet();toast("Нужда добавлена")}},
   editPrayer:d=>prayerForm(S.prayers[d.id]),
-  delPrayer:async d=>{if(!await ask("Удалить эту нужду? Записи в дневнике останутся.","Удалить",true))return;delete S.prayers[d.id];persist(d.id);closeSheet();render();toast("Удалено")},
+  delPrayer:async d=>{if(!await ask("Удалить эту нужду? Записи в дневнике останутся.","Удалить",true))return;if(S.prayers[d.id]&&S.prayers[d.id].dueSynced&&tgOn())call("due/del",{key:d.id}).catch(()=>{});delete S.prayers[d.id];persist(d.id);closeSheet();render();toast("Удалено")},
   openPrayer:d=>{const p=S.prayers[d.id];if(!p)return;const ref=new Date(p.answeredAt||Date.now());ui.detail=d.id;ui.dY=ref.getFullYear();ui.dM=ref.getMonth();ui.sheetKind="";sheetDetail()},
   quick:async d=>{const p=S.prayers[d.id];if(!p)return;const n=(p.log||{})[today()]||0;
     if(n&&!d.f){const r=await choose(`«${p.title}»: сегодня уже ${n} ${plural(n,"раз","раза","раз")}`,[["add","🙏 Помолился ещё раз"],["undo","↩︎ Отменить одну отметку","dangerf"]]);
@@ -2787,11 +2877,12 @@ const act={
   answerForm:d=>answerForm(d.id),
   saveAnswer:d=>{const p=S.prayers[d.id],txt=$("#aText").value.trim(),at=ui.ans||"yes";
     if(at==="wait"){p.wait={text:txt,at:Date.now()};persist(p.id);const eid=rid("e_");S.entries[eid]={kind:"entry",id:eid,type:"answer",text:"⏳ Бог сказал «подожди»"+(txt?": "+txt:""),prayerIds:[p.id],createdAt:Date.now()};persist(eid);render();ui.detail=p.id;ui.sheetKind="";sheetDetail();toast("Продолжаем молиться и ждать ⏳");return}
-    p.status="answered";p.ansType=at;p.answer=txt;p.answeredAt=Date.now();p.wait=null;persist(p.id);
+    p.status="answered";p.ansType=at;p.answer=txt;p.answeredAt=Date.now();p.wait=null;persist(p.id);dueSync(p);
     const eid=rid("e_");S.entries[eid]={kind:"entry",id:eid,type:"answer",text:(at==="no"?"✋ Бог сказал «нет»":at==="let"?"🕊 Отпустил":"")+(txt?(at==="yes"?"":": ")+txt:(at==="yes"?"Бог ответил на молитву: "+p.title:"")),prayerIds:[p.id],createdAt:Date.now()};persist(eid);
     if(at!=="yes"){render();ui.detail=p.id;ui.sheetKind="";sheetDetail();toast(at==="no"?"Его «нет» — тоже любовь 🤍":"Отпущено в Его руки 🕊");return}
     render();ui.detail=p.id;ui.sheetKind="";sheetDetail();burst();buzz();toast("Слава Богу! На небе зажглась золотая звезда ✨");setTimeout(checkBadges,2800)},
-  reopen:d=>{const p=S.prayers[d.id];p.status="active";persist(p.id);render();sheetDetail()},
+  reopen:d=>{const p=S.prayers[d.id];p.status="active";persist(p.id);dueSync(p);render();sheetDetail()},
+  dueStill:d=>{const p=S.prayers[d.id];if(!p)return;p.dueAsked=p.due;persist(p.id);render();toast("Продолжаем молиться 🤍")},
   newEntry:d=>entryForm(d.v),
   jf:d=>{ui.jf=d.v;render()},
   eType:d=>{ui.form.type=d.v;markPick($("#eTypes"),d.v);const x=d.v==="exp";$("#eSermon").classList.toggle("hidden",d.v!=="sermon"&&!x);$("#eTitleL").textContent=x?"Коротко: что произошло":"Тема и проповедник";$("#eTitle").placeholder=x?"Например: «Бог помог найти работу»":"Например: «Вера и дела», пастор Андрей"},

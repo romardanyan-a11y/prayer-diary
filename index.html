@@ -595,6 +595,12 @@ p.reader .vs{font-size:var(--rs);line-height:1.7}
 .aiv{display:block;padding:12px 14px;border-radius:18px;background:var(--card);border:1px solid var(--stroke);margin-top:8px;cursor:pointer}.aiv p{margin:0;font-family:"Literata",Georgia,serif;font-size:15.5px;line-height:1.5}.aiv span{display:block;margin-top:4px;font-weight:800;font-size:13px;color:var(--gold)}.aiv small{display:block;margin-top:4px;font-size:13px;color:var(--muted)}
 .aiul{margin:8px 0 0;padding-left:20px}.aiul li{margin:4px 0;font-size:15.5px}
 .aiq{margin-top:14px;padding:10px 14px;border-radius:16px 16px 4px 16px;background:var(--card2);font-weight:600;margin-left:15%}
+.mode-main{display:block;width:100%;text-align:left;padding:18px 18px 16px;border-radius:26px;background:var(--grad);color:var(--on-grad);box-shadow:0 18px 40px -18px rgba(255,120,80,.6)}
+.mode-main .mm-e{font-size:34px;line-height:1}.mode-main b{display:block;font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:6px}.mode-main span:last-child{display:block;font-size:14px;font-weight:600;opacity:.78;margin-top:4px;line-height:1.35}
+.mode2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.mode-sm{text-align:left;padding:14px;border-radius:22px;background:var(--card);border:1px solid var(--stroke)}.mode-sm .ms-e{font-size:26px}.mode-sm b{display:block;font-size:16px;font-weight:800;margin-top:4px}.mode-sm small{display:block;font-size:12.5px;color:var(--muted);font-weight:600}
+.more-btn{display:flex;justify-content:center;gap:6px;width:100%;padding:14px 0 6px;font-weight:700;font-size:14.5px;color:var(--muted)}
+.mode-list{margin-top:6px}
 .qs{margin:12px 0 4px;padding:0;list-style:none;counter-reset:q}
 .qs li{counter-increment:q;position:relative;padding:10px 0 10px 36px;font-size:15.5px;border-top:1px solid var(--stroke)}
 .qs li::before{content:counter(q);position:absolute;left:0;top:9px;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-size:12.5px;font-weight:800;background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--gold)}
@@ -891,7 +897,7 @@ const VERSES=[
 ];
 const MODES={
  cards:{name:"По карточкам",desc:"Нужды на сегодня — одна за другой",emoji:"🃏",c:"#FF6A8A",steps:[]},
- full:{name:"Полное время",desc:"6 шагов · около 10 минут",emoji:"🕯️",c:"#FF9E4D",steps:[
+ full:{name:"Время с Богом",desc:"6 шагов · около 10 минут",emoji:"🕯️",c:"#FF9E4D",steps:[
   {k:"quiet",t:"Тишина",p:"Отложи всё на минуту. Сделай несколько медленных вдохов и выдохов. Ты пришёл к Отцу, Который ждёт тебя.",v:{t:"Остановитесь и познайте, что Я — Бог.",r:"Пс 45:11"}},
   {k:"praise",t:"Хвала",p:"Прославь Бога за то, Кто Он: Отец, Спаситель, Утешитель. Пока ничего не проси — просто поклонись.",v:{t:"Благослови, душа моя, Господа, и вся внутренность моя — святое имя Его. Благослови, душа моя, Господа и не забывай всех благодеяний Его.",r:"Пс 102:1–2"}},
   {k:"repent",t:"Покаяние",p:"Есть ли что-то, что стоит между тобой и Богом? Назови это честно. Он ждёт не оправданий, а сердца.",v:{t:"Если исповедуем грехи наши, то Он, будучи верен и праведен, простит нам грехи наши и очистит нас от всякой неправды.",r:"1 Ин 1:9"}},
@@ -2528,14 +2534,24 @@ function entryView(id){
   ${["exp","answer","thanks","word","sermon"].includes(e.type)&&e.text?`<button class="btn ghost wide mt" data-a="tgShare" data-v="${esc((e.type==="exp"?"✨ Мой опыт":e.type==="answer"?"🙌 Бог ответил на молитву":e.type==="thanks"?"🙏 Благодарю Бога":"📖")+(e.title?": "+e.title:"")+"\n\n"+e.text)}">${ic("share")}Поделиться в Telegram</button>`:""}
   <button class="btn danger wide mt" data-a="delEntry" data-id="${id}">Удалить запись</button>`,"view");
 }
-function modeSheet(){
-  openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Как помолимся?</h2><span style="width:40px"></span></div>
-  ${Object.entries(MODES).filter(([,m])=>!m.hidden).map(([k,m])=>`<button class="mode" data-a="pmStart" data-v="${k}"><span class="mi" style="background:color-mix(in srgb,${m.c} 22%,transparent)">${m.emoji}</span><span><b>${m.name}</b><span>${m.desc}</span></span><span class="go">${ic("right")}</span></button>`).join("")}
-  ${tgOn()&&(!CH.ai||CH.ai.ready)?`<button class="mode" data-a="aiOpen" data-v="prayer"><span class="mi" style="background:color-mix(in srgb,#B9A6FF 25%,transparent)">✨</span><span><b>Помочь с молитвой</b><span>ИИ поможет найти слова и стихи</span></span><span class="go">${ic("right")}</span></button>`:""}
-  <button class="mode" data-a="confStart"><span class="mi" style="background:color-mix(in srgb,#9486FF 22%,transparent)">🤍</span><span><b>Покаяние</b><span>Исповедь дня · записать и отпустить</span></span><span class="go">${ic("right")}</span></button>
-  ${S.meta.fast&&S.meta.fast.start?"":`<button class="mode" data-a="fastStart"><span class="mi" style="background:color-mix(in srgb,#C9A27A 25%,transparent)">🌾</span><span><b>Начать пост</b><span>Таймер и цель поста</span></span><span class="go">${ic("right")}</span></button>`}
-  <label class="l">Фон во время молитвы</label>${bgPick()}`,"mode");
+function modeSheet(){const n=todaysList().length,more=!!ui.modeMore,bg=BGS.find(x=>x[0]===bgPref())||BGS[BGS.length-1];
+  const row=(a,v,e,c,t,d)=>`<button class="mode" data-a="${a}" ${v?`data-v="${v}"`:""}><span class="mi" style="background:color-mix(in srgb,${c} 22%,transparent)">${e}</span><span><b>${t}</b><span>${d}</span></span><span class="go">${ic("right")}</span></button>`;
+  const html=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Как помолимся?</h2><span style="width:40px"></span></div>
+  <button class="mode-main" data-a="pmStart" data-v="full"><span class="mm-e">🙏</span><b>Время с Богом</b><span>Около 10 минут: тишина, хвала, покаяние, благодарность, просьбы и слушание</span></button>
+  <div class="mode2"><button class="mode-sm" data-a="pmStart" data-v="cards"><span class="ms-e">🃏</span><b>Мои нужды</b><small>${n?n+" "+plural(n,"нужда","нужды","нужд")+" на сегодня":"по карточкам"}</small></button>
+  <button class="mode-sm" data-a="pmStart" data-v="quick"><span class="ms-e">⚡</span><b>Коротко</b><small>3 шага · 2 минуты</small></button></div>
+  <button class="set" style="width:100%;text-align:left;margin-top:12px" data-a="bgChoose"><div><b>${bg[1]} Фон: ${bg[2]}</b><span>Что будет звучать во время молитвы</span></div>${ic("right")}</button>
+  <button class="more-btn" data-a="modeMore">${more?"Скрыть":"Ещё способы молиться"} <span>${more?"▴":"▾"}</span></button>
+  ${more?`<div class="mode-list">
+    ${row("pmStart","walk","🚶","#43C985","Молитвенная прогулка","Молись на ходу — за то, что видишь")}
+    ${row("pmStart","lectio","📜","#9486FF","Лекцио Дивина","Медленное чтение Слова и молитва им")}
+    ${row("pmStart","lord","🕊️","#5AA9F0","Отче наш","Молитва Господня, строка за строкой")}
+    ${row("confStart","","🤍","#9486FF","Покаяние","Исповедь дня · записать и отпустить")}
+    ${S.meta.fast&&S.meta.fast.start?"":row("fastStart","","🌾","#C9A27A","Начать пост","Таймер и цель поста")}
+    ${tgOn()&&(!CH.ai||CH.ai.ready)?row("aiOpen","prayer","✨","#B9A6FF","Помочь с молитвой","ИИ поможет найти слова и стихи"):""}</div>`:""}`;
+  if(ui.sheetKind==="mode")redrawSheet(html);else openSheet(html,"mode");
 }
+
 function versesSheet(){
   const onlyFav=ui.vFav,f=favs(),allV=VERSES.concat(S.meta.custom||[]),list=allV.filter(v=>!onlyFav||f.includes(v.r));
   const html=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Стихи о молитве</h2><span style="width:40px"></span></div>
@@ -2979,6 +2995,8 @@ const act={
     if(e0&&e0.type==="session"){const k=dk(new Date(e0.createdAt));bump(S.meta.days,k,-1);persist("meta");(e0.prayerIds||[]).forEach(id=>{const p=S.prayers[id];if(p&&p.log){bump(p.log,k,-1);persist(id)}})}
     delete S.entries[d.id];persist(d.id);closeSheet();render()},
   pmClose:async()=>{if(PM&&!PM.done&&(Date.now()-PM.start>20000)&&!await ask("Выйти без сохранения?","Выйти"))return;closePM()},
+  modeMore:()=>{ui.modeMore=!ui.modeMore;modeSheet()},
+  bgChoose:async()=>{const r=await choose("Фон для молитвы",BGS.map(([k,e,l])=>[k,e+" "+l,bgPref()===k?"":"ghost"]));if(!r)return;S.meta.bg=r;persist("meta");if(ui.sheetKind==="mode")modeSheet()},
   pmMusic:async()=>{const r=await choose("Фон для молитвы",BGS.map(([k,e,l])=>[k,e+" "+l,bgNow()===k?"":"ghost"]));if(!r)return;S.meta.bg=r;persist("meta");if(r==="off")bgStop();else bgStart(r);if(PM)drawPM(true)},
   pmNext:()=>{PM.step++;drawPM()},
   pmPrev:()=>{PM.step--;drawPM()},

@@ -518,6 +518,19 @@ p.reader .vs{font-size:var(--rs);line-height:1.7}
 .r-nav .btn{background:var(--card2);color:inherit}
 .t-paper .r-nav .btn{background:rgba(90,60,20,.08)}
 .soap h2{font-size:18px}
+.cm{display:inline-grid;place-items:center;height:22px;min-width:22px;padding:0 5px;border-radius:8px;margin-left:4px;vertical-align:2px;font-size:12px;line-height:1;background:linear-gradient(135deg,color-mix(in srgb,#FFD27A 45%,transparent),color-mix(in srgb,#FF9E4D 30%,transparent));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gold) 35%,transparent)}
+.r-intro{position:relative;margin:-4px 0 22px;padding:14px 16px;border-radius:18px;background:color-mix(in srgb,var(--gold) 9%,transparent);border:1px solid color-mix(in srgb,var(--gold) 22%,transparent);font-size:15px;line-height:1.5}
+.r-intro small{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.r-intro .x{position:absolute;right:8px;top:8px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
+.r-intro .x svg.i{width:15px;height:15px}
+.cmn{padding:16px 0;border-bottom:1px solid var(--stroke)}
+.cmn:last-child{border-bottom:0}
+.cmn .kd{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;padding:5px 10px;border-radius:99px;background:var(--card2);color:var(--gold)}
+.cmn h3{font-size:20px;font-weight:800;letter-spacing:-.02em;margin:10px 0 6px;line-height:1.2}
+.cmn p{margin:0;font-size:16px;line-height:1.6}
+.qs{margin:12px 0 4px;padding:0;list-style:none;counter-reset:q}
+.qs li{counter-increment:q;position:relative;padding:10px 0 10px 36px;font-size:15.5px;border-top:1px solid var(--stroke)}
+.qs li::before{content:counter(q);position:absolute;left:0;top:9px;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-size:12.5px;font-weight:800;background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--gold)}
 .soap-i{padding:12px 0;border-bottom:1px solid var(--stroke)}
 .soap-i p{margin:6px 0;font-size:15px}
 .vbar{position:fixed;left:12px;right:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:25;max-width:540px;margin:0 auto;padding:12px;border-radius:26px;background:var(--glass);border:1px solid var(--stroke);backdrop-filter:blur(26px) saturate(160%);-webkit-backdrop-filter:blur(26px) saturate(160%);box-shadow:0 20px 50px -14px rgba(0,0,0,.55);animation:rise .25s both}
@@ -1541,8 +1554,23 @@ const markId=(b,c)=>"m_"+b+"_"+c;
 function mark(b,c,create){const id=markId(b,c);if(!S.marks[id]&&create)S.marks[id]={kind:"mark",id,b,c,hl:{},notes:{},soap:[]};return S.marks[id]||null}
 function cleanMark(m){if(!m)return;const empty=!Object.keys(m.hl||{}).length&&!Object.keys(m.notes||{}).length&&!(m.soap||[]).length;if(empty){delete S.marks[m.id]}persist(m.id)}
 const HL={gold:"#FFD166",green:"#6EE7B7",blue:"#7CC4FF",pink:"#FF9EC4",violet:"#B9A6FF"};
-const RP=()=>{let o={};try{o=JSON.parse(localStorage.getItem("pj-reader")||"{}")}catch(e){}return Object.assign({size:19,font:"lit",theme:"auto",layout:"flow"},o)};
+const RP=()=>{let o={};try{o=JSON.parse(localStorage.getItem("pj-reader")||"{}")}catch(e){}return Object.assign({size:19,font:"lit",theme:"auto",layout:"flow",cmt:"on"},o)};
 function setRP(k,v){const o=RP();o[k]=v;try{localStorage.setItem("pj-reader",JSON.stringify(o))}catch(e){}}
+
+/* ---------- commentary ---------- */
+const CMT={};
+const CK={history:["🏺","История и быт"],word:["🔤","Значение слова"],place:["📍","Место"],people:["👥","Люди"],link:["🔗","Связь с Писанием"],fact:["💡","Интересная деталь"]};
+function cmtFor(b,c){if(RP().cmt==="off")return null;const x=CMT[b];
+  if(x===undefined){CMT[b]="loading";fetch("comments/"+b+".json").then(r=>r.ok?r.json():null).then(o=>{CMT[b]=o||null;const p=readerPos();if(o&&p.b===b&&ui.tab==="bible")render()}).catch(()=>{delete CMT[b]});return null}
+  return x&&x!=="loading"?x[c]||null:null}
+function cmtSheet(v){const {b,c}=readerPos(),cm=cmtFor(b,c);if(!cm)return;const all=cm.notes||[],here=all.filter(n=>n.v[1]===v);if(!here.length)return;
+  const ends=[...new Set(all.map(n=>n.v[1]))].sort((x,y)=>x-y),i=ends.indexOf(v),nx=ends[i+1],pv=ends[i-1];
+  const html=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>${esc(BOOKS[b][1])} ${c}:${here[0].v[0]===v?v:here[0].v[0]+"–"+v}</h2><span style="width:40px"></span></div>
+  <blockquote class="vq">${esc(vText(b,c,Array.from({length:v-here[0].v[0]+1},(_,k)=>here[0].v[0]+k)))}</blockquote>
+  ${here.map(n=>{const k=CK[n.kind]||CK.fact;return `<div class="cmn"><span class="kd">${k[0]} ${k[1]}</span><h3>${esc(n.title)}</h3><p>${esc(n.text)}</p></div>`}).join("")}
+  <div class="row2 mt"><button class="btn ghost" data-a="cmt" data-v="${pv||""}" ${pv?"":"disabled"}>${ic("left")}Пред.</button><button class="btn ghost" data-a="cmt" data-v="${nx||""}" ${nx?"":"disabled"}>След.${ic("right")}</button></div>
+  <p class="small" style="text-align:center;margin-top:12px">Комментарий ${i+1} из ${ends.length} в этой главе</p>`;
+  if(ui.sheetKind==="cmt"){redrawSheet(html);$("#sheet").scrollTop=0}else openSheet(html,"cmt");ui.flash=v;const el=$("#v"+v);if(el){el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash")}}
 
 /* ---------- reader view ---------- */
 function readerPos(){const p=S.meta.pos;return p&&BOOKS[p.b]&&p.c>=1&&p.c<=BOOKS[p.b][2]?p:{b:42,c:1}}
@@ -1552,15 +1580,17 @@ function vReader(){
     <p>Синодальный перевод — общественное достояние, его можно свободно скачать. Загрузи файл один раз — и читай, выделяй стихи, пиши заметки и размышления к главам.</p>
     <ol><li>Открой в браузере <b>github.com/thiagobodruk/bible</b></li><li>Папка <b>json</b> → файл <b>ru_synodal.json</b> → кнопка скачивания</li><li>Нажми ниже и выбери этот файл</li></ol>
     <button class="btn wide" data-a="bibleFile">${ic("up")}Загрузить файл Библии</button><p class="small" style="margin-top:10px">Подходят JSON-файлы Синодального перевода (формат thiagobodruk или Bible SuperSearch). Файл хранится на этом устройстве.</p></section>`;
-  const {b,c}=readerPos(),R=RP(),vs=BIB[b][c-1]||[],m=mark(b,c),sel=ui.rsel||[];
+  const {b,c}=readerPos(),R=RP(),vs=BIB[b][c-1]||[],m=mark(b,c),sel=ui.rsel||[],cm=cmtFor(b,c),cmE={};
+  if(cm)(cm.notes||[]).forEach(n=>{(cmE[n.v[1]]=cmE[n.v[1]]||[]).push(n)});
   const readTodayCh=bToday().some(e=>e.book===b&&(e.chapters||[]).includes(c)),readEver=readSet().has(b+":"+c);
   const verses=vs.map((t,i)=>{const n=i+1,h=m&&m.hl[n],note=m&&m.notes[n];
     const tx=n===1&&R.layout==="flow"&&t?`<span class="dc">${esc(t.charAt(0))}</span>${esc(t.slice(1))}`:esc(t);
-    return `<span class="vs ${h?"hl":""} ${TTS.on&&TTS.i+1===n?"speak":""} ${sel.includes(n)?"sel":""} ${ui.flash===n?"flash":""}" id="v${n}" data-a="vtap" data-v="${n}" style="${h?`--h:${HL[h]}`:""}">${n===1&&R.layout==="flow"?"":`<sup>${n}</sup>`}${tx}${note?`<button class="vn" data-a="vnote" data-v="${n}" aria-label="Заметка к стиху ${n}">${ic("pen")}</button>`:""}</span>`}).join(R.layout==="flow"?" ":"");
+    return `<span class="vs ${h?"hl":""} ${TTS.on&&TTS.i+1===n?"speak":""} ${sel.includes(n)?"sel":""} ${ui.flash===n?"flash":""}" id="v${n}" data-a="vtap" data-v="${n}" style="${h?`--h:${HL[h]}`:""}">${n===1&&R.layout==="flow"?"":`<sup>${n}</sup>`}${tx}${note?`<button class="vn" data-a="vnote" data-v="${n}" aria-label="Заметка к стиху ${n}">${ic("pen")}</button>`:""}${cmE[n]?`<button class="cm" data-a="cmt" data-v="${n}" aria-label="Комментарий к стиху ${n}">${[...new Set(cmE[n].map(x=>(CK[x.kind]||CK.fact)[0]))].join("")}</button>`:""}</span>`}).join(R.layout==="flow"?" ":"");
   const soap=(m&&m.soap)||[];
   return `<div class="rbar"><button class="rpick" data-a="rPick">${esc(BOOKS[b][0])} ${c}${ic("chev")}</button><button class="rb ${TTS.on?"play":""}" data-a="rListen" aria-label="${TTS.on?"Остановить чтение":"Слушать главу"}">${TTS.on?"⏸":"🎧"}</button><button class="rb" data-a="rSearch" aria-label="Поиск по Библии">${ic("search")}</button><button class="rb" data-a="rSettings" aria-label="Настройки текста"><b style="font-family:var(--serif);font-size:18px">Аа</b></button></div>
   <article class="reader t-${R.theme} f-${R.font} l-${R.layout}" style="--rs:${R.size}px">
     <div class="r-book">${esc(BOOKS[b][0])}</div><h2 class="r-ch">Глава ${c}</h2>
+    ${cm&&cm.intro&&!ui.introOff?`<div class="r-intro"><small>✦ О чём эта глава</small>${esc(cm.intro)}<button class="x" data-a="introOff" aria-label="Скрыть">${ic("x")}</button></div>`:""}
     <div class="r-text">${verses}</div>
     <div class="r-end">
       <button class="btn wide ${readTodayCh?"done":""}" data-a="rRead">${ic("check")}${readTodayCh?"Прочитано сегодня":readEver?"Прочитал снова":"Отметить главу прочитанной"}</button>
@@ -1569,6 +1599,7 @@ function vReader(){
   </article>
   <section class="card soap"><div class="lab">${ic("spark")}Размышление о главе</div><h2 style="margin-top:6px">${esc(BOOKS[b][1])} ${c}: что Бог говорит мне?</h2>
     ${soap.map((s_,i)=>`<div class="soap-i"><div class="small">${fDayY.format(new Date(s_.ts))}</div>${[["s","Зацепило"],["o","Смысл"],["a","Применю"],["p","Молитва"]].filter(([k])=>s_[k]).map(([k,l])=>`<p><b>${l}:</b> ${esc(s_[k])}</p>`).join("")}<button class="textbtn" style="color:var(--muted)" data-a="soapDel" data-v="${i}">Удалить</button></div>`).join("")}
+    ${cm&&cm.questions&&cm.questions.length?`<div class="small" style="margin-top:10px;font-weight:700">Вопросы для размышления</div><ol class="qs">${cm.questions.map(q=>`<li>${esc(q)}</li>`).join("")}</ol>`:""}
     <button class="btn ghost wide mt" data-a="soapNew">${ic("pen")}${soap.length?"Добавить ещё":"Написать размышление"}</button></section>
   ${sel.length?`<div class="vbar" role="toolbar" aria-label="Действия со стихами"><div class="vb-top"><b>${vRef(b,c,sel)}</b><button class="rb" data-a="vClear" aria-label="Снять выделение">${ic("x")}</button></div>
     <div class="vb-colors">${Object.entries(HL).map(([k,col])=>`<button style="--h:${col}" data-a="vHl" data-v="${k}" aria-label="Выделить цветом"></button>`).join("")}<button class="nohl" data-a="vHl" data-v="" aria-label="Убрать выделение">${ic("x")}</button></div>
@@ -1617,6 +1648,7 @@ function rSettingsSheet(){
   <label class="l">Шрифт</label>${opt("font",[["lit","Литерата"],["cor","Классический"],["sans","Без засечек"]])}
   <label class="l">Страница</label>${opt("theme",[["auto","Как приложение"],["paper","Бумага"],["night","Ночь"]])}
   <label class="l">Вид</label>${opt("layout",[["flow","Сплошным текстом"],["lines","Каждый стих с новой строки"]])}
+  <label class="l">Комментарии к тексту</label>${opt("cmt",[["on","Показывать ✦"],["off","Скрыть"]])}
   <p class="reader t-${R.theme} f-${R.font}" style="--rs:${R.size}px;padding:16px 18px;border-radius:20px;margin-top:16px"><span class="vs"><sup>1</sup>В начале было Слово, и Слово было у Бога, и Слово было Бог.</span></p>`;
   if(ui.sheetKind==="rset")redrawSheet(html);else openSheet(html,"rset")}
 function vNoteSheet(b,c,vs){
@@ -2136,6 +2168,8 @@ const act={
   rpCh:d=>openReader(ui.rp.book,+d.v),
   rSearch:()=>rSearchSheet(),
   rSettings:()=>rSettingsSheet(),
+  cmt:d=>{if(d.v)cmtSheet(+d.v)},
+  introOff:()=>{ui.introOff=true;render()},
   rSet:d=>{setRP(d.k,d.v);rSettingsSheet();render()},
   rSize:d=>{setRP("size",Math.min(30,Math.max(14,RP().size+Number(d.v))));rSettingsSheet();render()},
   vtap:d=>{const n=+d.v,a=ui.rsel=ui.rsel||[],i=a.indexOf(n);if(i>=0)a.splice(i,1);else a.push(n);buzz();render()},

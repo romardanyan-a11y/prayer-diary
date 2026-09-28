@@ -1834,15 +1834,35 @@ function botSheet(){const r=($("#botT")&&$("#botT").value)||(CH.me&&CH.me.remind
   ${CH.me&&!CH.me.chatOk?`<div class="answer-box gold"><div class="k">Важно</div><p>Чтобы бот мог писать, открой чат с @PrayerDiary_bot и нажми «Запустить» (/start).</p></div>`:""}
   <button class="btn wide mt" data-a="botSave">${ic("bell")}${on?"Сохранить":"Включить"}</button>${on?`<button class="btn danger wide mt" data-a="botOff">Выключить</button>`:""}`);
   if(ui.sheetKind==="bot")redrawSheet(html);else openSheet(html,"bot")}
+const PLAN_TPL=[
+  {k:"jn21",t:"Евангелие от Иоанна за 21 день",r:[[42]],d:21},
+  {k:"gos30",t:"Четыре Евангелия за 30 дней",r:[[39,42]],d:30},
+  {k:"acts28",t:"Деяния апостолов за 28 дней",r:[[43]],d:28},
+  {k:"ps30",t:"Псалмы за месяц",r:[[18]],d:30},
+  {k:"pr31",t:"Притчи за месяц",r:[[19]],d:31},
+  {k:"paul30",t:"Послания Павла за 30 дней",r:[[51,64]],d:30},
+  {k:"dr34",t:"Даниил и Откровение за 34 дня",r:[[26],[65]],d:34},
+  {k:"gen50",t:"Бытие за 50 дней",r:[[0]],d:50},
+  {k:"nt90",t:"Новый Завет за 90 дней",r:[[39,65]],d:90},
+  {k:"bible365",t:"Вся Библия за год",r:[[0,65]],d:365}];
+function tplDays(t){const chs=[];t.r.forEach(([a,b])=>{for(let x=a;x<=(b===undefined?a:b);x++)for(let c=1;c<=BOOKS[x][2];c++)chs.push([x,c])});
+  const days=[];for(let i=0;i<t.d;i++){const d=chs.slice(Math.floor(i*chs.length/t.d),Math.floor((i+1)*chs.length/t.d));if(d.length)days.push(d)}return days}
+function planTplInfo(){const k=$("#pnK").value,own=k==="own";$("#pnCustom").classList.toggle("hidden",!own);
+  if(own){const b=+$("#pnB").value,per=+$("#pnP").value,n=Math.ceil(BOOKS[b][2]/per);$("#pnInfo").textContent=n+" "+plural(n,"день","дня","дней")+" · по "+per+" "+plural(per,"главе","главы","глав")+" в день";$("#pnT").placeholder=BOOKS[b][0]+" за "+n+" "+plural(n,"день","дня","дней");return}
+  const t=PLAN_TPL.find(x=>x.k===k),days=tplDays(t),n=days.reduce((a,d)=>a+d.length,0),mn=Math.min(...days.map(d=>d.length)),mx=Math.max(...days.map(d=>d.length));
+  $("#pnInfo").textContent=days.length+" "+plural(days.length,"день","дня","дней")+" · "+n+" "+plural(n,"глава","главы","глав")+" · "+(mn===mx?mn:mn+"–"+mx)+" "+plural(mx,"глава","главы","глав")+" в день";$("#pnT").placeholder=t.t}
 function planNewSheet(){ui.pn={b:42,per:1};const o=BOOKS.map((x,i)=>`<option value="${i}" ${i===42?"selected":""}>${esc(x[0])} (${x[2]} гл.)</option>`).join("");
   const t=new Date();const tm=new Date();tm.setDate(tm.getDate()+1);
   openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>Новый план</h2><button class="pill pri" data-a="planCreate">Создать</button></div>
-  <label class="l" for="pnB">Книга</label><select class="in" id="pnB">${o}</select>
-  <label class="l" for="pnP">Глав в день</label><select class="in" id="pnP">${[1,2,3,4,5].map(n=>`<option value="${n}">${n}</option>`).join("")}</select>
-  <label class="l" for="pnT">Название</label><input class="in" id="pnT" maxlength="80" placeholder="Например: Иоанн за 21 день">
+  <label class="l" for="pnK">Что читаем</label><select class="in" id="pnK">${PLAN_TPL.map(x=>`<option value="${x.k}">${esc(x.t)}</option>`).join("")}<option value="own">Своя книга…</option></select>
+  <div id="pnCustom" class="hidden"><label class="l" for="pnB">Книга</label><select class="in" id="pnB">${o}</select>
+  <label class="l" for="pnP">Глав в день</label><select class="in" id="pnP">${[1,2,3,4,5].map(n=>`<option value="${n}">${n}</option>`).join("")}</select></div>
+  <p class="small" id="pnInfo" style="margin:10px 4px 0"></p>
+  <label class="l" for="pnT">Название (необязательно)</label><input class="in" id="pnT" maxlength="80" placeholder="">
   <label class="l" for="pnS">Начало</label><input type="date" class="in" id="pnS" value="${dk(tm)}" min="${dk(t)}">
   <label class="l" for="pnC">Ссылка на чат для обсуждения (необязательно)</label><input class="in" id="pnC" placeholder="https://t.me/…">
-  <div class="set mt"><div><b>${CH.scope==="global"?"Сообщить всем":"Сообщить участникам"}</b><span>${CH.scope==="global"?"Бот напишет каждому пользователю о новом плане":"Бот напишет участникам церкви о новом плане"}</span></div><button class="pill" id="pnA" data-a="pnA">Нет</button></div>`,"plan")}
+  <div class="set mt"><div><b>${CH.scope==="global"?"Сообщить всем":"Сообщить участникам"}</b><span>${CH.scope==="global"?"Бот напишет каждому пользователю о новом плане":"Бот напишет участникам церкви о новом плане"}</span></div><button class="pill" id="pnA" data-a="pnA">Нет</button></div>`,"plan");
+  ["pnK","pnB","pnP"].forEach(id=>$("#"+id).addEventListener("change",planTplInfo));planTplInfo()}
 function ping(kind){if(!TG||API.startsWith("__"))return;call("event",{kind}).catch(()=>{})}
 const TOUR=[
   {t:"Мир тебе! 🕊️",x:"Это молитвенный дневник: твои молитвы, Библия с комментариями и молитва вместе с другими христианами.<br><br>Покажу за минуту, как тут всё устроено."},
@@ -2597,8 +2617,10 @@ const act={
   botOff:()=>{closeSheet();chDo(()=>call("settings",{remind:null}),"Сообщения выключены")},
   planNew:()=>planNewSheet(),
   pnA:()=>{const b=$("#pnA"),on=b.textContent==="Нет";b.textContent=on?"Да":"Нет";b.classList.toggle("on",on)},
-  planCreate:()=>{const b=+$("#pnB").value,per=+$("#pnP").value,n=BOOKS[b][2],days=[];for(let c=1;c<=n;c+=per){const d=[];for(let k=c;k<Math.min(n+1,c+per);k++)d.push([b,k]);days.push(d)}
-    const title=$("#pnT").value.trim()||(BOOKS[b][0]+" за "+days.length+" "+plural(days.length,"день","дня","дней"));
+  planCreate:()=>{const k=$("#pnK").value,tpl=PLAN_TPL.find(x=>x.k===k);let days=[],title=$("#pnT").value.trim();
+    if(tpl){days=tplDays(tpl);title=title||tpl.t}
+    else{const b=+$("#pnB").value,per=+$("#pnP").value,n=BOOKS[b][2];for(let c=1;c<=n;c+=per){const d=[];for(let x=c;x<Math.min(n+1,c+per);x++)d.push([b,x]);days.push(d)}
+      title=title||(BOOKS[b][0]+" за "+days.length+" "+plural(days.length,"день","дня","дней"))}
     const body={title,days,start:$("#pnS").value,chat:$("#pnC").value.trim(),announce:$("#pnA").textContent==="Да",scope:CH.scope==="global"?null:CH.scope};closeSheet();CH.seg="plans";chDo(()=>call("plan/create",body),"План создан 📖")},
   planJoin:d=>chDo(()=>call("plan/join",{id:+d.id}),"Ты в плане! Читаем вместе 📖"),
   planDone:d=>{const undo=!!d.u;const p=CH.plans.find(x=>x.id===+d.id);if(p){if(undo)p.myDone=p.myDone.filter(x=>x!==+d.v);else p.myDone.push(+d.v);render()}if(!undo)burst();chDo(()=>call("plan/done",{id:+d.id,day:+d.v,undo}),undo?"Отметка снята":"День прочитан! 🎉")},

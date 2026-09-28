@@ -1,0 +1,24 @@
+Фоновые записи для «Молитвенного дневника». Все взяты с Wikimedia Commons.
+Файлы перекодированы в MP3, выровнены по громкости; записи природы обрезаны и сведены в бесшовную петлю.
+
+satie.mp3   — Эрик Сати, «Гимнопедия №1». Исполнение: Teknopazzo. CC0.
+              https://commons.wikimedia.org/wiki/File:Gymnopedie_No._1..ogg
+debussy.mp3 — Клод Дебюсси, «Лунный свет» (фортепиано). Общественное достояние.
+              https://commons.wikimedia.org/wiki/File:Clair_de_Lune_by_Claude_Debussy_(1905,_piano_solo).opus
+chopin.mp3  — Фредерик Шопен, Ноктюрн ми-бемоль мажор, соч. 9 №2. Исполнение: Peter Johnston. CC0.
+              https://commons.wikimedia.org/wiki/File:Chopin_Nocturne_No._2_in_E_Flat_Major,_Op._9.ogg
+bach.mp3    — И. С. Бах, «Ария». United States Air Force Band, Air Force Strings. Общественное достояние.
+              https://commons.wikimedia.org/wiki/File:Air_-_Air_Force_Strings_-_United_States_Air_Force_Band.mp3
+grace.mp3   — «Amazing Grace» (О, благодать). United States Air Force Band, струнные. Общественное достояние.
+              https://commons.wikimedia.org/wiki/File:Amazing_Grace_(USAFB_strings).ogg
+nearer.mp3  — «Nearer, My God, to Thee» (Ближе, Господь, к Тебе). United States Air Force Band. Общественное достояние.
+              https://commons.wikimedia.org/wiki/File:Nearer_My_God_to_Thee_-_Concert_Band_-_United_States_Air_Force_Band.mp3
+rain.mp3    — «Rain against the window», автор cori (pdsounds.org). Общественное достояние.
+              https://commons.wikimedia.org/wiki/File:Rain_against_the_window.ogg
+waves.mp3   — «Ocean Waves on a Tropical Beach», Jarrod stanley. CC0.
+              https://commons.wikimedia.org/wiki/File:Ocean_Waves_on_a_Tropical_Beach.ogg
+birds.mp3   — «Home Dawn Chorus 2020-04-28 0600», Robert EA Harvey. CC BY-SA 4.0
+              https://commons.wikimedia.org/wiki/File:Home_Dawn_Chorus_2020-04-28_0600.mp3
+              Изменения: фрагмент 4:05–6:41, фильтр низких частот (убран гул дороги), моно, петля.
+              Этот изменённый файл распространяется на тех же условиях: CC BY-SA 4.0
+              https://creativecommons.org/licenses/by-sa/4.0/

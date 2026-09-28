@@ -466,6 +466,18 @@ input[type=time].in{width:auto;padding:9px 12px;font-weight:700}
 .pc-prom span{font-weight:700;font-size:13.5px;color:var(--gold)}
 .pc-prom.soft p{font-size:19px;color:var(--muted);margin:0}
 .bgp button{height:38px;font-size:14px}
+.bgdlg{max-height:calc(100vh - 32px);overflow:auto;padding:18px}
+.bgdlg>p{margin-bottom:6px}
+.bg-h{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:12px 4px 8px}
+.bg-g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bgo{display:flex;align-items:center;gap:8px;text-align:left;padding:9px 10px;border-radius:16px;background:var(--card);border:1px solid var(--stroke);min-height:54px;color:var(--text)}
+.bgo i{font-style:normal;font-size:20px;flex:none}
+.bgo span{display:flex;flex-direction:column;min-width:0}
+.bgo b{font-size:14px;font-weight:650;line-height:1.2}
+.bgo small{font-size:11.5px;color:var(--muted);line-height:1.2;margin-top:2px}
+.bgo.on{background:var(--text);color:var(--bg);border-color:transparent}
+.bgo.on small{color:inherit;opacity:.7}
+.bg-cr{font-size:11px;color:var(--faint);text-align:center;margin-top:12px;line-height:1.4}
 .bookc{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:15px 16px;border-radius:24px;margin-bottom:12px;background:linear-gradient(135deg,#2A1E12,#4A2F16);color:#FFE9C4;border:1px solid rgba(255,200,120,.2)}
 .bookc b{display:block;font-size:17px;font-weight:800}.bookc small{display:block;font-size:13px;opacity:.75}.bookc>svg.i{margin-left:auto;opacity:.7}.bookc .be{font-size:30px}
 .storyc.year{background:radial-gradient(100% 120% at 0% 0%,#FFB35C,transparent 60%),radial-gradient(100% 120% at 100% 100%,#6B5CF0,transparent 60%),#2A1030}
@@ -2268,28 +2280,51 @@ function planCard(){const A=activeRPlan();if(!A)return "";const rs=readSince(A.s
 /* promise picker */
 function promiseChips(){const list=VERSES.filter(v=>favs().includes(v.r)).concat(S.meta.custom||[]).concat(VERSES.filter(v=>!favs().includes(v.r))).slice(0,14);
   return `<div class="pick" style="margin-top:8px">${list.map(v=>`<button data-a="fPromise" data-v="${esc(v.r)}">${esc(v.r)}</button>`).join("")}</div>`}
-/* ambient sounds */
-function noiseBuf(C,type){const len=C.sampleRate*4,b=C.createBuffer(2,len,C.sampleRate);for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);let b0=0,b1=0,b2=0,last=0;
-  for(let i=0;i<len;i++){const w=Math.random()*2-1;if(type==="pink"){b0=.99765*b0+w*.099046;b1=.963*b1+w*.2965164;b2=.57*b2+w*1.0526913;d[i]=(b0+b1+b2+w*.1848)*.11}else if(type==="brown"){last=(last+.02*w)/1.02;d[i]=last*3.5}else d[i]=w*.4}}return b}
-const SND={nodes:[],timers:[]};
-function sndStop(){SND.timers.forEach(t=>{clearTimeout(t);clearInterval(t)});SND.timers=[];SND.nodes.forEach(n=>{try{if(n.gain){n.gain.cancelScheduledValues(0);n.gain.setTargetAtTime(0,AMB.ctx.currentTime,.4)}}catch(e){}});const ns=SND.nodes;SND.nodes=[];setTimeout(()=>ns.forEach(n=>{try{n.stop&&n.stop()}catch(e){}try{n.disconnect()}catch(e){}}),1600);SND.on=null}
-function sndStart(kind){
-  unlockAudio();try{const C=AMB.ctx||(AMB.ctx=new (window.AudioContext||window.webkitAudioContext)());if(C.state!=="running")C.resume().catch(()=>{});
-  const out=C.createGain();out.gain.setValueAtTime(0,C.currentTime);out.gain.linearRampToValueAtTime(kind==="fire"?.9:.7,C.currentTime+2.5);out.connect(C.destination);SND.nodes.push(out);SND.on=kind;
-  const loop=(type,f1,f2,g)=>{const s=C.createBufferSource();s.buffer=noiseBuf(C,type);s.loop=true;let n=s;if(f1){const hp=C.createBiquadFilter();hp.type="highpass";hp.frequency.value=f1;n.connect(hp);n=hp}if(f2){const lp=C.createBiquadFilter();lp.type="lowpass";lp.frequency.value=f2;n.connect(lp);n=lp}const gg=C.createGain();gg.gain.value=g;n.connect(gg);gg.connect(out);s.start();SND.nodes.push(s,gg);return gg};
-  const burst_=(dur,f,g,q)=>{const now=C.currentTime,s=C.createBufferSource();s.buffer=SND.wb||(SND.wb=noiseBuf(C,"white"));const bp=C.createBiquadFilter();bp.type="bandpass";bp.frequency.value=f;bp.Q.value=q||1;const gg=C.createGain();gg.gain.setValueAtTime(g,now);gg.gain.exponentialRampToValueAtTime(.0001,now+dur);s.connect(bp);bp.connect(gg);gg.connect(out);s.start(now,Math.random()*3);s.stop(now+dur+.05)};
-  if(kind==="rain"){loop("pink",500,7000,.55);loop("white",2500,9000,.08);const drop=()=>{if(SND.on!=="rain")return;burst_(.04+Math.random()*.05,1500+Math.random()*3000,.25,2);SND.timers.push(setTimeout(drop,30+Math.random()*160))};drop()}
-  if(kind==="fire"){loop("brown",0,400,.9);loop("pink",800,3000,.05);const cr=()=>{if(SND.on!=="fire")return;burst_(.015+Math.random()*.03,2500+Math.random()*3500,.5+Math.random()*.5,.8);SND.timers.push(setTimeout(cr,Math.random()<.2?20:120+Math.random()*700))};cr()}
-  if(kind==="waves"){const g=loop("brown",40,900,.6);const lfo=C.createOscillator(),lg=C.createGain();lfo.frequency.value=.11;lg.gain.value=.45;lfo.connect(lg);lg.connect(g.gain);lfo.start();SND.nodes.push(lfo,lg);loop("pink",1200,5000,.04)}
-  if(kind==="forest"){const g=loop("pink",250,1100,.35);const lfo=C.createOscillator(),lg=C.createGain();lfo.frequency.value=.07;lg.gain.value=.2;lfo.connect(lg);lg.connect(g.gain);lfo.start();SND.nodes.push(lfo,lg);
-    const bird=()=>{if(SND.on!=="forest")return;const n=2+Math.floor(Math.random()*4),base=2200+Math.random()*1800;for(let i=0;i<n;i++){const t0=C.currentTime+i*(.12+Math.random()*.08),o=C.createOscillator(),gg=C.createGain();o.type="sine";o.frequency.setValueAtTime(base,t0);o.frequency.exponentialRampToValueAtTime(base*(1.3+Math.random()*.5),t0+.08);gg.gain.setValueAtTime(0,t0);gg.gain.linearRampToValueAtTime(.05,t0+.01);gg.gain.exponentialRampToValueAtTime(.0001,t0+.11);o.connect(gg);gg.connect(out);o.start(t0);o.stop(t0+.13)}SND.timers.push(setTimeout(bird,2500+Math.random()*6000))};SND.timers.push(setTimeout(bird,1500))}
-  }catch(e){toast("Звук недоступен на этом устройстве")}}
-const BGS=[["music","🎵","Музыка"],["rain","🌧","Дождь"],["fire","🔥","Камин"],["forest","🌲","Лес"],["waves","🌊","Волны"],["off","🔇","Тишина"]];
-const bgPref=()=>S.meta.bg||(S.meta.music?"music":"off");
-function bgStart(k){bgStop();if(k==="music")ambStart();else if(k&&k!=="off")sndStart(k)}
-function bgStop(){if(AMB.on)ambStop();if(SND.on)sndStop()}
-const bgNow=()=>AMB.on?"music":SND.on||"off";
-function bgPick(){return `<div class="pick bgp">${BGS.map(([k,e,l])=>`<button class="${bgPref()===k?"on":""}" data-a="bgSet" data-v="${k}">${e} ${l}</button>`).join("")}</div>`}
+/* background sounds: real recordings in audio/*.mp3 + generated ambient ("music") */
+const BGS=[["satie","🎹","Гимнопедия","Эрик Сати","m"],["debussy","🌙","Лунный свет","Клод Дебюсси","m"],["chopin","🕯","Ноктюрн","Фредерик Шопен","m"],["bach","🎻","Ария","И. С. Бах","m"],
+  ["grace","🕊","О, благодать","гимн, струнные","m"],["nearer","🎺","Ближе к Тебе","гимн, оркестр","m"],["music","✨","Эмбиент","тихие переливы","m"],
+  ["rain","🌧","Дождь","за окном","n"],["waves","🌊","Волны","берег океана","n"],["birds","🐦","Птицы","раннее утро","n"],["off","🔇","Тишина","","n"]];
+const BG_OLD={fire:"rain",forest:"birds"};
+const bgPref=()=>{const k=S.meta.bg||(S.meta.music?"music":"off"),v=BG_OLD[k]||k;return BGS.some(b=>b[0]===v)?v:"off"};
+const TRK={on:null,a:null,src:null,g:null,buf:null,bk:null,tm:null};
+let _volOK=null;const volOK=()=>_volOK!=null?_volOK:(_volOK=(()=>{try{const a=new Audio();a.volume=.3;return Math.abs(a.volume-.3)<.01}catch(e){return false}})());
+function elFade(a,to,ms,done){clearTimeout(a._f);if(!volOK()){if(done)done();return}const from=a.volume,t0=performance.now();
+  const step=()=>{const k=Math.min(1,(performance.now()-t0)/ms);try{a.volume=from+(to-from)*k}catch(e){}if(k<1)a._f=setTimeout(step,50);else if(done)done()};step()}
+function loopEdges(b){const d=b.getChannelData(0),n=d.length,cap=Math.min(6000,n>>4),q=x=>Math.abs(x)<.002;let i=0,j=n-1;while(i<cap&&q(d[i]))i++;while(j>n-1-cap&&q(d[j]))j--;return [i<48?0:i,j>n-49?n:j+1]}
+function trkFail(msg){trkStop();toast(msg);if(PM)drawPM(true)}
+function trkMusic(k){const a=new Audio();a.setAttribute("playsinline","");a.preload="auto";a.src="audio/"+k+".mp3";if(volOK())a.volume=0;TRK.a=a;TRK.on=k;
+  a.onended=()=>{TRK.tm=setTimeout(()=>{if(TRK.a===a){a.currentTime=0;const p=a.play();if(p&&p.catch)p.catch(()=>{})}},2500)};
+  a.onerror=()=>{if(TRK.a===a)trkFail("Не получилось загрузить музыку. Проверь интернет")};
+  const p=a.play();if(p&&p.catch)p.catch(e=>{if(TRK.a===a&&e&&e.name==="NotAllowedError")trkFail("Нажми «Фон» наверху, чтобы включить звук")});
+  elFade(a,.85,1500)}
+async function trkLoop(k){TRK.on=k;unlockAudio();
+  try{const C=AMB.ctx||(AMB.ctx=new (window.AudioContext||window.webkitAudioContext)());if(C.state!=="running")C.resume().catch(()=>{});
+    let b=TRK.bk===k&&TRK.buf;
+    if(!b){const r=await fetch("audio/"+k+".mp3");if(!r.ok)throw new Error("http "+r.status);const ab=await r.arrayBuffer();
+      b=await new Promise((res,rej)=>{const p=C.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej)});TRK.buf=b;TRK.bk=k}
+    if(TRK.on!==k||TRK.src)return;
+    const s=C.createBufferSource(),g=C.createGain(),e=loopEdges(b);s.buffer=b;s.loop=true;s.loopStart=e[0]/b.sampleRate;s.loopEnd=e[1]/b.sampleRate;
+    g.gain.setValueAtTime(0,C.currentTime);g.gain.linearRampToValueAtTime(1,C.currentTime+2.5);s.connect(g);g.connect(C.destination);s.start(0,s.loopStart);TRK.src=s;TRK.g=g}
+  catch(e){if(TRK.on===k)trkFail("Не получилось загрузить звук. Проверь интернет")}}
+function trkStop(){clearTimeout(TRK.tm);const a=TRK.a,s=TRK.src,g=TRK.g;TRK.on=TRK.a=TRK.src=TRK.g=null;
+  if(a)elFade(a,0,900,()=>{try{a.pause();a.removeAttribute("src");a.load()}catch(e){}});
+  if(s&&g){try{AMB.el&&AMB.el.pause()}catch(e){}const C=AMB.ctx;try{g.gain.cancelScheduledValues(C.currentTime);g.gain.setValueAtTime(g.gain.value,C.currentTime);g.gain.linearRampToValueAtTime(0,C.currentTime+1.2)}catch(e){}
+    setTimeout(()=>{try{s.stop()}catch(e){}try{s.disconnect();g.disconnect()}catch(e){}},1400)}}
+function bgStart(k){bgStop();const b=BGS.find(x=>x[0]===k);if(!b||k==="off")return;if(k==="music")ambStart();else if(b[4]==="m")trkMusic(k);else trkLoop(k)}
+function bgStop(){if(AMB.on)ambStop();if(TRK.on||TRK.a||TRK.src)trkStop()}
+const bgNow=()=>AMB.on?"music":TRK.on||"off";
+const bgInfo=k=>BGS.find(x=>x[0]===k)||BGS[BGS.length-1];
+/* picker: `now` runs inside the tap itself, so iOS lets the sound start */
+function bgDialog(cur,now){return new Promise(res=>{const d=$("#dlg");
+  const btn=b=>`<button class="bgo ${cur===b[0]?"on":""}" data-k="${b[0]}"><i>${b[1]}</i><span><b>${b[2]}</b>${b[3]?`<small>${b[3]}</small>`:""}</span></button>`;
+  const grp=g=>BGS.filter(b=>b[4]===g).map(btn).join("");
+  d.innerHTML=`<div class="dlg-card bgdlg" role="dialog" aria-modal="true"><p>Фон для молитвы</p>
+    <div class="bg-h">Музыка</div><div class="bg-g">${grp("m")}</div>
+    <div class="bg-h">Природа</div><div class="bg-g">${grp("n")}</div>
+    <button class="btn ghost wide" data-k="" style="margin-top:14px">Закрыть</button>
+    <div class="bg-cr">Записи — Wikimedia Commons, свободные лицензии.<br>Птицы — Robert EA Harvey, CC BY-SA 4.0</div></div>`;
+  d.classList.add("show");const done=v=>{d.classList.remove("show");d.innerHTML="";res(v)};
+  d.querySelectorAll("[data-k]").forEach(b=>b.onclick=e=>{e.stopPropagation();const k=b.dataset.k;if(k&&now)now(k);done(k)});d.onclick=e=>{if(e.target===d)done("")}})}
 /* cards mode (Echo-style) */
 function drawCards(){
   const L=PM.list,i=PM.ci;if(i>=L.length){act.pmFinish();return}const p=L[i];
@@ -2534,13 +2569,13 @@ function entryView(id){
   ${["exp","answer","thanks","word","sermon"].includes(e.type)&&e.text?`<button class="btn ghost wide mt" data-a="tgShare" data-v="${esc((e.type==="exp"?"✨ Мой опыт":e.type==="answer"?"🙌 Бог ответил на молитву":e.type==="thanks"?"🙏 Благодарю Бога":"📖")+(e.title?": "+e.title:"")+"\n\n"+e.text)}">${ic("share")}Поделиться в Telegram</button>`:""}
   <button class="btn danger wide mt" data-a="delEntry" data-id="${id}">Удалить запись</button>`,"view");
 }
-function modeSheet(){const n=todaysList().length,more=!!ui.modeMore,bg=BGS.find(x=>x[0]===bgPref())||BGS[BGS.length-1];
+function modeSheet(){const n=todaysList().length,more=!!ui.modeMore,bg=bgInfo(bgPref());
   const row=(a,v,e,c,t,d)=>`<button class="mode" data-a="${a}" ${v?`data-v="${v}"`:""}><span class="mi" style="background:color-mix(in srgb,${c} 22%,transparent)">${e}</span><span><b>${t}</b><span>${d}</span></span><span class="go">${ic("right")}</span></button>`;
   const html=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Как помолимся?</h2><span style="width:40px"></span></div>
   <button class="mode-main" data-a="pmStart" data-v="full"><span class="mm-e">🙏</span><b>Время с Богом</b><span>Около 10 минут: тишина, хвала, покаяние, благодарность, просьбы и слушание</span></button>
   <div class="mode2"><button class="mode-sm" data-a="pmStart" data-v="cards"><span class="ms-e">🃏</span><b>Мои нужды</b><small>${n?n+" "+plural(n,"нужда","нужды","нужд")+" на сегодня":"по карточкам"}</small></button>
   <button class="mode-sm" data-a="pmStart" data-v="quick"><span class="ms-e">⚡</span><b>Коротко</b><small>3 шага · 2 минуты</small></button></div>
-  <button class="set" style="width:100%;text-align:left;margin-top:12px" data-a="bgChoose"><div><b>${bg[1]} Фон: ${bg[2]}</b><span>Что будет звучать во время молитвы</span></div>${ic("right")}</button>
+  <button class="set" style="width:100%;text-align:left;margin-top:12px" data-a="bgChoose"><div><b>${bg[1]} Фон: ${bg[2]}</b><span>${bg[3]?bg[3]+" · ":""}нажми, чтобы сменить</span></div>${ic("right")}</button>
   <button class="more-btn" data-a="modeMore">${more?"Скрыть":"Ещё способы молиться"} <span>${more?"▴":"▾"}</span></button>
   ${more?`<div class="mode-list">
     ${row("pmStart","walk","🚶","#43C985","Молитвенная прогулка","Молись на ходу — за то, что видишь")}
@@ -2565,7 +2600,7 @@ function settingsSheet(redraw){
   const html=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Настройки</h2><span style="width:40px"></span></div>
   <div class="set"><div><b>Цель на день</b><span>Сколько раз в день хочешь молиться</span></div><div class="stepper"><button data-a="goal" data-v="-1" aria-label="Меньше">${ic("minus")}</button><output>${goal()}</output><button data-a="goal" data-v="1" aria-label="Больше">${ic("plus")}</button></div></div>
   <div class="set" style="flex-wrap:wrap"><div><b>Напоминание</b><span>Ежедневное событие в календаре телефона</span></div><div style="display:flex;gap:8px;align-items:center"><input type="time" class="in" id="remT" value="${esc(S.meta.remind||"08:00")}"><button class="pill pri" data-a="reminder" ${dl?"":"disabled"}>${ic("bell")}Добавить</button></div></div>
-  <div class="set" style="flex-wrap:wrap"><div><b>Фон во время молитвы</b><span>Музыка или звуки природы</span></div>${bgPick()}</div>
+  <button class="set" style="width:100%;text-align:left" data-a="bgChoose"><div><b>Фон во время молитвы</b><span>${bgInfo(bgPref())[1]} ${bgInfo(bgPref())[2]}${bgInfo(bgPref())[3]?" · "+bgInfo(bgPref())[3]:""}</span></div>${ic("right")}</button>
   <div class="set"><div><b>Нужд в день по кругу</b><span>Для «Сегодня в молитве»</span></div><div class="stepper"><button data-a="perDay" data-v="-1" aria-label="Меньше">${ic("minus")}</button><output>${perDayN()}</output><button data-a="perDay" data-v="1" aria-label="Больше">${ic("plus")}</button></div></div>
   <div class="set"><div><b>Стих дня</b><span>${BIB?"Из всей Библии или о молитве":"Загрузи Библию, чтобы брать из всей"}</span></div><div class="pick">${[["bible","Вся Библия"],["prayer","О молитве"]].map(([k,l])=>`<button class="${(S.meta.votd||"bible")===k?"on":""}" data-a="votd" data-v="${k}">${l}</button>`).join("")}</div></div>
   <div class="set"><div><b>Часы молитвы</b><span>Утро, день, вечер — как Даниил</span></div><button class="pill ${S.meta.hoursOff?"":"on"}" data-a="hoursTog">${S.meta.hoursOff?"Выкл":"Вкл"}</button></div>
@@ -2996,8 +3031,8 @@ const act={
     delete S.entries[d.id];persist(d.id);closeSheet();render()},
   pmClose:async()=>{if(PM&&!PM.done&&(Date.now()-PM.start>20000)&&!await ask("Выйти без сохранения?","Выйти"))return;closePM()},
   modeMore:()=>{ui.modeMore=!ui.modeMore;modeSheet()},
-  bgChoose:async()=>{const r=await choose("Фон для молитвы",BGS.map(([k,e,l])=>[k,e+" "+l,bgPref()===k?"":"ghost"]));if(!r)return;S.meta.bg=r;persist("meta");if(ui.sheetKind==="mode")modeSheet()},
-  pmMusic:async()=>{const r=await choose("Фон для молитвы",BGS.map(([k,e,l])=>[k,e+" "+l,bgNow()===k?"":"ghost"]));if(!r)return;S.meta.bg=r;persist("meta");if(r==="off")bgStop();else bgStart(r);if(PM)drawPM(true)},
+  bgChoose:async()=>{const r=await bgDialog(bgPref());if(!r)return;S.meta.bg=r;persist("meta");if(ui.sheetKind==="mode")modeSheet();else if(ui.sheetKind==="settings")settingsSheet(true)},
+  pmMusic:async()=>{const r=await bgDialog(bgNow(),k=>{if(k==="off")bgStop();else bgStart(k)});if(!r)return;S.meta.bg=r;persist("meta");if(PM)drawPM(true)},
   pmNext:()=>{PM.step++;drawPM()},
   pmPrev:()=>{PM.step--;drawPM()},
   pmCheck:d=>{if(PM.checked.has(d.id))PM.checked.delete(d.id);else PM.checked.add(d.id);buzz();drawPM(true)},

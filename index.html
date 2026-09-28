@@ -1645,12 +1645,14 @@ function wallNewSheet(){openSheet(`<div class="sh-top"><button class="pill icon"
   <p class="small" style="margin:0 4px 12px">Её увидят все, кто пользуется дневником. Не пиши того, чем не готов делиться, — для личного есть «Мои молитвы».</p>
   <textarea class="in" id="wText" maxlength="600" style="min-height:150px" placeholder="Например: помолитесь о маме — у неё операция в четверг"></textarea>
   <div class="set mt"><div><b>Анонимно</b><span>Имя не будет показано</span></div><button class="pill" id="wAnon" data-a="wAnon">Нет</button></div>`,"wall");setTimeout(()=>$("#wText").focus(),350)}
-function botSheet(){const r=(CH.me&&CH.me.remind)||"08:00",on=!!(CH.me&&CH.me.remind);
-  openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Сообщения от бота</h2><span style="width:40px"></span></div>
-  <p class="small" style="margin:0 4px 14px">Каждый день в выбранное время бот пришлёт стих дня, чтение по общему плану и расскажет, сколько людей молились за твои просьбы. По субботам — поздравит с субботой 🕊</p>
+function botSheet(){const r=($("#botT")&&$("#botT").value)||(CH.me&&CH.me.remind)||"08:00",on=!!(CH.me&&CH.me.remind);
+  const html=(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Сообщения от бота</h2><span style="width:40px"></span></div>
+  <p class="small" style="margin:0 4px 14px">Каждый день в выбранное время бот пришлёт стих дня, чтение по общему плану и расскажет, сколько людей молились за твои просьбы. </p>
   <div class="set"><div><b>Время</b><span>По твоему часовому поясу</span></div><input type="time" class="in" id="botT" value="${esc(r)}"></div>
+  <div class="set"><div><b>Поздравлять с субботой</b><span>По субботам — «Счастливой субботы! 🕊»</span></div><button class="pill ${CH.me&&CH.me.sabbath?"on":""}" data-a="botSab">${CH.me&&CH.me.sabbath?"Вкл":"Выкл"}</button></div>
   ${CH.me&&!CH.me.chatOk?`<div class="answer-box gold"><div class="k">Важно</div><p>Чтобы бот мог писать, открой чат с @PrayerDiary_bot и нажми «Запустить» (/start).</p></div>`:""}
-  <button class="btn wide mt" data-a="botSave">${ic("bell")}${on?"Сохранить":"Включить"}</button>${on?`<button class="btn danger wide mt" data-a="botOff">Выключить</button>`:""}`,"bot")}
+  <button class="btn wide mt" data-a="botSave">${ic("bell")}${on?"Сохранить":"Включить"}</button>${on?`<button class="btn danger wide mt" data-a="botOff">Выключить</button>`:""}`);
+  if(ui.sheetKind==="bot")redrawSheet(html);else openSheet(html,"bot")}
 function planNewSheet(){ui.pn={b:42,per:1};const o=BOOKS.map((x,i)=>`<option value="${i}" ${i===42?"selected":""}>${esc(x[0])} (${x[2]} гл.)</option>`).join("");
   const t=new Date();const tm=new Date();tm.setDate(tm.getDate()+1);
   openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>Новый план</h2><button class="pill pri" data-a="planCreate">Создать</button></div>
@@ -2332,6 +2334,7 @@ const act={
   wallMenu:async d=>{const w=CH.wall.find(x=>x.id===+d.id);if(!w)return;const r=await choose("Просьба о молитве",[["del","Удалить","dangerf"]]);if(r==="del"&&await ask("Удалить просьбу со стены?","Удалить",true))chDo(()=>call("wall/delete",{id:w.id}),"Удалено")},
   botSheet:()=>botSheet(),
   botSave:()=>{const t=$("#botT").value||"08:00";closeSheet();chDo(()=>call("settings",{remind:t,verse:true}),"Бот будет писать в "+t+" 🔔")},
+  botSab:()=>{const v=!(CH.me&&CH.me.sabbath);if(CH.me)CH.me.sabbath=v;botSheet();call("settings",{sabbath:v}).then(()=>toast(v?"Будем поздравлять с субботой 🕊":"Поздравление выключено")).catch(e=>{if(CH.me)CH.me.sabbath=!v;toast(e.message)})},
   botOff:()=>{closeSheet();chDo(()=>call("settings",{remind:null}),"Сообщения выключены")},
   planNew:()=>planNewSheet(),
   pnA:()=>{const b=$("#pnA"),on=b.textContent==="Нет";b.textContent=on?"Да":"Нет";b.classList.toggle("on",on)},

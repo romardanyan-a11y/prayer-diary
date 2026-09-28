@@ -588,6 +588,13 @@ p.reader .vs{font-size:var(--rs);line-height:1.7}
 .cd-t{height:4px;border-radius:9px;background:var(--card2);overflow:hidden;margin:14px 4px 6px}.cd-t i{display:block;height:100%;width:0;background:var(--grad);animation:cdfill 60s linear forwards}
 @keyframes cdfill{to{width:100%}}
 .sw-hint{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;font-weight:600;color:var(--muted);margin:0 4px}
+.aic{display:flex;align-items:center;gap:13px;width:100%;text-align:left;padding:13px 16px;border-radius:24px;margin:0 0 12px;background:linear-gradient(135deg,color-mix(in srgb,#B9A6FF 26%,transparent),color-mix(in srgb,#7CC4FF 14%,transparent)),var(--card);border:1px solid var(--stroke)}
+.aic b{display:block;font-size:16.5px;font-weight:800}.aic small{display:block;font-size:12.5px;color:var(--muted);font-weight:600}.aic .be{font-size:28px}.aic>svg.i{margin-left:auto;opacity:.5}
+.aires{margin-top:14px;padding:14px 16px;border-radius:20px;background:color-mix(in srgb,#B9A6FF 12%,transparent);border:1px solid color-mix(in srgb,#B9A6FF 30%,transparent)}
+.aipr{font-family:var(--serif);font-style:italic;font-size:20px;line-height:1.4;margin:8px 0 0;white-space:pre-wrap}
+.aiv{display:block;padding:12px 14px;border-radius:18px;background:var(--card);border:1px solid var(--stroke);margin-top:8px;cursor:pointer}.aiv p{margin:0;font-family:"Literata",Georgia,serif;font-size:15.5px;line-height:1.5}.aiv span{display:block;margin-top:4px;font-weight:800;font-size:13px;color:var(--gold)}.aiv small{display:block;margin-top:4px;font-size:13px;color:var(--muted)}
+.aiul{margin:8px 0 0;padding-left:20px}.aiul li{margin:4px 0;font-size:15.5px}
+.aiq{margin-top:14px;padding:10px 14px;border-radius:16px 16px 4px 16px;background:var(--card2);font-weight:600;margin-left:15%}
 .qs{margin:12px 0 4px;padding:0;list-style:none;counter-reset:q}
 .qs li{counter-increment:q;position:relative;padding:10px 0 10px 36px;font-size:15.5px;border-top:1px solid var(--stroke)}
 .qs li::before{content:counter(q);position:absolute;left:0;top:9px;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-size:12.5px;font-weight:800;background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--gold)}
@@ -1211,6 +1218,7 @@ function vHome(){
     ${weekStrip()}</section>
   ${ringsCard()}
   <button class="cta" data-a="startPrayer"><span class="orb">${ic("flame")}</span><span><b>Начать молитву</b><small>Молитва, покаяние или пост</small></span><span class="go">${ic("play")}</span></button>
+  ${tgOn()&&(!CH.ai||CH.ai.ready)?`<button class="aic" data-a="aiOpen" data-v="prayer"><span class="be">✨</span><span><b>ИИ-помощник</b><small>Помолиться своими словами · стих под ситуацию · разобрать заметки</small></span>${ic("right")}</button>`:""}
   ${fastCard()}${capsuleHome()}${bdayCard()}${todayCard()}${dueCard()}${hoursCard()}${srsCard()}${forMeCard()}${worldCard()}${churchHome()}
   ${(new Date().getMonth()===11&&new Date().getDate()>=15)||(new Date().getMonth()===0&&new Date().getDate()<=15)?`<button class="weekc" data-a="yearOpen" style="background:radial-gradient(100% 120% at 0% 0%,#FFB35C,transparent 60%),radial-gradient(100% 120% at 100% 100%,#6B5CF0,transparent 60%),#2A1030"><span class="wk-orb">🎆</span><span><small>Итоги года</small><b>Твой год с Богом</b></span>${ic("right")}</button>`:""}
   ${(wd===0||wd===1)?`<button class="weekc" data-a="storyOpen"><span class="wk-orb">✨</span><span><small>${wd===0?"Неделя подходит к концу":"Новая неделя"}</small><b>Твоя неделя с Богом</b></span>${ic("right")}</button>`:""}
@@ -1641,7 +1649,7 @@ async function call(path,body){if(!TG)throw new Error("Открой дневни
   const o=await r.json().catch(()=>({error:"Нет связи с сервером"}));if(!r.ok||o.error)throw new Error(o.error||"Ошибка");return o}
 async function chLoad(quiet){if(!TG||CH.loading)return;CH.loading=true;CH.tried=true;if(!quiet&&!CH.loaded&&ui.tab==="church")render();
   call("forme/get").then(f=>{CH.forme=f;if(ui.tab==="home"&&$("#sheet").classList.contains("hidden"))render()}).catch(()=>{});
-  liveLoad();worldLoad();
+  liveLoad();worldLoad();aiStatus();
   const get=async()=>{const sc=CH.scope;const [me,w,p]=await Promise.all([call("me"),call("wall/list",{scope:sc}).catch(()=>null),call("plan/list")]);
     let wall=w;if(sc!=="global"&&!(me.churches||[]).some(c=>c.id===sc)){setScope("global");wall=null}
     if(!wall||CH.scope!==sc)wall=await call("wall/list",{scope:CH.scope});return [me,wall,p]};
@@ -1767,6 +1775,62 @@ async function testStorySheet(o){openSheet(`<div class="sh-top"><button class="p
   <img class="story" src="${url}" alt="Свидетельство">
   <button class="btn wide" data-a="saveStory" data-v="svidetelstvo">${ic("down")}Сохранить картинку</button>
   <p class="small" style="text-align:center;margin-top:10px">Или нажми на картинку и удерживай. Выложи в сторис Telegram или Instagram — пусть люди увидят, что Бог отвечает 🙌</p>`)}
+/* ---------- ИИ-помощник ---------- */
+function aiStatus(){if(!tgOn())return;call("ai/status").then(r=>{CH.ai=r}).catch(()=>{})}
+async function aiAsk(kind,payload){const r=await call("ai/ask",Object.assign({kind},payload));CH.ai=Object.assign({},CH.ai||{},{ready:true,left:r.left});return r}
+function resolveRef(ref){const m=/^\s*(\d?)\s*([А-Яа-яЁё]+)\.?\s*(\d+)\s*[:.]\s*(\d+)(?:\s*[-–—]\s*(\d+))?/.exec(String(ref||""));if(!m)return null;
+  const key=(m[1]+m[2]).toLowerCase(),full=m[2].toLowerCase();let b=BOOKS.findIndex(x=>x[1].toLowerCase()===key);
+  if(b<0)b=BOOKS.findIndex(x=>x[0].toLowerCase().replace(/\s/g,"")===key||(!m[1]&&x[0].toLowerCase().startsWith(full)));
+  if(b<0)return null;const c=+m[3],v1=+m[4],v2=Math.min(+(m[5]||m[4]),v1+7);if(c<1||c>BOOKS[b][2]||v2<v1)return null;
+  const vs=[];for(let v=v1;v<=v2;v++)vs.push(v);const t=BIB?vText(b,c,vs).trim():"";if(BIB&&!t)return null;return {b,c,v:v1,vs,r:vRef(b,c,vs),t}}
+const refsOf=list=>(list||[]).map(resolveRef).filter(Boolean);
+const aiLeftTxt=()=>CH.ai&&CH.ai.ready?`Осталось сегодня: ${CH.ai.left} из 5`:"";
+function aiVerseCard(v,why){return `<div class="aiv" data-a="rOpen" data-b="${v.b}" data-c="${v.c}" data-v="${v.v}" role="button" tabindex="0">${v.t?`<p>«${esc(v.t)}»</p>`:""}<span>${esc(v.r)}</span>${why?`<small>${esc(why)}</small>`:""}</div>`}
+const AI_TABS=[["prayer","🙏 Молитва"],["verse","📖 Стих"],["notes","📝 Заметки"]];
+const AI_PH={prayer:"Расскажи своими словами, что на сердце. Например: «Завтра операция у мамы, мне очень страшно»",verse:"Опиши ситуацию или чувство. Например: «Поссорился с другом и не знаю, как помириться»",notes:"Вставь сюда заметки — например, конспект проповеди, записанный наспех. ИИ разложит по полочкам: главные мысли, стихи, что применить"};
+function aiSheet(tab,pre){ui.aiTab=tab||ui.aiTab||"prayer";if(pre!==undefined)ui.aiText=pre;ui.aiRes=null;aiDraw();aiStatus()}
+function aiDraw(){const t=ui.aiTab,R=ui.aiRes,ready=!CH.ai||CH.ai.ready!==false;
+  const html=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>✨ ИИ-помощник</h2><span style="width:40px"></span></div>
+  <div class="seg s3 ${t==="verse"?"p1":t==="notes"?"p2":""}"><span class="knob"></span>${AI_TABS.map(([k,l])=>`<button class="${t===k?"on":""}" data-a="aiTab" data-v="${k}">${l}</button>`).join("")}</div>
+  ${!ready?`<div class="empty">ИИ-помощник скоро появится 🙂</div>`:`
+  <textarea class="in" id="aiT" maxlength="${t==="notes"?8000:1500}" style="min-height:${t==="notes"?200:120}px" placeholder="${AI_PH[t]}">${esc(ui.aiText||"")}</textarea>
+  <button class="btn wide mt" data-a="aiGo" ${ui.aiBusy?"disabled":""}>${ui.aiBusy?"✨ Думаю…":t==="prayer"?"✨ Помоги помолиться":t==="verse"?"✨ Найти слово из Библии":"✨ Разложить по полочкам"}</button>
+  <div class="small" style="text-align:center;margin-top:8px">${aiLeftTxt()}</div>
+  ${R&&R.tab===t?aiResult(t,R):""}`}
+  <p class="small" style="margin:16px 4px 0">🔒 Текст отправляется ИИ-сервису (DeepSeek) только чтобы получить ответ. Мы его не храним. Стихи берутся из Синодального перевода в приложении. ИИ может ошибаться — сверяй со Словом и с пастором.</p>`;
+  if(ui.sheetKind==="ai")redrawSheet(html);else openSheet(html,"ai");
+  const ta=$("#aiT");if(ta)ta.addEventListener("input",()=>{ui.aiText=ta.value})}
+function aiResult(t,R){const vs=refsOf(R.refs);
+  if(t==="prayer")return `<div class="aires"><div class="lab">🙏 Молитва</div><p class="aipr">${esc(R.prayer)}</p>${R.word?`<p class="small" style="margin:8px 0 0">${esc(R.word)}</p>`:""}</div>
+    ${vs.length?`<div class="lab" style="margin:14px 4px 8px">📖 Молись Словом</div>${vs.map(v=>aiVerseCard(v)).join("")}`:""}
+    <div class="row2 mt"><button class="btn sm ghost" data-a="aiSavePrayer">Сохранить в дневник</button><button class="btn sm" data-a="aiAddNeed">＋ Сделать нуждой</button></div>`;
+  if(t==="verse")return `<div class="aires"><p style="margin:0">${esc(R.words)}</p></div>${vs.map((v,i)=>aiVerseCard(v,R.why&&R.why[i])).join("")||`<p class="small">Не получилось подобрать стихи — попробуй описать иначе.</p>`}
+    ${vs.length?`<button class="btn sm ghost wide mt" data-a="aiFavVerses">♥ Сохранить стихи в «Мои стихи»</button>`:""}`;
+  if(t==="notes")return `<div class="aires"><div class="lab">📌 ${esc(R.title||"Главное")}</div><ul class="aiul">${R.points.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+    ${vs.length?`<div class="lab" style="margin-top:10px">📖 Стихи</div>${vs.map(v=>aiVerseCard(v)).join("")}`:""}
+    ${R.apply.length?`<div class="lab" style="margin-top:10px">✅ Применить</div><ul class="aiul">${R.apply.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
+    ${R.prayer?`<div class="lab" style="margin-top:10px">🙏 Молитва</div><p style="margin:6px 0 0">${esc(R.prayer)}</p>`:""}</div>
+    <button class="btn wide mt" data-a="aiSaveNotes">Сохранить как запись (проповедь)</button>`;
+  return ""}
+function notesText(R){const vs=refsOf(R.refs);return [R.points.length?"📌 Главное:\n"+R.points.map(x=>"• "+x).join("\n"):"",vs.length?"📖 Стихи: "+vs.map(v=>v.r).join("; "):"",R.apply.length?"✅ Применить:\n"+R.apply.map(x=>"• "+x).join("\n"):"",R.prayer?"🙏 "+R.prayer:""].filter(Boolean).join("\n\n")}
+/* вопрос о главе */
+function chapterAISheet(){const {b,c}=readerPos(),k=b+"_"+c;ui.aiCh=k;ui.aiHist=ui.aiHist||{};const H=ui.aiHist[k]||[],sel=ui.rsel||[];
+  const sug=["О чём эта глава простыми словами?","Как применить это в моей жизни?","Что здесь самое важное?"].concat(sel.length?["Объясни "+vRef(b,c,sel)]:[]);
+  const html=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>✨ Спросить о главе</h2><span style="width:40px"></span></div>
+  <p class="small" style="margin:0 4px 12px">${esc(BOOKS[b][0])} ${c} · ИИ отвечает, опираясь на текст главы и комментарии</p>
+  ${H.map(h=>`<div class="aiq">${esc(h.q)}</div><div class="aires"><p style="margin:0;white-space:pre-wrap">${esc(h.a)}</p>${refsOf(h.refs).map(v=>aiVerseCard(v)).join("")}</div>`).join("")}
+  ${ui.aiBusy?`<div class="aires"><p class="small" style="margin:0">✨ Думаю…</p></div>`:""}
+  <div class="pick" style="margin:10px 0">${sug.map(q=>`<button data-a="aiChQ" data-v="${esc(q)}">${esc(q)}</button>`).join("")}</div>
+  <div class="addline"><textarea class="in" id="aiQ" rows="2" maxlength="600" placeholder="Свой вопрос о главе…"></textarea><button class="btn" data-a="aiChAsk" aria-label="Спросить" ${ui.aiBusy?"disabled":""}>${ic("right")}</button></div>
+  <div class="small" style="text-align:center;margin-top:8px">${aiLeftTxt()}</div>
+  <p class="small" style="margin:12px 4px 0">🔒 Вопрос и текст главы отправляются ИИ-сервису (DeepSeek) только для ответа. ИИ может ошибаться — сверяй со Словом.</p>`;
+  if(ui.sheetKind==="aich")redrawSheet(html);else openSheet(html,"aich");const sh=$("#sheet");if(sh&&H.length)sh.scrollTop=sh.scrollHeight}
+async function chapterAsk(q){q=String(q||"").trim();if(!q||ui.aiBusy)return;const {b,c}=readerPos(),k=b+"_"+c,cm=cmtFor(b,c);
+  const text=(BIB&&BIB[b]&&BIB[b][c-1]||[]).map((t,i)=>(i+1)+". "+t).join("\n");
+  const notes=cm?[cm.intro].concat((cm.notes||[]).map(n=>"ст. "+n.v.join("–")+" — "+n.title+": "+n.text)).join("\n"):"";
+  const H=(ui.aiHist[k]=ui.aiHist[k]||[]);ui.aiBusy=true;chapterAISheet();
+  try{const r=await aiAsk("chapter",{ref:BOOKS[b][1]+" "+c,text,notes,q,hist:H.map(h=>({q:h.q,a:h.a}))});H.push({q,a:r.answer,refs:r.refs})}catch(e){toast(e.message)}
+  ui.aiBusy=false;if(ui.sheetKind==="aich"&&ui.aiCh===k)chapterAISheet()}
 const inMine=wid=>Object.values(S.prayers).some(p=>p.wallId===wid);
 function addWallToMine(w){if(!w||inMine(w.id))return;const id=rid("p_"),t=w.text.replace(/\s+/g," ").trim();
   S.prayers[id]={kind:"prayer",id,title:t.length>60?t.slice(0,57)+"…":t,who:w.name||"",note:w.text,cat:"Другое",icon:"⛪",color:COLORS[Object.keys(S.prayers).length%COLORS.length],createdAt:Date.now(),status:"active",log:{},answer:"",answeredAt:null,wallId:w.id};persist(id)}
@@ -2026,6 +2090,7 @@ function vReader(){
       <div class="r-nav"><button class="btn ghost" data-a="rGo" data-v="-1" ${b===0&&c===1?"disabled":""}>${ic("left")}Назад</button><button class="btn ghost" data-a="rGo" data-v="1" ${b===65&&c===BOOKS[65][2]?"disabled":""}>Дальше${ic("right")}</button></div>
     </div>
   </article>
+  ${tgOn()&&(!CH.ai||CH.ai.ready)&&BIB?`<button class="aic" data-a="aiChapter"><span class="be">✨</span><span><b>Спросить о главе</b><small>Непонятное место, контекст, как применить — ответит ИИ</small></span>${ic("right")}</button>`:""}
   ${cm&&cm.quiz&&cm.quiz.length?`<button class="quizc" data-a="quizGo"><span class="be">🧩</span><span><b>Проверь себя</b><small>${(S.meta.quiz||{})[b+"_"+c]!=null?"Твой результат: "+S.meta.quiz[b+"_"+c]+" из "+cm.quiz.length+" · пройти снова":cm.quiz.length+" вопроса по главе"}</small></span>${ic("right")}</button>`:""}
   <section class="card soap"><div class="lab">${ic("spark")}Размышление о главе</div><h2 style="margin-top:6px">${esc(BOOKS[b][1])} ${c}: что Бог говорит мне?</h2>
     ${soap.map((s_,i)=>`<div class="soap-i"><div class="small">${fDayY.format(new Date(s_.ts))}</div>${[["s","Зацепило"],["o","Смысл"],["a","Применю"],["p","Молитва"]].filter(([k])=>s_[k]).map(([k,l])=>`<p><b>${l}:</b> ${esc(s_[k])}</p>`).join("")}<button class="textbtn" style="color:var(--muted)" data-a="soapDel" data-v="${i}">Удалить</button></div>`).join("")}
@@ -2445,7 +2510,7 @@ function entryForm(type){
   ui.form={type,prayerIds:[]};const a=active();
   openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>${type==="thanks"?"Благодарность":type==="exp"?"Мой опыт":"Новая запись"}</h2><button class="pill pri" data-a="saveEntry">Готово</button></div>
   <div class="pick" id="eTypes">${["exp","note","thanks","word","sermon"].map(t=>`<button class="${t===type?"on":""}" data-a="eType" data-v="${t}">${ETYPES[t]}</button>`).join("")}</div>
-  <div id="eSermon" class="${type==="sermon"||type==="exp"?"":"hidden"}"><label class="l" for="eTitle" id="eTitleL">${type==="exp"?"Коротко: что произошло":"Тема и проповедник"}</label><input class="in" id="eTitle" maxlength="80" placeholder="${type==="exp"?"Например: «Бог помог найти работу»":"Например: «Вера и дела», пастор Андрей"}"></div><label class="l" for="eText">Текст</label><textarea class="in" id="eText" style="min-height:180px" placeholder="${type==="thanks"?"Господи, благодарю Тебя за…":type==="sermon"?"Главные мысли, стихи, что применить в жизни…":type==="exp"?"Расскажи, как это было: что случилось, как молился, как Бог ответил и что ты понял. Такие истории потом очень укрепляют — и тебя, и других.":"Что на сердце, о чём говорил с Богом"}"></textarea>
+  <div id="eSermon" class="${type==="sermon"||type==="exp"?"":"hidden"}"><label class="l" for="eTitle" id="eTitleL">${type==="exp"?"Коротко: что произошло":"Тема и проповедник"}</label><input class="in" id="eTitle" maxlength="80" placeholder="${type==="exp"?"Например: «Бог помог найти работу»":"Например: «Вера и дела», пастор Андрей"}"></div><label class="l" for="eText">Текст</label>${tgOn()&&(!CH.ai||CH.ai.ready)?`<button class="textbtn" style="float:right;margin-top:-34px" data-a="aiStructEntry">✨ Разложить с ИИ</button>`:""}<textarea class="in" id="eText" style="min-height:180px" placeholder="${type==="thanks"?"Господи, благодарю Тебя за…":type==="sermon"?"Главные мысли, стихи, что применить в жизни…":type==="exp"?"Расскажи, как это было: что случилось, как молился, как Бог ответил и что ты понял. Такие истории потом очень укрепляют — и тебя, и других.":"Что на сердце, о чём говорил с Богом"}"></textarea>
   ${a.length?`<label class="l">Связано с молитвой</label><div class="pick" id="ePr">${a.map(p=>`<button data-a="eLink" data-v="${p.id}">${p.icon} ${esc(p.title)}</button>`).join("")}</div>`:""}`,"entry");
   setTimeout(()=>$("#eText").focus(),350);
 }
@@ -2466,6 +2531,7 @@ function entryView(id){
 function modeSheet(){
   openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Как помолимся?</h2><span style="width:40px"></span></div>
   ${Object.entries(MODES).filter(([,m])=>!m.hidden).map(([k,m])=>`<button class="mode" data-a="pmStart" data-v="${k}"><span class="mi" style="background:color-mix(in srgb,${m.c} 22%,transparent)">${m.emoji}</span><span><b>${m.name}</b><span>${m.desc}</span></span><span class="go">${ic("right")}</span></button>`).join("")}
+  ${tgOn()&&(!CH.ai||CH.ai.ready)?`<button class="mode" data-a="aiOpen" data-v="prayer"><span class="mi" style="background:color-mix(in srgb,#B9A6FF 25%,transparent)">✨</span><span><b>Помочь с молитвой</b><span>ИИ поможет найти слова и стихи</span></span><span class="go">${ic("right")}</span></button>`:""}
   <button class="mode" data-a="confStart"><span class="mi" style="background:color-mix(in srgb,#9486FF 22%,transparent)">🤍</span><span><b>Покаяние</b><span>Исповедь дня · записать и отпустить</span></span><span class="go">${ic("right")}</span></button>
   ${S.meta.fast&&S.meta.fast.start?"":`<button class="mode" data-a="fastStart"><span class="mi" style="background:color-mix(in srgb,#C9A27A 25%,transparent)">🌾</span><span><b>Начать пост</b><span>Таймер и цель поста</span></span><span class="go">${ic("right")}</span></button>`}
   <label class="l">Фон во время молитвы</label>${bgPick()}`,"mode");
@@ -2649,6 +2715,25 @@ const act={
   welcomeOpen:()=>{closeSheet();setTimeout(tourStart,350)},
   chSeg:d=>{CH.seg=d.v;if(d.v==="tog"&&(!CH.tog||CH.tog.scope!==CH.scope))togLoad();render()},
   chReload:()=>{CH.err="";chLoad()},
+  aiOpen:d=>{closeSheet();setTimeout(()=>aiSheet(d.v||"prayer"),PM?0:250)},
+  aiTab:d=>{ui.aiTab=d.v;ui.aiRes=ui.aiRes&&ui.aiRes.tab===d.v?ui.aiRes:null;aiDraw()},
+  aiGo:async()=>{const t=ui.aiTab,x=($("#aiT")&&$("#aiT").value.trim())||"";ui.aiText=x;if(x.length<(t==="notes"?20:3)){toast(t==="notes"?"Вставь заметки подлиннее":"Напиши хотя бы пару слов");return}
+    ui.aiBusy=true;aiDraw();try{const r=await aiAsk(t,{text:x});ui.aiRes=Object.assign({tab:t},r);buzz()}catch(e){toast(e.message)}ui.aiBusy=false;if(ui.sheetKind==="ai")aiDraw()},
+  aiSavePrayer:()=>{const R=ui.aiRes;if(!R)return;const vs=refsOf(R.refs),id=rid("e_");
+    S.entries[id]={kind:"entry",id,type:"note",text:(ui.aiText?"На сердце: "+ui.aiText+"\n\n":"")+R.prayer+(vs.length?"\n\n📖 "+vs.map(v=>v.r).join("; "):""),prayerIds:[],createdAt:Date.now()};persist(id);toast("Сохранено в дневник ✨");checkBadges()},
+  aiAddNeed:()=>{const R=ui.aiRes;if(!R)return;const vs=refsOf(R.refs),t=(ui.aiText||"").replace(/\s+/g," ").trim(),id=rid("p_");
+    S.prayers[id]={kind:"prayer",id,title:t.length>60?t.slice(0,57)+"…":t||"Молитва",who:"",note:R.prayer,cat:"Другое",icon:"🙏",color:COLORS[Object.keys(S.prayers).length%COLORS.length],createdAt:Date.now(),status:"active",log:{},answer:"",answeredAt:null,promise:vs[0]&&vs[0].t?{t:vs[0].t,r:vs[0].r}:null};
+    persist(id);render();toast("Добавлено в «Мои молитвы» 🙏")},
+  aiFavVerses:()=>{const R=ui.aiRes;if(!R)return;const vs=refsOf(R.refs).filter(v=>v.t);const cu=(S.meta.custom||[]).filter(x=>!vs.some(v=>v.r===x.r)).concat(vs.map(v=>({t:v.t,r:v.r})));S.meta.custom=cu;S.meta.fav=favs().concat(vs.map(v=>v.r).filter(r=>!favs().includes(r)));persist("meta");buzz();toast("Стихи в «Моих стихах» ♥")},
+  aiSaveNotes:()=>{const R=ui.aiRes;if(!R)return;const id=rid("e_");S.entries[id]={kind:"entry",id,type:"sermon",title:R.title||"",text:notesText(R)+(ui.aiText?"\n\n— Исходные заметки —\n"+ui.aiText:""),prayerIds:[],createdAt:Date.now()};persist(id);closeSheet();ui.tab="journal";render();toast("Запись сохранена в дневник 📝")},
+  aiChapter:()=>chapterAISheet(),
+  aiChQ:d=>chapterAsk(d.v),
+  aiChAsk:()=>{const q=$("#aiQ")&&$("#aiQ").value.trim();if(!q){$("#aiQ").focus();return}chapterAsk(q)},
+  aiStructEntry:async(d,el)=>{const ta=$("#eText"),x=ta&&ta.value.trim();if(!x||x.length<20){toast("Сначала запиши заметки (хотя бы пару строк)");return}
+    if(el){el.disabled=true;el.textContent="✨ Думаю…"}try{const r=await aiAsk("notes",{text:x});ui.eUndo=x;ta.value=notesText(r)+"\n\n— Исходные заметки —\n"+x;
+      if(ui.form&&(ui.form.type==="note"||ui.form.type==="sermon")){ui.form.type="sermon";markPick($("#eTypes"),"sermon");$("#eSermon").classList.remove("hidden");$("#eTitleL").textContent="Тема и проповедник";if(!$("#eTitle").value.trim())$("#eTitle").value=r.title||""}
+      if(el){el.textContent="↩︎ Вернуть как было";el.disabled=false;el.dataset.a="aiUndoEntry"}toast("Готово ✨ Проверь и сохрани")}catch(e){toast(e.message);if(el){el.disabled=false;el.textContent="✨ Разложить с ИИ"}}},
+  aiUndoEntry:(d,el)=>{if(ui.eUndo!=null&&$("#eText"))$("#eText").value=ui.eUndo;if(el){el.textContent="✨ Разложить с ИИ";el.dataset.a="aiStructEntry"}},
   worldOpen:()=>{worldSheet();if(tgOn())worldLoad()},
   worldPray:async()=>{const t=today();S.meta.world=Object.assign({},S.meta.world||{},{[t]:true});persist("meta");buzz();burst();
     if(tgOn()){try{const r=await call("world/pray",{day:t});CH.world=Object.assign({day:t},r)}catch(e){}}worldSheet();render()},

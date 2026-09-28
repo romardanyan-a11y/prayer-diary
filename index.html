@@ -548,6 +548,11 @@ p.reader .vs{font-size:var(--rs);line-height:1.7}
 .wc p{margin:10px 0 0;font-size:16px;white-space:pre-wrap}
 .wc-f{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;font-size:13px;color:var(--muted);font-weight:600}
 .wc .textbtn{margin-top:6px}
+.tour-c{position:fixed;inset:0;z-index:128}
+.tour-h{position:fixed;z-index:129;border-radius:18px;box-shadow:0 0 0 2px color-mix(in srgb,var(--gold) 80%,transparent),0 0 0 9999px rgba(4,5,12,.74);pointer-events:none;transition:all .3s cubic-bezier(.2,.8,.2,1)}
+.tour-t{position:fixed;z-index:130;left:16px;right:16px;max-width:440px;margin:0 auto;padding:16px 16px 14px;border-radius:24px;background:var(--bg);border:1px solid var(--stroke);box-shadow:0 20px 50px -14px rgba(0,0,0,.6);transition:opacity .2s}
+.tour-t b{display:block;font-size:19px;font-weight:800;letter-spacing:-.02em}.tour-t p{margin:6px 0 14px;font-size:15.5px;line-height:1.5}
+.tour-b{display:flex;justify-content:space-between;gap:10px}.tour-b .btn{flex:0 0 auto}.tour-b .btn:last-child{flex:1}
 .qs{margin:12px 0 4px;padding:0;list-style:none;counter-reset:q}
 .qs li{counter-increment:q;position:relative;padding:10px 0 10px 36px;font-size:15.5px;border-top:1px solid var(--stroke)}
 .qs li::before{content:counter(q);position:absolute;left:0;top:9px;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-size:12.5px;font-weight:800;background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--gold)}
@@ -1583,22 +1588,29 @@ function setRP(k,v){const o=RP();o[k]=v;try{localStorage.setItem("pj-reader",JSO
 
 /* ---------- church (server) ---------- */
 const API="https://prayer-diary-api.romardanyan.workers.dev";
-const CH={loaded:false,loading:false,err:"",me:null,wall:[],plans:[],seg:"wall"};
+const CH={loaded:false,loading:false,tried:false,err:"",me:null,wall:[],plans:[],seg:"wall"};
+try{const c=JSON.parse(localStorage.getItem("pj-ch")||"null");if(c&&c.me){CH.me=c.me;CH.wall=c.wall||[];CH.plans=c.plans||[];CH.loaded=true}}catch(e){}
 async function call(path,body){if(!TG)throw new Error("Открой дневник через Telegram");
-  const r=await fetch(API+"/api/"+path,{method:"POST",headers:{"content-type":"application/json","x-init-data":TG.initData},body:JSON.stringify(Object.assign({tz:new Date().getTimezoneOffset()},body||{}))});
+  const ac=new AbortController(),to=setTimeout(()=>ac.abort(),12000);let r;
+  try{r=await fetch(API+"/api/"+path,{method:"POST",signal:ac.signal,headers:{"content-type":"application/json","x-init-data":TG.initData},body:JSON.stringify(Object.assign({tz:new Date().getTimezoneOffset()},body||{}))})}
+  catch(e){throw new Error("Нет связи с сервером — проверь интернет")}finally{clearTimeout(to)}
   const o=await r.json().catch(()=>({error:"Нет связи с сервером"}));if(!r.ok||o.error)throw new Error(o.error||"Ошибка");return o}
-async function chLoad(quiet){if(!TG||CH.loading)return;CH.loading=true;if(!quiet&&!CH.loaded&&ui.tab==="church")render();
-  try{const [me,w,p]=await Promise.all([call("me"),call("wall/list"),call("plan/list")]);CH.me=me;CH.wall=w.items;CH.plans=p.plans;CH.loaded=true;CH.err=""}catch(e){CH.err=e.message}
-  CH.loading=false;if(ui.tab==="church"||ui.tab==="home")render()}
+async function chLoad(quiet){if(!TG||CH.loading)return;CH.loading=true;CH.tried=true;if(!quiet&&!CH.loaded&&ui.tab==="church")render();
+  const get=()=>Promise.all([call("me"),call("wall/list"),call("plan/list")]);
+  try{let res;try{res=await get()}catch(e){await new Promise(r=>setTimeout(r,1500));res=await get()}
+    const [me,w,p]=res;CH.me=me;CH.wall=w.items;CH.plans=p.plans;CH.loaded=true;CH.err="";
+    try{localStorage.setItem("pj-ch",JSON.stringify({me,wall:w.items,plans:p.plans}))}catch(e){}}
+  catch(e){CH.err=e.message;if(CH.loaded&&ui.tab==="church"&&!quiet)toast("Не удалось обновить: "+e.message)}
+  CH.loading=false;if((ui.tab==="church"||ui.tab==="home")&&(!$("#sheet")||$("#sheet").classList.contains("hidden")))render()}
 const ago=t=>{const m=Math.round((Date.now()-t)/60000);if(m<1)return "только что";if(m<60)return m+" мин назад";const h=Math.round(m/60);if(h<24)return h+" "+plural(h,"час","часа","часов")+" назад";const d=Math.round(h/24);return d===1?"вчера":d+" "+plural(d,"день","дня","дней")+" назад"};
 const refsTxt=list=>{const out=[];(list||[]).forEach(([b,c])=>{const l=out[out.length-1];if(l&&l.b===b&&l.to===c-1)l.to=c;else out.push({b,from:c,to:c})});return out.map(x=>BOOKS[x.b][1]+" "+(x.from===x.to?x.from:x.from+"–"+x.to)).join(", ")};
 function planToday(p){return p.today>=0&&p.today<p.days.length?p.days[p.today]:null}
-function churchHome(){if(!TG||API.startsWith("__"))return `<button class="jbtn" style="width:100%;margin:0 0 12px" data-a="tab" data-v="stats"><span class="ti c-blue">${ic("chart")}</span>Мои итоги</button>`;if(!CH.loaded&&!CH.loading)setTimeout(()=>chLoad(true),300);
+function churchHome(){if(!TG||API.startsWith("__"))return `<button class="jbtn" style="width:100%;margin:0 0 12px" data-a="tab" data-v="stats"><span class="ti c-blue">${ic("chart")}</span>Мои итоги</button>`;if(!CH.tried&&!CH.loading)setTimeout(()=>chLoad(true),300);
   const open=CH.wall.filter(w=>!w.answered).length,pl=CH.plans.find(p=>p.joined&&planToday(p));
   return `<button class="chc" data-a="tab" data-v="church"><span class="be">⛪</span><span><b>Церковь</b><small>${CH.loaded?`${open} ${plural(open,"просьба","просьбы","просьб")} о молитве${pl?` · ${esc(pl.title)}: ${refsTxt(planToday(pl))}${pl.myDone.includes(pl.today)?" ✓":""}`:""}`:"Молитвенная стена и чтение вместе"}</small></span>${ic("right")}</button>
   <button class="jbtn" style="width:100%;margin:0 0 12px" data-a="tab" data-v="stats"><span class="ti c-blue">${ic("chart")}</span>Мои итоги</button>`}
 function vChurch(){
-  const head=`<header class="top"><div class="date">Вместе с церковью</div></header><h1>Церковь</h1>`;
+  const head=`<header class="top"><div class="date">Вместе с другими христианами</div></header><h1>Церковь</h1>`;
   if(API.startsWith("__"))return head+`<div class="empty"><div class="ei">⛪</div><b>Скоро здесь</b>Молитвенная стена церкви, общие планы чтения и утренние сообщения от бота. Подключаем сервер 🙏</div>`;
   if(!TG)return head+`<div class="empty"><div class="ei">⛪</div><b>Открой через Telegram</b>Молитвенная стена и общие планы чтения работают в боте — там тебя узнают без регистрации.<br><br><a class="btn" href="${BOT_URL}" target="_blank" rel="noopener">Открыть @PrayerDiary_bot</a></div>`;
   if(!CH.loaded)return head+(CH.err?`<div class="empty"><b>Не получилось загрузить</b>${esc(CH.err)}<br><br><button class="btn sm" data-a="chReload">Повторить</button></div>`:`<div class="empty">Загружаю…</div>`);
@@ -1623,14 +1635,14 @@ function vChurch(){
     ${w.answered?"":w.prayed?`<button class="tap done" disabled>✓ Помолился</button>`:`<button class="tap" data-a="wallPray" data-id="${w.id}">🙏 Помолился</button>`}</div>
     ${w.mine&&!w.answered?`<button class="textbtn" data-a="wallAnswer" data-id="${w.id}">🙌 Бог ответил — поделиться</button>`:""}</article>`;
   return head+seg+`<button class="btn wide" style="margin-bottom:14px" data-a="wallNew">${ic("plus")}Попросить о молитве</button>`+
-    (open.length?open.map(card).join(""):`<div class="empty"><div class="ei">🙏</div><b>Стена пока пуста</b>Поделись нуждой — церковь помолится за тебя. Можно анонимно.</div>`)+
+    (open.length?open.map(card).join(""):`<div class="empty"><div class="ei">🙏</div><b>Стена пока пуста</b>Поделись нуждой — другие христиане помолятся за тебя. Можно анонимно.</div>`)+
     (done.length?`<div class="day-h">🙌 Ответы на молитвы</div>`+done.map(card).join(""):"")+bot;
 }
 async function planAuto(){if(!TG||!CH.loaded)return;const read=new Set();bToday().forEach(e=>(e.chapters||[]).forEach(c=>read.add(e.book+":"+c)));
   for(const p of CH.plans){const td=planToday(p);if(!p.joined||!td||!td.length||p.myDone.includes(p.today))continue;
     if(td.every(([b,c])=>read.has(b+":"+c))){try{await call("plan/done",{id:p.id,day:p.today});p.myDone.push(p.today);toast("📖 «"+p.title+"»: день "+(p.today+1)+" прочитан!");burst()}catch(e){}}}}
 function wallNewSheet(){openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>Просьба о молитве</h2><button class="pill pri" data-a="wallSend">Отправить</button></div>
-  <p class="small" style="margin:0 4px 12px">Её увидят все в церковном дневнике. Не пиши того, чем не готов делиться, — для личного есть «Мои молитвы».</p>
+  <p class="small" style="margin:0 4px 12px">Её увидят все, кто пользуется дневником. Не пиши того, чем не готов делиться, — для личного есть «Мои молитвы».</p>
   <textarea class="in" id="wText" maxlength="600" style="min-height:150px" placeholder="Например: помолитесь о маме — у неё операция в четверг"></textarea>
   <div class="set mt"><div><b>Анонимно</b><span>Имя не будет показано</span></div><button class="pill" id="wAnon" data-a="wAnon">Нет</button></div>`,"wall");setTimeout(()=>$("#wText").focus(),350)}
 function botSheet(){const r=(CH.me&&CH.me.remind)||"08:00",on=!!(CH.me&&CH.me.remind);
@@ -1649,18 +1661,36 @@ function planNewSheet(){ui.pn={b:42,per:1};const o=BOOKS.map((x,i)=>`<option val
   <label class="l" for="pnC">Ссылка на чат для обсуждения (необязательно)</label><input class="in" id="pnC" placeholder="https://t.me/…">
   <div class="set mt"><div><b>Сообщить всем</b><span>Бот напишет каждому о новом плане</span></div><button class="pill" id="pnA" data-a="pnA">Нет</button></div>`,"plan")}
 function ping(kind){if(!TG||API.startsWith("__"))return;call("event",{kind}).catch(()=>{})}
-const WELCOME=[
-  ["🕊️","Мир тебе!","Это молитвенный дневник нашей церкви — место, чтобы каждый день побыть с Богом.<br><br>Всё личное — молитвы, дневник, покаяние — видишь <b>только ты</b>. Оно хранится в твоём Telegram и не теряется при смене телефона."],
-  ["🙏","Мои молитвы","Записывай нужды: за кого и о чём молишься. Отмечай «помолился», а когда Бог ответит — нажми <b>«Бог ответил»</b>. Так соберутся твои свидетельства.<br><br>Кнопка <b>«Начать молитву»</b> на главном экране — спокойное время с Богом: стих, благодарность, нужды, тихая музыка."],
-  ["📖","Библия","Синодальный перевод прямо в приложении. Значки у стихов — короткие интересные комментарии: история, значения слов, места. <b>🕊️</b> — взгляд адвентистов.<br><br>В конце главы — вопросы для размышления и <b>викторина 🧩</b>. Нажми на стих, чтобы выделить его, написать заметку или сделать картинку."],
-  ["⛪","Церковь","<b>Молитвенная стена:</b> попроси о молитве (можно анонимно) и помолись за других — автор узнает, что за него молятся.<br><br><b>Читаем вместе:</b> общие планы чтения Библии. А ещё бот может присылать тебе <b>утреннее сообщение</b> со стихом дня."],
-  ["✨","Дневник и опыты","Записывай мысли, благодарности, проповеди и <b>опыты</b> — как Бог действовал в твоей жизни. Потом так радостно их перечитывать!<br><br>Опытом или стихом можно поделиться с друзьями в Telegram одной кнопкой."]];
-function welcomeSheet(i){ui.wi=i=Math.max(0,Math.min(WELCOME.length-1,i||0));const [e,t,x]=WELCOME[i],last=i===WELCOME.length-1;
-  const html=`<div class="sh-top"><span style="width:40px"></span><div class="qz-dots" style="margin:0">${WELCOME.map((_,k)=>`<i class="${k<=i?"on":""}" style="width:22px"></i>`).join("")}</div>${last?`<span style="width:40px"></span>`:`<button class="pill" data-a="welcomeDone">Пропустить</button>`}</div>
-  <div style="text-align:center;padding:6px 4px 0"><div style="font-size:64px;line-height:1.1">${e}</div><h3 style="font-size:26px;font-weight:800;letter-spacing:-.03em;margin:12px 0 10px">${t}</h3><p style="font-size:16.5px;line-height:1.55;margin:0;color:var(--text)">${x}</p></div>
-  <div class="row2 mt" style="margin-top:22px">${i?`<button class="btn ghost" data-a="welcomeGo" data-v="${i-1}">${ic("left")}Назад</button>`:`<span></span>`}${last?`<button class="btn" data-a="welcomeDone">Начать 🙏</button>`:`<button class="btn" data-a="welcomeGo" data-v="${i+1}">Дальше${ic("right")}</button>`}</div>`;
-  if(ui.sheetKind==="welcome")redrawSheet(html);else openSheet(html,"welcome")}
-function maybeWelcome(){if(S.meta.welcomed||ui.welcomeShown)return;ui.welcomeShown=true;setTimeout(()=>{if(!S.meta.welcomed&&!PM&&$("#sheet").classList.contains("hidden"))welcomeSheet(0)},600)}
+const TOUR=[
+  {t:"Мир тебе! 🕊️",x:"Это молитвенный дневник: твои молитвы, Библия с комментариями и молитва вместе с другими христианами.<br><br>Покажу за минуту, как тут всё устроено."},
+  {tab:"home",sel:".cta",t:"Начать молитву",x:"Спокойное время с Богом: стих, благодарность, твои нужды и тихая музыка. Каждая молитва зажигает звезду на твоём небе."},
+  {tab:"home",sel:"#fab",t:"Добавить нужду",x:"Запиши, за кого или о чём молишься. Потом просто отмечай «помолился»."},
+  {tab:"prayers",sel:'#tabs [data-v="prayers"]',t:"Мои молитвы",x:"Все твои нужды здесь. Когда Бог ответит — открой молитву и нажми «Бог ответил». Так соберутся твои свидетельства."},
+  {tab:"bible",sel:".cm, .r-intro, .rbar",t:"Библия с комментариями",x:"Значки у стихов — короткие интересные комментарии. Нажми на любой стих, чтобы выделить его, написать заметку или сделать картинку. В конце главы — вопросы и викторина."},
+  {tab:"church",sel:'#tabs [data-v="church"]',t:"Вместе с другими",x:"Молитвенная стена: попроси о молитве (можно анонимно) и помолись за других. «Читаем вместе» — общие планы чтения Библии."},
+  {tab:"journal",sel:".expbtn",t:"Дневник и опыты",x:"Мысли, благодарности, проповеди и опыты — как Бог действовал в твоей жизни. Всё личное видишь только ты."},
+  {tab:"home",sel:'[data-a="settings"]',t:"Настройки",x:"Оформление, напоминания, код для покаяния. Здесь же можно снова пройти это знакомство."}];
+let TR=null;
+function tourStart(){closeSheet();TR={i:0};document.body.style.overflow="hidden";
+  if(!$("#tourC")){document.body.insertAdjacentHTML("beforeend",`<div id="tourC" class="tour-c"></div><div id="tourH" class="tour-h"></div><div id="tourT" class="tour-t" role="dialog" aria-live="polite"></div>`)}
+  tourShow()}
+function tourShow(){const st=TOUR[TR.i],last=TR.i===TOUR.length-1;
+  if(st.tab&&ui.tab!==st.tab){ui.tab=st.tab;if(st.tab==="church")chLoad(true);render()}
+  const pick=()=>{for(const q of (st.sel||"").split(",")){const x=q.trim()&&$(q.trim());if(x)return x}return null};
+  if(st.tab==="bible"&&!$(".cm")&&(TR.wait||0)<6){TR.wait=(TR.wait||0)+1;setTimeout(()=>{if(TR)tourShow()},300);return}TR.wait=0;
+  const h=$("#tourH"),tp=$("#tourT"),el=pick();
+  tp.innerHTML=`<div class="qz-dots" style="justify-content:flex-start;margin:0 0 10px">${TOUR.map((_,k)=>`<i class="${k<=TR.i?"on":""}" style="width:18px"></i>`).join("")}</div><b>${st.t}</b><p>${st.x}</p>
+    <div class="tour-b">${TR.i?`<button class="btn ghost sm" data-a="tourGo" data-v="-1">${ic("left")}</button>`:`<button class="btn ghost sm" data-a="tourEnd">Пропустить</button>`}<button class="btn sm" data-a="${last?"tourEnd":"tourGo"}" data-v="1">${last?"Начать 🙏":TR.i?"Дальше":"Показать"}${last?"":ic("right")}</button></div>`;
+  tp.style.opacity="0";h.style.opacity="0";$("#tourC").style.background=el?"transparent":"rgba(4,5,12,.74)";
+  if(el){el.scrollIntoView({block:"center",behavior:"instant"})}else window.scrollTo(0,0);
+  setTimeout(()=>{if(!TR)return;const vh=innerHeight;
+    if(el){const r=el.getBoundingClientRect(),pd=6;h.style.cssText=`left:${r.left-pd}px;top:${r.top-pd}px;width:${r.width+pd*2}px;height:${r.height+pd*2}px;opacity:1`;
+      const below=r.bottom+pd+14,th=tp.offsetHeight;tp.style.top=(below+th<vh-10?below:Math.max(10,r.top-pd-14-th))+"px"}
+    else{h.style.cssText="left:50%;top:50%;width:0;height:0;opacity:1";tp.style.top=Math.max(20,(vh-tp.offsetHeight)/2)+"px"}
+    tp.style.opacity="1"},RM?0:260)}
+function tourEnd(){TR=null;document.body.style.overflow="";["tourC","tourH","tourT"].forEach(id=>{const x=$("#"+id);if(x)x.remove()});
+  if(!S.meta.tour){S.meta.tour=Date.now();S.meta.welcomed=S.meta.welcomed||Date.now();persist("meta")}ui.tab="home";render();window.scrollTo(0,0)}
+function maybeWelcome(){if(S.meta.welcomed||S.meta.tour||ui.welcomeShown)return;ui.welcomeShown=true;setTimeout(()=>{if(!S.meta.welcomed&&!S.meta.tour&&!PM&&$("#sheet").classList.contains("hidden"))tourStart()},700)}
 async function chDo(fn,ok){try{await fn();if(ok)toast(ok);await chLoad(true)}catch(e){toast(e.message)}}
 
 const CMT={};
@@ -2288,14 +2318,14 @@ const act={
   rpCh:d=>openReader(ui.rp.book,+d.v),
   rSearch:()=>rSearchSheet(),
   rSettings:()=>rSettingsSheet(),
-  welcomeGo:d=>welcomeSheet(+d.v),
-  welcomeDone:()=>{if(!S.meta.welcomed){S.meta.welcomed=Date.now();persist("meta")}closeSheet()},
-  welcomeOpen:()=>{closeSheet();setTimeout(()=>welcomeSheet(0),350)},
+  tourGo:d=>{if(!TR)return;TR.i=Math.max(0,Math.min(TOUR.length-1,TR.i+Number(d.v)));tourShow()},
+  tourEnd:()=>tourEnd(),
+  welcomeOpen:()=>{closeSheet();setTimeout(tourStart,350)},
   chSeg:d=>{CH.seg=d.v;render()},
   chReload:()=>{CH.err="";chLoad()},
   wallNew:()=>wallNewSheet(),
   wAnon:()=>{const b=$("#wAnon"),on=b.textContent==="Нет";b.textContent=on?"Да":"Нет";b.classList.toggle("on",on)},
-  wallSend:()=>{const t=$("#wText").value.trim();if(t.length<3){$("#wText").focus();return}const anon=$("#wAnon").textContent==="Да";closeSheet();chDo(()=>call("wall/add",{text:t,anon}),"Просьба отправлена. Церковь молится с тобой 🙏")},
+  wallSend:()=>{const t=$("#wText").value.trim();if(t.length<3){$("#wText").focus();return}const anon=$("#wAnon").textContent==="Да";closeSheet();chDo(()=>call("wall/add",{text:t,anon}),"Просьба отправлена. Мы молимся с тобой 🙏")},
   wallPray:d=>{const w=CH.wall.find(x=>x.id===+d.id);if(w){w.prayed=true;w.people++;render()}buzz();chDo(()=>call("wall/pray",{id:+d.id}),"Аминь 🙏")},
   wallAnswer:d=>{openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>Бог ответил!</h2><button class="pill pri" data-a="wallAnsSave" data-id="${d.id}">Готово</button></div><p class="small" style="margin:0 4px 12px">Все, кто молился, получат сообщение от бота. Расскажи, как Бог ответил:</p><textarea class="in" id="waText" maxlength="600" style="min-height:140px"></textarea>`,"wall")},
   wallAnsSave:d=>{const t=$("#waText").value.trim();closeSheet();burst();chDo(()=>call("wall/answer",{id:+d.id,text:t}),"Слава Богу! Все, кто молился, узнают 🙌")},
@@ -2474,7 +2504,7 @@ $("#importFile").addEventListener("change",async e=>{const f=e.target.files[0];e
 
 document.addEventListener("click",e=>{const el=e.target.closest("[data-a]");if(!el)return;const a=act[el.dataset.a];if(!a)return;e.stopPropagation();e.preventDefault();a(el.dataset,el)});
 document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches("[role=button][data-a]")){e.preventDefault();e.target.click()}
-  if(e.key==="Escape"){if(STY)closeStory();else if(CF)act.cfClose();else if(PM)act.pmClose();else if(!$("#sheet").classList.contains("hidden"))closeSheet()}});
+  if(e.key==="Escape"){if(TR){tourEnd();return}if(STY)closeStory();else if(CF)act.cfClose();else if(PM)act.pmClose();else if(!$("#sheet").classList.contains("hidden"))closeSheet()}});
 
 render();
 connect();

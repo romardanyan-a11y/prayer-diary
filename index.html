@@ -561,6 +561,8 @@ p.reader .vs{font-size:var(--rs);line-height:1.7}
 .ccode{display:inline-block;font-size:34px;font-weight:800;letter-spacing:.18em;padding:12px 22px;border-radius:18px;background:var(--card2);font-variant-numeric:tabular-nums}
 .wc-a{display:flex;justify-content:space-between;gap:10px;margin-top:6px}.wc-a .textbtn{margin-top:0}
 .cmt{padding:12px 0;border-bottom:1px solid var(--stroke)}.cmt-h{display:flex;align-items:center;gap:8px}.cmt-h b{font-size:14.5px}.cmt-h span{font-size:12.5px;color:var(--muted);font-weight:600}.cmt-h .rb{margin-left:auto;width:28px;height:28px}.cmt p{margin:6px 0 0;font-size:15.5px;white-space:pre-wrap}
+.chr{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--stroke)}.chr .tx{flex:1;min-width:0}.chr b{display:block;font-size:16px;font-weight:700}.chr span{display:block;font-size:12.5px;color:var(--muted);font-weight:600}.chr small{display:block;font-size:13px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chr .che{width:44px;height:44px;font-size:22px;border-radius:15px}.chr .btn{flex:none}
+.cfm .rad{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--faint)}.cfm.on{border-color:color-mix(in srgb,var(--gold) 60%,transparent)}.cfm.on .rad{border:7px solid var(--gold)}
 .qs{margin:12px 0 4px;padding:0;list-style:none;counter-reset:q}
 .qs li{counter-increment:q;position:relative;padding:10px 0 10px 36px;font-size:15.5px;border-top:1px solid var(--stroke)}
 .qs li::before{content:counter(q);position:absolute;left:0;top:9px;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-size:12.5px;font-weight:800;background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--gold)}
@@ -1602,6 +1604,7 @@ const myCh=()=>(CH.me&&CH.me.churches)||[];
 const curCh=()=>CH.scope==="global"?null:myCh().find(c=>c.id===CH.scope)||null;
 const chAdm=c=>!!c&&(c.role==="owner"||c.role==="admin");
 function setScope(v){CH.scope=v==="global"||!v?"global":+v;try{localStorage.setItem("pj-scope",String(CH.scope))}catch(e){}}
+const CH_MODES={open:["🔓","Все желающие","Видна в поиске, вступить можно сразу"],request:["✋","По заявке","Видна в поиске, заявки принимаешь ты или помощники"],private:["🔒","Только по приглашению","Не видна в поиске, вход по ссылке или коду"]};
 const CH_EMOJI=["⛪","🕊️","✝️","🔥","🌿","🙏","📖","🌍","💒","🌅","⭐","💛","🎵","🏔️","🌊","🍞"];
 const JOIN0=(()=>{try{const q=new URLSearchParams(location.search).get("join");if(q)return q;const sp=TG&&TG.initDataUnsafe&&TG.initDataUnsafe.start_param;if(sp&&/^join_/.test(sp))return sp.slice(5)}catch(e){}return null})();
 try{const c=JSON.parse(localStorage.getItem("pj-ch")||"null");if(c&&c.me){CH.me=c.me;CH.wall=(c.scope||"global")===CH.scope?(c.wall||[]):[];CH.plans=c.plans||[];CH.loaded=true}}catch(e){}
@@ -1633,9 +1636,10 @@ function vChurch(){
   if(!CH.loaded)return head+(CH.err?`<div class="empty"><b>Не получилось загрузить</b>${esc(CH.err)}<br><br><button class="btn sm" data-a="chReload">Повторить</button></div>`:`<div class="empty">Загружаю…</div>`);
   const g=CH.scope==="global",cc=curCh(),adm=chAdm(cc);
   const scopes=`<div class="filters scopes"><button class="${g?"on":""}" data-a="chScope" data-v="global">🌍 Все христиане</button>${myCh().map(c=>`<button class="${CH.scope===c.id?"on":""}" data-a="chScope" data-v="${c.id}">${c.emoji} ${esc(c.name)}</button>`).join("")}<button data-a="chAdd">${ic("plus")} Церковь</button></div>`;
-  const card=cc?`<section class="chcard"><div class="chc-h"><span class="che">${cc.emoji}</span><div><b>${esc(cc.name)}</b><span>👥 ${cc.members} ${plural(cc.members,"участник","участника","участников")}${cc.role==="owner"?" · 👑 ты хозяин":cc.role==="admin"?" · ⭐ ты помощник":""}</span></div><button class="rb" data-a="chMenu" aria-label="Настройки церкви">⋯</button></div>${cc.about?`<p>${esc(cc.about)}</p>`:""}
+  const card=cc?`<section class="chcard"><div class="chc-h"><span class="che">${cc.emoji}</span><div><b>${esc(cc.name)}</b><span>${cc.city?esc(cc.city)+" · ":""}👥 ${cc.members} ${plural(cc.members,"участник","участника","участников")} · ${(CH_MODES[cc.mode]||CH_MODES.private)[0]}${cc.role==="owner"?" · 👑 ты хозяин":cc.role==="admin"?" · ⭐ ты помощник":""}</span></div><button class="rb" data-a="chMenu" aria-label="Настройки церкви">⋯</button></div>${cc.about?`<p>${esc(cc.about)}</p>`:""}
+    ${adm&&cc.pending?`<button class="btn sm green wide" style="margin-top:12px" data-a="chReqs">📥 Заявки на вступление: ${cc.pending}</button>`:""}
     <div class="row2"><button class="btn sm" data-a="chInvite">${ic("share")}Пригласить</button><button class="btn sm ghost" data-a="chMembers">${ic("users")}Участники</button></div></section>`
-    :(!myCh().length?`<button class="chc" data-a="chAdd"><span class="be">⛪</span><span><b>Своя церковь</b><small>Создай церковь или вступи по приглашению — у вас будет своя стена молитв и планы чтения</small></span>${ic("plus")}</button>`:"");
+    :(!myCh().length?`<button class="chc" data-a="chAdd"><span class="be">⛪</span><span><b>Найди свою церковь</b><small>Поиск по названию и городу, вступление по коду — или создай свою: у вас будет своя стена молитв и планы чтения</small></span>${ic("plus")}</button>`:"");
   const seg=`<div class="seg ${CH.seg==="plans"?"r":""}"><span class="knob"></span><button class="${CH.seg!=="plans"?"on":""}" data-a="chSeg" data-v="wall">🙏 Стена молитв</button><button class="${CH.seg==="plans"?"on":""}" data-a="chSeg" data-v="plans">📖 Читаем вместе</button></div>`;
   const bot=`<button class="set" style="width:100%;text-align:left" data-a="botSheet"><div><b>🔔 Сообщения от бота</b><span>${CH.me&&CH.me.remind?"Каждый день в "+CH.me.remind+(CH.me.chatOk?"":" · нажми /start в боте"):"Стих дня, план чтения и кто молился за тебя"}</span></div>${ic("right")}</button>`;
   const top=head+scopes+card+seg;
@@ -1674,6 +1678,24 @@ async function commentsSheet(id){const w=CH.wall.find(x=>x.id===id);if(!w)return
   redrawSheet(top+(items.length?items.map(c=>`<div class="cmt"><div class="cmt-h"><b>${esc(c.name)}${c.author?" · автор":""}</b><span>${ago(c.created)}</span><button class="rb" data-a="cmtMenu" data-id="${c.id}" data-d="${c.canDelete?1:""}" data-m="${c.mine?1:""}" aria-label="Ещё">⋯</button></div><p>${esc(c.text)}</p></div>`).join(""):`<p class="small" style="text-align:center;margin:18px 0">Пока никто не написал. Поддержи словом или стихом 🤍</p>`)+
     `<div class="addline mt"><textarea class="in" id="cmT" maxlength="500" rows="2" placeholder="Напиши слово поддержки…">${esc(draft)}</textarea><button class="btn" data-a="cmtSend" aria-label="Отправить">${ic("right")}</button></div>`);
   if(ui.tab==="church")render()}
+function searchSheet(){
+  openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Церкви</h2><span style="width:40px"></span></div>
+  <div class="search">${ic("search")}<input class="in" id="chQ" placeholder="Название или город" autocomplete="off"></div>
+  <div id="chRes"><div class="empty">Ищу…</div></div>
+  <label class="l" for="jCode">🔑 Есть код приглашения?</label><div class="addline"><input class="in" id="jCode" maxlength="8" autocapitalize="characters" placeholder="Например: X7CL6A" style="text-transform:uppercase;letter-spacing:.12em;font-weight:700"><button class="btn" data-a="chJoinCode">Войти</button></div>
+  <label class="l">Не нашёл свою?</label><button class="btn ghost wide" data-a="chCreate">⛪ Создать церковь</button>`,"chsearch");
+  const q=$("#chQ");q.addEventListener("input",()=>{clearTimeout(ui.chqT);ui.chqT=setTimeout(()=>chSearch(q.value),350)});chSearch("")}
+async function chSearch(q){const box=$("#chRes");if(!box)return;const my=++ui.chqN||(ui.chqN=1);
+  let r;try{r=await call("church/search",{q})}catch(e){if(my===ui.chqN&&$("#chRes"))$("#chRes").innerHTML=`<div class="empty">${esc(e.message)}</div>`;return}
+  if(my!==ui.chqN||!$("#chRes"))return;ui.chRes=r.items;
+  const btn=c=>c.status==="member"?`<button class="btn sm ghost" data-a="chOpen" data-v="${c.id}">Открыть</button>`:c.status==="pending"?`<button class="btn sm ghost" data-a="chCancel" data-v="${c.id}">✓ Заявка</button>`:c.mode==="open"?`<button class="btn sm green" data-a="chJoinOpen" data-v="${c.id}">Вступить</button>`:`<button class="btn sm" data-a="chReq" data-v="${c.id}">Заявка</button>`;
+  $("#chRes").innerHTML=r.items.length?r.items.map(c=>`<div class="chr"><span class="che">${c.emoji}</span><div class="tx"><b>${esc(c.name)}</b><span>${c.city?esc(c.city)+" · ":""}👥 ${c.members} · ${(CH_MODES[c.mode]||CH_MODES.request)[0]} ${c.mode==="open"?"открытая":"по заявке"}${c.week?` · 🙏 ${c.week} за неделю`:""}</span>${c.about?`<small>${esc(c.about)}</small>`:""}</div>${btn(c)}</div>`).join("")
+    :`<div class="empty" style="padding:22px">${String(q).trim()?"Ничего не нашлось. Попробуй другое слово — или попроси у знакомых код приглашения.":"Пока нет открытых церквей. Создай первую!"}</div>`}
+async function requestsSheet(){const c=curCh();if(!c)return;const top=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Заявки</h2><span style="width:40px"></span></div>`;
+  if(ui.sheetKind!=="reqs")openSheet(top+`<div class="empty">Загружаю…</div>`,"reqs");
+  let r;try{r=await call("church/requests",{id:c.id})}catch(e){redrawSheet(top+`<div class="empty">${esc(e.message)}</div>`);return}
+  redrawSheet(top+(r.items.length?`<p class="small" style="margin:0 4px 8px">Эти люди хотят вступить в ${c.emoji} «${esc(c.name)}»</p>`+r.items.map(u=>`<div class="chr"><span class="che">👤</span><div class="tx"><b>${esc(u.name)}</b><span>${u.username?"@"+esc(u.username)+" · ":""}${ago(u.created)}</span></div><button class="btn sm green" data-a="chDecide" data-id="${u.id}" data-ok="1">Принять</button><button class="rb" data-a="chDecide" data-id="${u.id}" data-ok="" aria-label="Отклонить">${ic("x")}</button></div>`).join("")
+    :`<div class="empty">Новых заявок нет 🙏</div>`))}
 async function joinPrompt(code){code=String(code||"").toUpperCase().replace(/[^A-Z0-9]/g,"");if(!code||!TG)return;
   const top=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Приглашение</h2><span style="width:40px"></span></div>`;
   openSheet(top+`<div class="empty">Ищу церковь…</div>`,"join");
@@ -1682,10 +1704,12 @@ async function joinPrompt(code){code=String(code||"").toUpperCase().replace(/[^A
   redrawSheet(top+`<div style="text-align:center;padding:4px 0 8px"><div style="font-size:64px;line-height:1.1">${c.emoji}</div><h3 style="font-size:26px;font-weight:800;letter-spacing:-.03em;margin:10px 0 4px">${esc(c.name)}</h3><div class="small">👥 ${c.members} ${plural(c.members,"участник","участника","участников")}</div>${c.about?`<p style="margin:12px 0 0">${esc(c.about)}</p>`:""}</div>
     <p class="small" style="text-align:center;margin:14px 6px">В церкви — своя молитвенная стена и планы чтения. Участники видят просьбы друг друга и молятся вместе.</p>
     <button class="btn wide" data-a="chJoin" data-v="${code}">${c.emoji} Вступить</button>`)}
-function churchFormSheet(c){ui.cf={emoji:c?c.emoji:"⛪",id:c?c.id:null};
+function churchFormSheet(c){ui.cf={emoji:c?c.emoji:"⛪",id:c?c.id:null,mode:c?(c.mode||"private"):"request"};
   openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>${c?"Настройки церкви":"Новая церковь"}</h2><button class="pill pri" data-a="chSave">${c?"Готово":"Создать"}</button></div>
   <label class="l" for="cfN">Название</label><input class="in" id="cfN" maxlength="60" value="${esc(c?c.name:"")}" placeholder="Например: Молодёжь церкви «Благодать»">
   <label class="l">Значок</label><div class="icons" id="cfE">${CH_EMOJI.map(e=>`<button class="${e===ui.cf.emoji?"on":""}" data-a="cfEmoji" data-v="${e}">${e}</button>`).join("")}</div>
+  <label class="l" for="cfC">Город (необязательно)</label><input class="in" id="cfC" maxlength="40" value="${esc(c&&c.city||"")}" placeholder="Чтобы тебя было легче найти">
+  <label class="l">Кто может вступить</label><div id="cfM">${Object.entries(CH_MODES).map(([k,[e,t,x]])=>`<button class="set cfm ${ui.cf.mode===k?"on":""}" style="width:100%;text-align:left" data-a="cfMode" data-v="${k}"><div><b>${e} ${t}</b><span>${x}</span></div><i class="rad"></i></button>`).join("")}</div>
   <label class="l" for="cfA">Пара слов о церкви (необязательно)</label><textarea class="in" id="cfA" maxlength="300" style="min-height:80px" placeholder="Где собираетесь, кто вы">${esc(c&&c.about||"")}</textarea>
   ${c?"":`<p class="small" style="margin:12px 4px 0">Ты станешь хозяином: сможешь приглашать людей по ссылке или коду, назначать помощников и создавать планы чтения.</p>`}`,"chform");if(!c)setTimeout(()=>$("#cfN").focus(),350)}
 function inviteSheet(c){if(!c)return;ui.inv=c;
@@ -1701,7 +1725,7 @@ async function membersSheet(){const c=curCh();if(!c)return;const top=`<div class
   if(ui.sheetKind!=="members")openSheet(top+`<div class="empty">Загружаю…</div>`,"members");
   let r;try{r=await call("church/members",{id:c.id})}catch(e){redrawSheet(top+`<div class="empty">${esc(e.message)}</div>`);return}
   ui.mem=r.items;const can=u=>!u.me&&u.role!=="owner"&&(r.role==="owner"||(r.role==="admin"&&u.role==="member"));
-  redrawSheet(top+`<p class="small" style="margin:0 4px 8px">${r.items.length} ${plural(r.items.length,"участник","участника","участников")}${r.role==="owner"?" · нажми на человека, чтобы назначить помощника или исключить":""}</p>`+
+  redrawSheet(top+(chAdm(c)&&c.pending?`<button class="btn sm green wide" style="margin-bottom:10px" data-a="chReqs">📥 Заявки на вступление: ${c.pending}</button>`:"")+`<p class="small" style="margin:0 4px 8px">${r.items.length} ${plural(r.items.length,"участник","участника","участников")}${r.role==="owner"?" · нажми на человека, чтобы назначить помощника или исключить":""}</p>`+
     r.items.map(u=>`<${can(u)?`button data-a="chMember" data-id="${u.id}"`:"div"} class="thx" style="width:100%;text-align:left"><span>${u.role==="owner"?"👑":u.role==="admin"?"⭐":"👤"} ${esc(u.name)}${u.me?" (ты)":""}${u.username?` <span class="small">@${esc(u.username)}</span>`:""}</span><span class="small">${u.role==="owner"?"хозяин":u.role==="admin"?"помощник":""}</span></${can(u)?"button":"div"}>`).join(""))}
 
 async function planAuto(){if(!TG||!CH.loaded)return;const read=new Set();bToday().forEach(e=>(e.chapters||[]).forEach(c=>read.add(e.book+":"+c)));
@@ -2411,18 +2435,22 @@ const act={
     if(r==="del"){try{await call("wall/comment_delete",{id:+d.id});commentsSheet(ui.cw)}catch(e){toast(e.message)}}
     if(r==="rep"){call("wall/report",{id:ui.cw,comment:+d.id}).then(()=>toast("Жалоба отправлена. Спасибо!")).catch(e=>toast(e.message))}},
   chScope:d=>{const v=d.v==="global"?"global":+d.v;if(v===CH.scope)return;setScope(v);CH.wall=[];wallReload()},
-  chAdd:()=>openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Церковь</h2><span style="width:40px"></span></div>
-    <label class="l" style="margin-top:0" for="jCode">Вступить по коду</label><div class="addline"><input class="in" id="jCode" maxlength="8" autocapitalize="characters" placeholder="Например: X7CL6A" style="text-transform:uppercase;letter-spacing:.12em;font-weight:700"><button class="btn" data-a="chJoinCode">Найти</button></div>
-    <p class="small" style="margin:8px 4px 0">Код или ссылку даёт хозяин церкви или любой участник: «Церковь» → «Пригласить».</p>
-    <label class="l">Или создай свою</label><button class="btn wide" data-a="chCreate">⛪ Создать церковь</button>
-    <p class="small" style="margin:8px 4px 0">Своя молитвенная стена и планы чтения только для участников. Приглашай людей по ссылке, назначай помощников.</p>`,"chadd"),
+  chAdd:()=>searchSheet(),
+  chOpen:d=>{setScope(+d.v);CH.seg="wall";CH.wall=[];closeSheet();ui.tab="church";wallReload();window.scrollTo(0,0)},
+  chJoinOpen:async(d,el)=>{if(el)el.disabled=true;try{const r=await call("church/join",{id:+d.v});setScope(r.id);CH.seg="wall";CH.wall=[];closeSheet();ui.tab="church";burst();await chLoad(true);render();window.scrollTo(0,0);const c=curCh();toast(c?"Добро пожаловать в «"+c.name+"» 🙏":"Ты в церкви 🙏")}catch(e){toast(e.message);if(el)el.disabled=false}},
+  chReq:async(d,el)=>{if(el)el.disabled=true;try{const r=await call("church/request",{id:+d.v});if(r.status==="member"){setScope(r.id||+d.v);closeSheet();ui.tab="church";await chLoad(true);render();toast("Ты в церкви 🙏");return}
+    const it=(ui.chRes||[]).find(x=>x.id===+d.v);if(it)it.status="pending";if(el){el.outerHTML=`<button class="btn sm ghost" data-a="chCancel" data-v="${d.v}">✓ Заявка</button>`}buzz();toast("Заявка отправлена — хозяин церкви получит уведомление")}catch(e){toast(e.message);if(el)el.disabled=false}},
+  chCancel:async d=>{if(!await ask("Отозвать заявку?","Отозвать"))return;try{await call("church/cancel",{id:+d.v});chSearch($("#chQ")?$("#chQ").value:"");toast("Заявка отозвана")}catch(e){toast(e.message)}},
+  chReqs:()=>requestsSheet(),
+  chDecide:async(d,el)=>{const c=curCh();if(!c)return;if(el)el.disabled=true;try{await call("church/decide",{id:c.id,user:+d.id,ok:!!d.ok});toast(d.ok?"Принят(а) в церковь 🎉":"Заявка отклонена");await requestsSheet();chLoad(true)}catch(e){toast(e.message);if(el)el.disabled=false}},
+  cfMode:d=>{ui.cf.mode=d.v;document.querySelectorAll("#cfM .cfm").forEach(b=>b.classList.toggle("on",b.dataset.v===d.v))},
   chJoinCode:()=>{const v=$("#jCode").value.trim();if(!v){$("#jCode").focus();return}joinPrompt(v)},
   chJoin:async d=>{const b=document.querySelector('[data-a="chJoin"]');if(b)b.disabled=true;try{const r=await call("church/join",{code:d.v});setScope(r.id);CH.seg="wall";CH.wall=[];closeSheet();ui.tab="church";burst();await chLoad(true);render();window.scrollTo(0,0);const c=curCh();toast(c?"Добро пожаловать в «"+c.name+"» 🙏":"Ты в церкви 🙏")}catch(e){toast(e.message);if(b)b.disabled=false}},
   chCreate:()=>{closeSheet();setTimeout(()=>churchFormSheet(null),300)},
   cfEmoji:d=>{ui.cf.emoji=d.v;markPick($("#cfE"),d.v)},
-  chSave:async()=>{const name=$("#cfN").value.trim();if(name.length<2){$("#cfN").focus();return}const about=$("#cfA").value.trim(),f=ui.cf;const b=document.querySelector('[data-a="chSave"]');if(b)b.disabled=true;
-    try{if(f.id){await call("church/update",{id:f.id,name,emoji:f.emoji,about});closeSheet();await chLoad(true);toast("Сохранено")}
-      else{const r=await call("church/create",{name,emoji:f.emoji,about});setScope(r.id);CH.seg="wall";CH.wall=[];closeSheet();burst();await chLoad(true);render();toast("Церковь создана ⛪ Пригласи людей!");setTimeout(()=>inviteSheet(curCh()),600)}}
+  chSave:async()=>{const name=$("#cfN").value.trim();if(name.length<2){$("#cfN").focus();return}const about=$("#cfA").value.trim(),city=$("#cfC").value.trim(),f=ui.cf,mode=f.mode;const b=document.querySelector('[data-a="chSave"]');if(b)b.disabled=true;
+    try{if(f.id){await call("church/update",{id:f.id,name,emoji:f.emoji,about,city,mode});closeSheet();await chLoad(true);toast("Сохранено")}
+      else{const r=await call("church/create",{name,emoji:f.emoji,about,city,mode});setScope(r.id);CH.seg="wall";CH.wall=[];closeSheet();burst();await chLoad(true);render();toast("Церковь создана ⛪ Пригласи людей!");setTimeout(()=>inviteSheet(curCh()),600)}}
     catch(e){toast(e.message);if(b)b.disabled=false}},
   chInvite:()=>inviteSheet(curCh()),
   chShare:()=>{const c=ui.inv;if(!c)return;const u="https://t.me/share/url?url="+encodeURIComponent(c.link)+"&text="+encodeURIComponent("Присоединяйся к церкви «"+c.name+"» в Молитвенном дневнике 🙏 Будем молиться друг за друга!");try{if(TG&&TG.openTelegramLink){TG.openTelegramLink(u);return}}catch(e){}window.open(u,"_blank")},

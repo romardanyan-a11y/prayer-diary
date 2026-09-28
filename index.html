@@ -407,6 +407,10 @@ input[type=time].in{width:auto;padding:9px 12px;font-weight:700}
 .vs.speak{background:color-mix(in srgb,#3CC8B4 30%,transparent);box-shadow:0 0 0 2px color-mix(in srgb,#3CC8B4 40%,transparent)}
 .rb.play{background:linear-gradient(135deg,#9FF0DD,#3CC8B4);color:#04201B}
 .ent.capsule{--k:#8B7CFF}
+.ent.exp{--k:#FF6A8A;background:radial-gradient(120% 100% at 100% 0%,color-mix(in srgb,#FF6A8A 16%,transparent),transparent 60%),var(--card)}
+.ent.exp .et{display:block;font-size:17px;font-weight:800;letter-spacing:-.01em;margin-top:6px}
+.expbtn{display:flex;align-items:center;gap:13px;width:100%;text-align:left;padding:14px 16px;border-radius:24px;margin:0 0 12px;color:#2A0E18;background:linear-gradient(135deg,#FFD6E0,#FF9EB5 55%,#FFB86B)}
+.expbtn b{display:block;font-size:16.5px;font-weight:800}.expbtn small{display:block;font-size:13px;opacity:.75;font-weight:600}.expbtn .be{font-size:30px}
 .ent.locked{background:repeating-linear-gradient(135deg,var(--card),var(--card) 12px,var(--card2) 12px,var(--card2) 24px)}
 .ansp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ansp button{height:48px;border-radius:16px;background:var(--card);border:1px solid var(--stroke);font-weight:700;font-size:15px}
@@ -528,6 +532,22 @@ p.reader .vs{font-size:var(--rs);line-height:1.7}
 .cmn .kd{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;padding:5px 10px;border-radius:99px;background:var(--card2);color:var(--gold)}
 .cmn h3{font-size:20px;font-weight:800;letter-spacing:-.02em;margin:10px 0 6px;line-height:1.2}
 .cmn p{margin:0;font-size:16px;line-height:1.6}
+.quizc{display:flex;align-items:center;gap:13px;width:100%;text-align:left;padding:14px 16px;border-radius:24px;margin-bottom:12px;color:#1B1440;background:linear-gradient(135deg,#C9C1FF,#9FE3FF 60%,#B8F5D8)}
+.quizc b{display:block;font-size:16.5px;font-weight:800}.quizc small{display:block;font-size:13px;opacity:.75;font-weight:600}.quizc .be{font-size:30px}.quizc>svg.i{margin-left:auto;opacity:.6}
+.qz-q{font-size:21px;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin:6px 4px 18px}
+.qz-a{display:flex;flex-direction:column;gap:10px}
+.qz-a button{min-height:56px;padding:12px 16px;border-radius:18px;background:var(--card);border:1.5px solid var(--stroke);font-size:16px;font-weight:600;text-align:left}
+.qz-a button.ok{background:color-mix(in srgb,#43C985 22%,transparent);border-color:#43C985}
+.qz-a button.bad{background:color-mix(in srgb,#FF6B7A 18%,transparent);border-color:#FF6B7A}
+.qz-dots{display:flex;gap:6px;justify-content:center;margin:0 0 14px}.qz-dots i{width:28px;height:5px;border-radius:9px;background:var(--card2)}.qz-dots i.on{background:var(--grad)}
+.chc{display:flex;align-items:center;gap:13px;width:100%;text-align:left;padding:14px 16px;border-radius:24px;margin-bottom:10px;background:linear-gradient(135deg,color-mix(in srgb,#5AA9F0 24%,transparent),color-mix(in srgb,#9486FF 12%,transparent)),var(--card);border:1px solid var(--stroke)}
+.chc b{display:block;font-size:17px;font-weight:800}.chc small{display:block;font-size:13px;color:var(--muted);font-weight:600}.chc .be{font-size:30px}.chc>svg.i{margin-left:auto;opacity:.5}
+.wc{border-radius:24px;padding:14px 16px;margin-bottom:10px;background:var(--card);border:1px solid var(--stroke);box-shadow:var(--shadow)}
+.wc.ans{background:linear-gradient(135deg,color-mix(in srgb,#43C985 14%,transparent),transparent 70%),var(--card)}
+.wc-h{display:flex;align-items:center;gap:10px}.wc-h b{display:block;font-size:15px}.wc-h span{font-size:12.5px;color:var(--muted);font-weight:600}
+.wc p{margin:10px 0 0;font-size:16px;white-space:pre-wrap}
+.wc-f{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;font-size:13px;color:var(--muted);font-weight:600}
+.wc .textbtn{margin-top:6px}
 .qs{margin:12px 0 4px;padding:0;list-style:none;counter-reset:q}
 .qs li{counter-increment:q;position:relative;padding:10px 0 10px 36px;font-size:15.5px;border-top:1px solid var(--stroke)}
 .qs li::before{content:counter(q);position:absolute;left:0;top:9px;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-size:12.5px;font-weight:800;background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--gold)}
@@ -762,7 +782,7 @@ function applyTheme(){let t="auto";try{t=localStorage.getItem("pj-theme")||"auto
 applyTheme();
 
 /* ---------- icons ---------- */
-const IC={
+const IC={users:'<path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20"/><circle cx="10" cy="8" r="3.5"/><path d="M20 20v-1.5a3.5 3.5 0 0 0-2.5-3.35M15.5 4.6a3.5 3.5 0 0 1 0 6.8"/>',
  flame:'<path d="M12 3c.6 3.2 5 5.4 5 10.2A5 5 0 0 1 7 13.2c0-2.3 1.2-3.9 2.4-4.9.2 1.7 1.1 2.8 2.4 3.2-.3-3.1-.7-5.8.2-8.5z"/>',
  heart:'<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z"/>',
  book:'<path d="M12 6.5C10.5 5 8 4.5 4 4.5v13c4 0 6.5.5 8 2 1.5-1.5 4-2 8-2v-13c-4 0-6.5.5-8 2z"/><path d="M12 6.5v13"/>',
@@ -860,7 +880,9 @@ const MODES={
 const CATS=["Семья","Здоровье","Друзья","Работа","Служение","Моя жизнь","Страна и мир","Другое"];
 const ICONS=["🙏","❤️","✝️","🕊️","🏠","👨‍👩‍👧","🩺","💼","🎓","🌍","🔥","⛪","💍","🚗","💰","🌱","✨","🛡️"];
 const COLORS=["#E9B44A","#EC7680","#6BB6E8","#72C495","#A58BE8","#F0A15E","#4FC2B5","#D95B63"];
-const ETYPES={session:"Молитва",note:"Мысли",thanks:"Благодарность",word:"Слово от Бога",answer:"Ответ на молитву",bible:"Чтение Библии",sermon:"Проповедь",fast:"Пост",confess:"Покаяние",capsule:"Капсула времени"};
+const ETYPES={session:"Молитва",note:"Мысли",thanks:"Благодарность",word:"Слово от Бога",answer:"Ответ на молитву",bible:"Чтение Библии",sermon:"Проповедь",fast:"Пост",confess:"Покаяние",capsule:"Капсула времени",exp:"Опыт"};
+const BOT_URL="https://t.me/PrayerDiary_bot";
+function tgShare(text){const u="https://t.me/share/url?url="+encodeURIComponent(BOT_URL)+"&text="+encodeURIComponent(text);try{if(TG&&TG.openTelegramLink){TG.openTelegramLink(u);return}}catch(e){}window.open(u,"_blank")}
 
 /* ---------- utils ---------- */
 const $=s=>document.querySelector(s);
@@ -1148,7 +1170,7 @@ function vHome(){
     ${weekStrip()}</section>
   ${ringsCard()}
   <button class="cta" data-a="startPrayer"><span class="orb">${ic("flame")}</span><span><b>Начать молитву</b><small>Молитва, покаяние или пост</small></span><span class="go">${ic("play")}</span></button>
-  ${fastCard()}${capsuleHome()}${bdayCard()}${todayCard()}${hoursCard()}${srsCard()}
+  ${fastCard()}${capsuleHome()}${bdayCard()}${todayCard()}${hoursCard()}${srsCard()}${churchHome()}
   ${(new Date().getMonth()===11&&new Date().getDate()>=15)||(new Date().getMonth()===0&&new Date().getDate()<=15)?`<button class="weekc" data-a="yearOpen" style="background:radial-gradient(100% 120% at 0% 0%,#FFB35C,transparent 60%),radial-gradient(100% 120% at 100% 100%,#6B5CF0,transparent 60%),#2A1030"><span class="wk-orb">🎆</span><span><small>Итоги года</small><b>Твой год с Богом</b></span>${ic("right")}</button>`:""}
   ${(wd===0||wd===1)?`<button class="weekc" data-a="storyOpen"><span class="wk-orb">✨</span><span><small>${wd===0?"Неделя подходит к концу":"Новая неделя"}</small><b>Твоя неделя с Богом</b></span>${ic("right")}</button>`:""}
   ${h>=17&&!confDone?`<button class="confc" data-a="confStart"><span class="cf-orb">🤍</span><span><small>Вечерний разбор</small><b>Посмотри на день с Богом</b><span>Покайся — и засыпай прощённым</span></span>${ic("right")}</button>`:""}
@@ -1183,11 +1205,11 @@ function vPrayers(){
 function entryCard(e){
   if(capLocked(e))return `<button class="ent capsule locked" data-a="capLockedTap" data-id="${e.id}"><div class="k"><em>📬 Капсула времени</em><span>${fDay.format(new Date(e.createdAt))}</span></div><p>🔒 Откроется ${fDayY.format(parseDk(e.openAt))}</p></button>`;
   const names=(e.prayerIds||[]).map(id=>S.prayers[id]).filter(Boolean);
-  const kind=e.type==="bible"?"Библия · "+fmtRead(e):e.type==="sermon"&&e.title?"Проповедь · "+e.title:e.type==="session"&&e.mode&&MODES[e.mode]&&e.mode!=="full"?MODES[e.mode].name:(ETYPES[e.type]||"Запись");
+  const kind=e.type==="exp"?"Опыт":e.type==="bible"?"Библия · "+fmtRead(e):e.type==="sermon"&&e.title?"Проповедь · "+e.title:e.type==="session"&&e.mode&&MODES[e.mode]&&e.mode!=="full"?MODES[e.mode].name:(ETYPES[e.type]||"Запись");
   const extra=e.type==="session"&&e.minutes?` · ${e.minutes} мин`:e.type==="fast"&&e.minutes?` · ${fmtDur(e.minutes*60000)}`:"";
   const body=[e.thanks?"Благодарю: "+e.thanks:"",e.text||""].filter(Boolean).join("\n\n");
-  return `<button class="ent ${e.type}" data-a="openEntry" data-id="${e.id}"><div class="k"><em>${esc(kind)}${extra}</em><span>${fTime.format(new Date(e.createdAt))}</span></div>
-  ${body?`<p>${esc(body)}</p>`:""}${names.length?`<div class="chips">${names.map(p=>`<span class="chip">${p.icon} ${esc(p.title)}</span>`).join("")}</div>`:""}</button>`;
+  return `<button class="ent ${e.type}" data-a="openEntry" data-id="${e.id}"><div class="k"><em>${e.type==="exp"?"✨ ":""}${esc(kind)}${extra}</em><span>${fTime.format(new Date(e.createdAt))}</span></div>
+  ${e.type==="exp"&&e.title?`<span class="et">${esc(e.title)}</span>`:""}${body?`<p>${esc(body)}</p>`:""}${names.length?`<div class="chips">${names.map(p=>`<span class="chip">${p.icon} ${esc(p.title)}</span>`).join("")}</div>`:""}</button>`;
 }
 function memoryEntry(es){
   const now=new Date();let best=null;
@@ -1202,11 +1224,12 @@ function vJournal(){
   const f=ui.jf||"all",q=(ui.jq||"").trim().toLowerCase();
   const es=all.filter(e=>(f==="all"||e.type===f)&&(!q||!capLocked(e)&&[(e.text||""),(e.thanks||""),(e.title||""),e.type==="bible"?fmtRead(e,true)+" "+fmtRead(e):""].concat((e.prayerIds||[]).map(id=>S.prayers[id]?S.prayers[id].title:"")).join(" ").toLowerCase().includes(q)));
   const mem=memoryEntry(all);
-  const FL=[["all","Все"],["session","Молитвы"],["thanks","Благодарность"],["answer","Ответы"],["bible","Библия"],["sermon","Проповеди"],["note","Мысли"],["word","Слово"],["fast","Пост"],["capsule","Капсулы"]];
+  const FL=[["all","Все"],["exp","Опыты"],["session","Молитвы"],["thanks","Благодарность"],["answer","Ответы"],["bible","Библия"],["sermon","Проповеди"],["note","Мысли"],["word","Слово"],["fast","Пост"],["capsule","Капсулы"]];
   let html=`<header class="top"><div class="date">${all.length} ${plural(all.length,"запись","записи","записей")}</div><span data-sync class="sync ${ui.sync}">${syncInner()}</span></header>
   <h1>Дневник</h1>
   ${segH}
   <div class="jbtns"><button class="jbtn" data-a="newEntry" data-v="note"><span class="ti c-violet">${ic("pen")}</span>Запись</button><button class="jbtn" data-a="newEntry" data-v="thanks"><span class="ti c-gold">${ic("spark")}</span>Благодарность</button></div>
+  <button class="expbtn" data-a="newEntry" data-v="exp"><span class="be">✨</span><span><b>Записать опыт</b><small>Как Бог действовал в моей жизни</small></span></button>
   <button class="jbtn" style="width:100%;margin:-2px 0 12px" data-a="capNew"><span class="ti c-violet">📬</span>Капсула времени — письмо себе в будущее</button>
   ${all.length?`<div class="search">${ic("search")}<input class="in" id="jq" placeholder="Поиск по дневнику" value="${esc(ui.jq||"")}"></div>
   <div class="filters">${FL.map(([k,l])=>`<button class="${f===k?"on":""}" data-a="jf" data-v="${k}">${l}</button>`).join("")}</div>`:""}
@@ -1557,12 +1580,91 @@ const HL={gold:"#FFD166",green:"#6EE7B7",blue:"#7CC4FF",pink:"#FF9EC4",violet:"#
 const RP=()=>{let o={};try{o=JSON.parse(localStorage.getItem("pj-reader")||"{}")}catch(e){}return Object.assign({size:19,font:"lit",theme:"auto",layout:"flow",cmt:"on"},o)};
 function setRP(k,v){const o=RP();o[k]=v;try{localStorage.setItem("pj-reader",JSON.stringify(o))}catch(e){}}
 
-/* ---------- commentary ---------- */
+/* ---------- church (server) ---------- */
+const API="__API_URL__";
+const CH={loaded:false,loading:false,err:"",me:null,wall:[],plans:[],seg:"wall"};
+async function call(path,body){if(!TG)throw new Error("Открой дневник через Telegram");
+  const r=await fetch(API+"/api/"+path,{method:"POST",headers:{"content-type":"application/json","x-init-data":TG.initData},body:JSON.stringify(Object.assign({tz:new Date().getTimezoneOffset()},body||{}))});
+  const o=await r.json().catch(()=>({error:"Нет связи с сервером"}));if(!r.ok||o.error)throw new Error(o.error||"Ошибка");return o}
+async function chLoad(quiet){if(!TG||CH.loading)return;CH.loading=true;if(!quiet&&!CH.loaded&&ui.tab==="church")render();
+  try{const [me,w,p]=await Promise.all([call("me"),call("wall/list"),call("plan/list")]);CH.me=me;CH.wall=w.items;CH.plans=p.plans;CH.loaded=true;CH.err=""}catch(e){CH.err=e.message}
+  CH.loading=false;if(ui.tab==="church"||ui.tab==="home")render()}
+const ago=t=>{const m=Math.round((Date.now()-t)/60000);if(m<1)return "только что";if(m<60)return m+" мин назад";const h=Math.round(m/60);if(h<24)return h+" "+plural(h,"час","часа","часов")+" назад";const d=Math.round(h/24);return d===1?"вчера":d+" "+plural(d,"день","дня","дней")+" назад"};
+const refsTxt=list=>{const out=[];(list||[]).forEach(([b,c])=>{const l=out[out.length-1];if(l&&l.b===b&&l.to===c-1)l.to=c;else out.push({b,from:c,to:c})});return out.map(x=>BOOKS[x.b][1]+" "+(x.from===x.to?x.from:x.from+"–"+x.to)).join(", ")};
+function planToday(p){return p.today>=0&&p.today<p.days.length?p.days[p.today]:null}
+function churchHome(){if(!TG||API.startsWith("__"))return `<button class="jbtn" style="width:100%;margin:0 0 12px" data-a="tab" data-v="stats"><span class="ti c-blue">${ic("chart")}</span>Мои итоги</button>`;if(!CH.loaded&&!CH.loading)setTimeout(()=>chLoad(true),300);
+  const open=CH.wall.filter(w=>!w.answered).length,pl=CH.plans.find(p=>p.joined&&planToday(p));
+  return `<button class="chc" data-a="tab" data-v="church"><span class="be">⛪</span><span><b>Церковь</b><small>${CH.loaded?`${open} ${plural(open,"просьба","просьбы","просьб")} о молитве${pl?` · ${esc(pl.title)}: ${refsTxt(planToday(pl))}${pl.myDone.includes(pl.today)?" ✓":""}`:""}`:"Молитвенная стена и чтение вместе"}</small></span>${ic("right")}</button>
+  <button class="jbtn" style="width:100%;margin:0 0 12px" data-a="tab" data-v="stats"><span class="ti c-blue">${ic("chart")}</span>Мои итоги</button>`}
+function vChurch(){
+  const head=`<header class="top"><div class="date">Вместе с церковью</div></header><h1>Церковь</h1>`;
+  if(API.startsWith("__"))return head+`<div class="empty"><div class="ei">⛪</div><b>Скоро здесь</b>Молитвенная стена церкви, общие планы чтения и утренние сообщения от бота. Подключаем сервер 🙏</div>`;
+  if(!TG)return head+`<div class="empty"><div class="ei">⛪</div><b>Открой через Telegram</b>Молитвенная стена и общие планы чтения работают в боте — там тебя узнают без регистрации.<br><br><a class="btn" href="${BOT_URL}" target="_blank" rel="noopener">Открыть @PrayerDiary_bot</a></div>`;
+  if(!CH.loaded)return head+(CH.err?`<div class="empty"><b>Не получилось загрузить</b>${esc(CH.err)}<br><br><button class="btn sm" data-a="chReload">Повторить</button></div>`:`<div class="empty">Загружаю…</div>`);
+  const seg=`<div class="seg ${CH.seg==="plans"?"r":""}"><span class="knob"></span><button class="${CH.seg!=="plans"?"on":""}" data-a="chSeg" data-v="wall">🙏 Стена молитв</button><button class="${CH.seg==="plans"?"on":""}" data-a="chSeg" data-v="plans">📖 Читаем вместе</button></div>`;
+  const bot=`<button class="set" style="width:100%;text-align:left" data-a="botSheet"><div><b>🔔 Утреннее сообщение от бота</b><span>${CH.me&&CH.me.remind?"Каждый день в "+CH.me.remind+(CH.me.chatOk?"":" · нажми /start в боте"):"Стих дня, план чтения и кто молился за тебя"}</span></div>${ic("right")}</button>`;
+  if(CH.seg==="plans"){
+    return head+seg+(CH.me&&CH.me.admin?`<button class="btn wide" style="margin-bottom:12px" data-a="planNew">${ic("plus")}Новый план чтения</button>`:"")+
+    (CH.plans.length?CH.plans.map(p=>{const td=planToday(p),n=p.days.length,done=p.myDone.length,pct=Math.round(done/n*100),did=p.myDone.includes(p.today);
+      return `<section class="rpc"><div class="rp-h"><div><small>${p.today<0?"Старт "+p.start.split("-").reverse().join("."):p.today>=n?"План завершён":"День "+(p.today+1)+" из "+n}</small><b>${esc(p.title)}</b></div><span class="rp-pct">${pct}%</span></div>
+      ${td&&td.length?`<div class="rp-ch">${td.map(([b,c])=>`<button data-a="rOpen" data-b="${b}" data-c="${c}">${BOOKS[b][1]} ${c}</button>`).join("")}</div>`:`<div class="rp-behind">${p.today<0?"Скоро начинаем":"Сегодня чтения нет"}</div>`}
+      <div class="rp-behind">👥 ${p.members} ${plural(p.members,"участник","участника","участников")} · сегодня прочитали ${p.doneToday}</div>
+      <div class="rp-bar"><i style="width:${pct}%"></i></div>
+      <div class="row2" style="margin-top:12px">${p.joined?(td&&td.length?`<button class="btn sm ${did?"ghost":"green"}" data-a="planDone" data-id="${p.id}" data-v="${p.today}" ${did?`data-u="1"`:""}>${did?"✓ Прочитано":"Прочитал сегодня"}</button>`:`<span></span>`):`<button class="btn sm green" data-a="planJoin" data-id="${p.id}">Присоединиться</button>`}
+      <button class="btn sm ghost" data-a="planInfo" data-id="${p.id}">Участники</button></div>
+      ${p.chat?`<a class="btn sm ghost wide" style="margin-top:8px;color:inherit;background:rgba(255,255,255,.12)" href="${esc(p.chat)}" target="_blank" rel="noopener">💬 Обсуждение в чате</a>`:""}</section>`}).join(""):`<div class="empty"><div class="ei">📖</div><b>Пока нет общих планов</b>${CH.me&&CH.me.admin?"Создай первый — например, «Иоанн за 21 день».":"Когда служитель создаст план, он появится здесь."}</div>`)+bot;
+  }
+  const open=CH.wall.filter(w=>!w.answered),done=CH.wall.filter(w=>w.answered);
+  const card=w=>`<article class="wc ${w.answered?"ans":""}"><div class="wc-h"><span class="pav" style="--c:${w.name?COLORS[hash(w.name)%COLORS.length]:"#8C94A8"};width:38px;height:38px;font-size:17px">${w.name?esc(w.name.charAt(0)):"🤍"}</span><div><b>${w.name?esc(w.name):"Анонимно"}</b><span>${ago(w.created)}</span></div>${w.canDelete?`<button class="rb" style="margin-left:auto;width:32px;height:32px" data-a="wallMenu" data-id="${w.id}" aria-label="Ещё">⋯</button>`:""}</div>
+    <p>${esc(w.text)}</p>
+    ${w.answered?`<div class="answer-box" style="margin:10px 0 0"><div class="k">${ic("ok")}Бог ответил</div>${w.answer?`<p>${esc(w.answer)}</p>`:""}</div>`:""}
+    <div class="wc-f"><span>🙏 ${w.people?w.people+" "+plural(w.people,"человек молится","человека молятся","человек молятся"):"Будь первым, кто помолится"}</span>
+    ${w.answered?"":w.prayed?`<button class="tap done" disabled>✓ Помолился</button>`:`<button class="tap" data-a="wallPray" data-id="${w.id}">🙏 Помолился</button>`}</div>
+    ${w.mine&&!w.answered?`<button class="textbtn" data-a="wallAnswer" data-id="${w.id}">🙌 Бог ответил — поделиться</button>`:""}</article>`;
+  return head+seg+`<button class="btn wide" style="margin-bottom:14px" data-a="wallNew">${ic("plus")}Попросить о молитве</button>`+
+    (open.length?open.map(card).join(""):`<div class="empty"><div class="ei">🙏</div><b>Стена пока пуста</b>Поделись нуждой — церковь помолится за тебя. Можно анонимно.</div>`)+
+    (done.length?`<div class="day-h">🙌 Ответы на молитвы</div>`+done.map(card).join(""):"")+bot;
+}
+async function planAuto(){if(!TG||!CH.loaded)return;const read=new Set();bToday().forEach(e=>(e.chapters||[]).forEach(c=>read.add(e.book+":"+c)));
+  for(const p of CH.plans){const td=planToday(p);if(!p.joined||!td||!td.length||p.myDone.includes(p.today))continue;
+    if(td.every(([b,c])=>read.has(b+":"+c))){try{await call("plan/done",{id:p.id,day:p.today});p.myDone.push(p.today);toast("📖 «"+p.title+"»: день "+(p.today+1)+" прочитан!");burst()}catch(e){}}}}
+function wallNewSheet(){openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>Просьба о молитве</h2><button class="pill pri" data-a="wallSend">Отправить</button></div>
+  <p class="small" style="margin:0 4px 12px">Её увидят все в церковном дневнике. Не пиши того, чем не готов делиться, — для личного есть «Мои молитвы».</p>
+  <textarea class="in" id="wText" maxlength="600" style="min-height:150px" placeholder="Например: помолитесь о маме — у неё операция в четверг"></textarea>
+  <div class="set mt"><div><b>Анонимно</b><span>Имя не будет показано</span></div><button class="pill" id="wAnon" data-a="wAnon">Нет</button></div>`,"wall");setTimeout(()=>$("#wText").focus(),350)}
+function botSheet(){const r=(CH.me&&CH.me.remind)||"08:00",on=!!(CH.me&&CH.me.remind);
+  openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Сообщения от бота</h2><span style="width:40px"></span></div>
+  <p class="small" style="margin:0 4px 14px">Каждый день в выбранное время бот пришлёт стих дня, чтение по общему плану и расскажет, сколько людей молились за твои просьбы. По субботам — поздравит с субботой 🕊</p>
+  <div class="set"><div><b>Время</b><span>По твоему часовому поясу</span></div><input type="time" class="in" id="botT" value="${esc(r)}"></div>
+  ${CH.me&&!CH.me.chatOk?`<div class="answer-box gold"><div class="k">Важно</div><p>Чтобы бот мог писать, открой чат с @PrayerDiary_bot и нажми «Запустить» (/start).</p></div>`:""}
+  <button class="btn wide mt" data-a="botSave">${ic("bell")}${on?"Сохранить":"Включить"}</button>${on?`<button class="btn danger wide mt" data-a="botOff">Выключить</button>`:""}`,"bot")}
+function planNewSheet(){ui.pn={b:42,per:1};const o=BOOKS.map((x,i)=>`<option value="${i}" ${i===42?"selected":""}>${esc(x[0])} (${x[2]} гл.)</option>`).join("");
+  const t=new Date();const tm=new Date();tm.setDate(tm.getDate()+1);
+  openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>Новый план</h2><button class="pill pri" data-a="planCreate">Создать</button></div>
+  <label class="l" for="pnB">Книга</label><select class="in" id="pnB">${o}</select>
+  <label class="l" for="pnP">Глав в день</label><select class="in" id="pnP">${[1,2,3,4,5].map(n=>`<option value="${n}">${n}</option>`).join("")}</select>
+  <label class="l" for="pnT">Название</label><input class="in" id="pnT" maxlength="80" placeholder="Например: Иоанн за 21 день">
+  <label class="l" for="pnS">Начало</label><input type="date" class="in" id="pnS" value="${dk(tm)}" min="${dk(t)}">
+  <label class="l" for="pnC">Ссылка на чат для обсуждения (необязательно)</label><input class="in" id="pnC" placeholder="https://t.me/…">
+  <div class="set mt"><div><b>Сообщить всем</b><span>Бот напишет каждому о новом плане</span></div><button class="pill" id="pnA" data-a="pnA">Нет</button></div>`,"plan")}
+async function chDo(fn,ok){try{await fn();if(ok)toast(ok);await chLoad(true)}catch(e){toast(e.message)}}
+
 const CMT={};
-const CK={history:["🏺","История и быт"],word:["🔤","Значение слова"],place:["📍","Место"],people:["👥","Люди"],link:["🔗","Связь с Писанием"],fact:["💡","Интересная деталь"]};
+const CK={history:["🏺","История и быт"],word:["🔤","Значение слова"],place:["📍","Место"],people:["👥","Люди"],link:["🔗","Связь с Писанием"],fact:["💡","Интересная деталь"],sda:["🕊️","Взгляд адвентистов"]};
 function cmtFor(b,c){if(RP().cmt==="off")return null;const x=CMT[b];
   if(x===undefined){CMT[b]="loading";fetch("comments/"+b+".json").then(r=>r.ok?r.json():null).then(o=>{CMT[b]=o||null;const p=readerPos();if(o&&p.b===b&&ui.tab==="bible")render()}).catch(()=>{delete CMT[b]});return null}
   return x&&x!=="loading"?x[c]||null:null}
+function quizSheet(){const {b,c}=readerPos(),cm=cmtFor(b,c);if(!cm||!cm.quiz||!cm.quiz.length)return;const Q=ui.qz,items=cm.quiz;
+  const top=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Викторина · ${esc(BOOKS[b][1])} ${c}</h2><span style="width:40px"></span></div>`;
+  let html;
+  if(Q.i>=items.length){const n=Q.score,all=items.length;
+    html=top+`<div style="text-align:center;padding:10px 0 6px"><div style="font-size:64px">${n===all?"🏆":n?"👏":"📖"}</div><h3 style="font-size:26px;margin:8px 0 6px">${n} из ${all}</h3><p class="small" style="font-size:15px">${n===all?"Отлично! Ты читал внимательно.":n?"Неплохо! Загляни в главу ещё раз — там есть что заметить.":"Ничего страшного — перечитай главу, и всё получится."}</p></div>
+    <div class="row2 mt"><button class="btn ghost" data-a="quizGo">Ещё раз</button><button class="btn" data-a="closeSheet">Готово</button></div>`}
+  else{const it=items[Q.i];
+    html=top+`<div class="qz-dots">${items.map((_,k)=>`<i class="${k<=Q.i?"on":""}"></i>`).join("")}</div><div class="qz-q">${esc(it.q)}</div>
+    <div class="qz-a">${it.a.map((a,k)=>`<button class="${Q.pick!=null?(k===it.ok?"ok":k===Q.pick?"bad":""):""}" data-a="quizPick" data-v="${k}" ${Q.pick!=null?"disabled":""}>${esc(a)}</button>`).join("")}</div>
+    ${Q.pick!=null?`<button class="btn wide mt" data-a="quizNext">${Q.i+1<items.length?"Дальше":"Результат"}${ic("right")}</button>`:""}`}
+  if(ui.sheetKind==="quiz")redrawSheet(html);else openSheet(html,"quiz")}
 function cmtSheet(v){const {b,c}=readerPos(),cm=cmtFor(b,c);if(!cm)return;const all=cm.notes||[],here=all.filter(n=>n.v[1]===v);if(!here.length)return;
   const ends=[...new Set(all.map(n=>n.v[1]))].sort((x,y)=>x-y),i=ends.indexOf(v),nx=ends[i+1],pv=ends[i-1];
   const html=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>${esc(BOOKS[b][1])} ${c}:${here[0].v[0]===v?v:here[0].v[0]+"–"+v}</h2><span style="width:40px"></span></div>
@@ -1597,6 +1699,7 @@ function vReader(){
       <div class="r-nav"><button class="btn ghost" data-a="rGo" data-v="-1" ${b===0&&c===1?"disabled":""}>${ic("left")}Назад</button><button class="btn ghost" data-a="rGo" data-v="1" ${b===65&&c===BOOKS[65][2]?"disabled":""}>Дальше${ic("right")}</button></div>
     </div>
   </article>
+  ${cm&&cm.quiz&&cm.quiz.length?`<button class="quizc" data-a="quizGo"><span class="be">🧩</span><span><b>Проверь себя</b><small>${(S.meta.quiz||{})[b+"_"+c]!=null?"Твой результат: "+S.meta.quiz[b+"_"+c]+" из "+cm.quiz.length+" · пройти снова":cm.quiz.length+" вопроса по главе"}</small></span>${ic("right")}</button>`:""}
   <section class="card soap"><div class="lab">${ic("spark")}Размышление о главе</div><h2 style="margin-top:6px">${esc(BOOKS[b][1])} ${c}: что Бог говорит мне?</h2>
     ${soap.map((s_,i)=>`<div class="soap-i"><div class="small">${fDayY.format(new Date(s_.ts))}</div>${[["s","Зацепило"],["o","Смысл"],["a","Применю"],["p","Молитва"]].filter(([k])=>s_[k]).map(([k,l])=>`<p><b>${l}:</b> ${esc(s_[k])}</p>`).join("")}<button class="textbtn" style="color:var(--muted)" data-a="soapDel" data-v="${i}">Удалить</button></div>`).join("")}
     ${cm&&cm.questions&&cm.questions.length?`<div class="small" style="margin-top:10px;font-weight:700">Вопросы для размышления</div><ol class="qs">${cm.questions.map(q=>`<li>${esc(q)}</li>`).join("")}</ol>`:""}
@@ -1905,10 +2008,10 @@ function freshVerse(key,fallback){
   const pool=c.length>1?c.filter(v=>v.r!==last[key]):c;const v=pool[Math.floor(Math.random()*pool.length)];
   last[key]=v.r;try{localStorage.setItem("pj-lastv",JSON.stringify(last))}catch(e){}return v}
 
-const TABS=[["home","flame","Сегодня"],["prayers","heart","Молитвы"],["bible","book","Библия"],["journal","pen","Дневник"],["stats","chart","Итоги"]];
+const TABS=[["home","flame","Сегодня"],["prayers","heart","Молитвы"],["bible","book","Библия"],["church","users","Церковь"],["journal","pen","Дневник"]];
 function render(){
   const _m=$("#main");if(ui.lastTab!==ui.tab){ui.lastTab=ui.tab;_m.classList.remove("enter");void _m.offsetWidth;_m.classList.add("enter");clearTimeout(ui.enT);ui.enT=setTimeout(()=>_m.classList.remove("enter"),900)}
-  $("#main").innerHTML={home:vHome,prayers:vPrayers,bible:vBible,journal:vJournal,stats:vStats}[ui.tab]();
+  $("#main").innerHTML={home:vHome,prayers:vPrayers,bible:vBible,journal:vJournal,stats:vStats,church:vChurch}[ui.tab]();
   $("#tabs").innerHTML=TABS.map(([k,e,l])=>`<button class="${ui.tab===k?"on":""}" data-a="tab" data-v="${k}" aria-current="${ui.tab===k?"page":"false"}">${ic(e)}${l}</button>`).join("");
   $("#fab").innerHTML=ic(ui.tab==="journal"?"pen":ui.tab==="bible"?((ui.bSeg||"read")==="read"&&BIB?"book":"check"):"plus");
   $("#fab").setAttribute("aria-label",ui.tab==="journal"?"Новая запись":ui.tab==="bible"?"Отметить чтение":"Новая нужда");
@@ -1975,9 +2078,9 @@ function answerForm(id){
 }
 function entryForm(type){
   ui.form={type,prayerIds:[]};const a=active();
-  openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>${type==="thanks"?"Благодарность":"Новая запись"}</h2><button class="pill pri" data-a="saveEntry">Готово</button></div>
-  <div class="pick" id="eTypes">${["note","thanks","word","sermon"].map(t=>`<button class="${t===type?"on":""}" data-a="eType" data-v="${t}">${ETYPES[t]}</button>`).join("")}</div>
-  <div id="eSermon" class="${type==="sermon"?"":"hidden"}"><label class="l" for="eTitle">Тема и проповедник</label><input class="in" id="eTitle" maxlength="80" placeholder="Например: «Вера и дела», пастор Андрей"></div><label class="l" for="eText">Текст</label><textarea class="in" id="eText" style="min-height:180px" placeholder="${type==="thanks"?"Господи, благодарю Тебя за…":type==="sermon"?"Главные мысли, стихи, что применить в жизни…":"Что на сердце, о чём говорил с Богом"}"></textarea>
+  openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>${type==="thanks"?"Благодарность":type==="exp"?"Мой опыт":"Новая запись"}</h2><button class="pill pri" data-a="saveEntry">Готово</button></div>
+  <div class="pick" id="eTypes">${["exp","note","thanks","word","sermon"].map(t=>`<button class="${t===type?"on":""}" data-a="eType" data-v="${t}">${ETYPES[t]}</button>`).join("")}</div>
+  <div id="eSermon" class="${type==="sermon"||type==="exp"?"":"hidden"}"><label class="l" for="eTitle" id="eTitleL">${type==="exp"?"Коротко: что произошло":"Тема и проповедник"}</label><input class="in" id="eTitle" maxlength="80" placeholder="${type==="exp"?"Например: «Бог помог найти работу»":"Например: «Вера и дела», пастор Андрей"}"></div><label class="l" for="eText">Текст</label><textarea class="in" id="eText" style="min-height:180px" placeholder="${type==="thanks"?"Господи, благодарю Тебя за…":type==="sermon"?"Главные мысли, стихи, что применить в жизни…":type==="exp"?"Расскажи, как это было: что случилось, как молился, как Бог ответил и что ты понял. Такие истории потом очень укрепляют — и тебя, и других.":"Что на сердце, о чём говорил с Богом"}"></textarea>
   ${a.length?`<label class="l">Связано с молитвой</label><div class="pick" id="ePr">${a.map(p=>`<button data-a="eLink" data-v="${p.id}">${p.icon} ${esc(p.title)}</button>`).join("")}</div>`:""}`,"entry");
   setTimeout(()=>$("#eText").focus(),350);
 }
@@ -1990,6 +2093,7 @@ function entryView(id){
   ${e.thanks?`<div class="answer-box gold"><div class="k">${ic("spark")}Благодарю</div><p>${esc(e.thanks)}</p></div>`:""}
   ${e.text?`<div class="full-text" style="padding:0 4px">${esc(e.text)}</div>`:""}
   ${names.length?`<label class="l">Молился за</label><div class="chips">${names.map(p=>`<span class="chip">${p.icon} ${esc(p.title)}</span>`).join("")}</div>`:""}
+  ${["exp","answer","thanks","word","sermon"].includes(e.type)&&e.text?`<button class="btn ghost wide mt" data-a="tgShare" data-v="${esc((e.type==="exp"?"✨ Мой опыт":e.type==="answer"?"🙌 Бог ответил на молитву":e.type==="thanks"?"🙏 Благодарю Бога":"📖")+(e.title?": "+e.title:"")+"\n\n"+e.text)}">${ic("share")}Поделиться в Telegram</button>`:""}
   <button class="btn danger wide mt" data-a="delEntry" data-id="${id}">Удалить запись</button>`,"view");
 }
 function modeSheet(){
@@ -2050,6 +2154,7 @@ async function shareVerse(ref){
   const cv=await makeStory(v);const url=cv.toDataURL("image/png");ui.story=cv;
   redrawSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Картинка со стихом</h2><span style="width:40px"></span></div>
   <img class="story" src="${url}" alt="${esc(v.t)} — ${esc(v.r)}">
+  <button class="btn green wide" style="margin-bottom:10px" data-a="tgShare" data-v="${esc("«"+v.t+"» — "+v.r)}">${ic("share")}Отправить стих в Telegram</button>
   ${dl?`<button class="btn wide" data-a="saveStory" data-v="${esc(v.r)}">${ic("down")}Сохранить картинку</button>`:""}
   <p class="small" style="text-align:center;margin-top:10px">${dl?"Или нажми на картинку и удерживай, чтобы сохранить. Подходит для сторис.":"Нажми на картинку и удерживай, чтобы сохранить. Подходит для сторис."}</p>`);
 }
@@ -2106,7 +2211,7 @@ let dl={async save({filename,data}){const blob=data instanceof Blob?data:new Blo
   if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file]});return}catch(e){if(e&&e.name==="AbortError")throw{code:"cancelled"}}}
   const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}};
 const act={
-  tab:d=>{if(TTS.on&&d.v!=="bible"){TTS.on=false;try{speechSynthesis.cancel()}catch(e){}}ui.tab=d.v;render();window.scrollTo(0,0)},
+  tab:d=>{if(TTS.on&&d.v!=="bible"){TTS.on=false;try{speechSynthesis.cancel()}catch(e){}}ui.tab=d.v;if(d.v==="church")chLoad();render();window.scrollTo(0,0)},
   nextVerse:()=>{ui.vOff++;render()},
   startPrayer:()=>modeSheet(),
   pmStart:d=>startPM(d.v),
@@ -2168,6 +2273,34 @@ const act={
   rpCh:d=>openReader(ui.rp.book,+d.v),
   rSearch:()=>rSearchSheet(),
   rSettings:()=>rSettingsSheet(),
+  chSeg:d=>{CH.seg=d.v;render()},
+  chReload:()=>{CH.err="";chLoad()},
+  wallNew:()=>wallNewSheet(),
+  wAnon:()=>{const b=$("#wAnon"),on=b.textContent==="Нет";b.textContent=on?"Да":"Нет";b.classList.toggle("on",on)},
+  wallSend:()=>{const t=$("#wText").value.trim();if(t.length<3){$("#wText").focus();return}const anon=$("#wAnon").textContent==="Да";closeSheet();chDo(()=>call("wall/add",{text:t,anon}),"Просьба отправлена. Церковь молится с тобой 🙏")},
+  wallPray:d=>{const w=CH.wall.find(x=>x.id===+d.id);if(w){w.prayed=true;w.people++;render()}buzz();chDo(()=>call("wall/pray",{id:+d.id}),"Аминь 🙏")},
+  wallAnswer:d=>{openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>Бог ответил!</h2><button class="pill pri" data-a="wallAnsSave" data-id="${d.id}">Готово</button></div><p class="small" style="margin:0 4px 12px">Все, кто молился, получат сообщение от бота. Расскажи, как Бог ответил:</p><textarea class="in" id="waText" maxlength="600" style="min-height:140px"></textarea>`,"wall")},
+  wallAnsSave:d=>{const t=$("#waText").value.trim();closeSheet();burst();chDo(()=>call("wall/answer",{id:+d.id,text:t}),"Слава Богу! Все, кто молился, узнают 🙌")},
+  wallMenu:async d=>{const w=CH.wall.find(x=>x.id===+d.id);if(!w)return;const r=await choose("Просьба о молитве",[["del","Удалить","dangerf"]]);if(r==="del"&&await ask("Удалить просьбу со стены?","Удалить",true))chDo(()=>call("wall/delete",{id:w.id}),"Удалено")},
+  botSheet:()=>botSheet(),
+  botSave:()=>{const t=$("#botT").value||"08:00";closeSheet();chDo(()=>call("settings",{remind:t,verse:true}),"Бот будет писать в "+t+" 🔔")},
+  botOff:()=>{closeSheet();chDo(()=>call("settings",{remind:null}),"Сообщения выключены")},
+  planNew:()=>planNewSheet(),
+  pnA:()=>{const b=$("#pnA"),on=b.textContent==="Нет";b.textContent=on?"Да":"Нет";b.classList.toggle("on",on)},
+  planCreate:()=>{const b=+$("#pnB").value,per=+$("#pnP").value,n=BOOKS[b][2],days=[];for(let c=1;c<=n;c+=per){const d=[];for(let k=c;k<Math.min(n+1,c+per);k++)d.push([b,k]);days.push(d)}
+    const title=$("#pnT").value.trim()||(BOOKS[b][0]+" за "+days.length+" "+plural(days.length,"день","дня","дней"));
+    const body={title,days,start:$("#pnS").value,chat:$("#pnC").value.trim(),announce:$("#pnA").textContent==="Да"};closeSheet();CH.seg="plans";chDo(()=>call("plan/create",body),"План создан 📖")},
+  planJoin:d=>chDo(()=>call("plan/join",{id:+d.id}),"Ты в плане! Читаем вместе 📖"),
+  planDone:d=>{const undo=!!d.u;const p=CH.plans.find(x=>x.id===+d.id);if(p){if(undo)p.myDone=p.myDone.filter(x=>x!==+d.v);else p.myDone.push(+d.v);render()}if(!undo)burst();chDo(()=>call("plan/done",{id:+d.id,day:+d.v,undo}),undo?"Отметка снята":"День прочитан! 🎉")},
+  planInfo:d=>{const p=CH.plans.find(x=>x.id===+d.id);if(!p)return;openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>${esc(p.title)}</h2><span style="width:40px"></span></div>
+    ${p.board.map((u,i)=>`<div class="thx"><span>${i<3&&u.n?["🥇","🥈","🥉"][i]:"👤"} ${esc(u.name)}</span><b>${u.n} ${plural(u.n,"день","дня","дней")}</b></div>`).join("")||`<p class="small">Пока никого</p>`}
+    ${p.joined?`<button class="btn ghost wide mt" data-a="planLeave" data-id="${p.id}">Выйти из плана</button>`:""}${p.canDelete?`<button class="btn danger wide mt" data-a="planDel" data-id="${p.id}">Удалить план</button>`:""}`,"plan")},
+  planLeave:d=>{closeSheet();chDo(()=>call("plan/leave",{id:+d.id}),"Ты вышел из плана")},
+  planDel:async d=>{if(!await ask("Удалить план для всех?","Удалить",true))return;closeSheet();chDo(()=>call("plan/delete",{id:+d.id}),"План удалён")},
+  quizGo:()=>{ui.qz={i:0,score:0,pick:null};quizSheet()},
+  quizPick:d=>{const Q=ui.qz;if(!Q||Q.pick!=null)return;const {b,c}=readerPos(),cm=cmtFor(b,c),it=cm.quiz[Q.i];Q.pick=+d.v;if(Q.pick===it.ok){Q.score++;buzz()}quizSheet()},
+  quizNext:()=>{const Q=ui.qz;Q.i++;Q.pick=null;const {b,c}=readerPos(),cm=cmtFor(b,c);if(Q.i>=cm.quiz.length){const k=b+"_"+c,qm=Object.assign({},S.meta.quiz||{});qm[k]=Math.max(qm[k]||0,Q.score);S.meta.quiz=qm;persist("meta");if(Q.score===cm.quiz.length)burst();render()}quizSheet()},
+  tgShare:d=>tgShare(d.v),
   cmt:d=>{if(d.v)cmtSheet(+d.v)},
   introOff:()=>{ui.introOff=true;render()},
   rSet:d=>{setRP(d.k,d.v);rSettingsSheet();render()},
@@ -2183,7 +2316,7 @@ const act={
   vShare:()=>{const {b,c}=readerPos(),vs=ui.rsel||[];if(!vs.length)return;shareVerse({t:vText(b,c,vs),r:vRef(b,c,vs)})},
   vLearn:()=>{const {b,c}=readerPos(),vs=ui.rsel||[];if(!vs.length)return;const v={t:vText(b,c,vs),r:vRef(b,c,vs)};if(!findVerse(v.r)){S.meta.custom=(S.meta.custom||[]).concat([v]);persist("meta")}ui.rsel=[];render();learnSheet(v.r)},
   vCopy:async()=>{const {b,c}=readerPos(),vs=ui.rsel||[];const t=`«${vText(b,c,vs)}» (${vRef(b,c,vs)})`;try{await navigator.clipboard.writeText(t);toast("Скопировано")}catch(e){openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Скопируй текст</h2><span style="width:40px"></span></div><textarea class="in" style="min-height:160px" readonly onfocus="this.select()">${esc(t)}</textarea>`,"copy")}},
-  rRead:()=>{const {b,c}=readerPos();if(bToday().some(e=>e.book===b&&(e.chapters||[]).includes(c))){toast("Уже отмечено сегодня ✓");return}saveReadingEntry(b,[c],"",today())},
+  rRead:()=>{const {b,c}=readerPos();if(bToday().some(e=>e.book===b&&(e.chapters||[]).includes(c))){toast("Уже отмечено сегодня ✓");return}saveReadingEntry(b,[c],"",today());planAuto()},
   rGo:d=>{let {b,c}=readerPos();c+=Number(d.v);if(c<1){if(b===0)return;b--;c=BOOKS[b][2]}else if(c>BOOKS[b][2]){if(b===65)return;b++;c=1}openReader(b,c)},
   rOpen:d=>openReader(+d.b,+d.c,d.v?+d.v:null),
   nf:d=>{ui.nf=d.v;render()},
@@ -2286,10 +2419,10 @@ const act={
   reopen:d=>{const p=S.prayers[d.id];p.status="active";persist(p.id);render();sheetDetail()},
   newEntry:d=>entryForm(d.v),
   jf:d=>{ui.jf=d.v;render()},
-  eType:d=>{ui.form.type=d.v;markPick($("#eTypes"),d.v);$("#eSermon").classList.toggle("hidden",d.v!=="sermon")},
+  eType:d=>{ui.form.type=d.v;markPick($("#eTypes"),d.v);const x=d.v==="exp";$("#eSermon").classList.toggle("hidden",d.v!=="sermon"&&!x);$("#eTitleL").textContent=x?"Коротко: что произошло":"Тема и проповедник";$("#eTitle").placeholder=x?"Например: «Бог помог найти работу»":"Например: «Вера и дела», пастор Андрей"},
   eLink:(d,el)=>{const a=ui.form.prayerIds,i=a.indexOf(d.v);if(i>=0)a.splice(i,1);else a.push(d.v);el.classList.toggle("on",i<0)},
   saveEntry:()=>{const txt=$("#eText").value.trim();if(!txt){$("#eText").focus();return}const id=rid("e_");
-    const ttl=ui.form.type==="sermon"&&$("#eTitle")?$("#eTitle").value.trim():"";S.entries[id]={kind:"entry",id,type:ui.form.type,text:txt,title:ttl,prayerIds:ui.form.prayerIds.slice(),createdAt:Date.now()};persist(id);closeSheet();render();toast("Сохранено в дневник");checkBadges()},
+    const ttl=(ui.form.type==="sermon"||ui.form.type==="exp")&&$("#eTitle")?$("#eTitle").value.trim():"";S.entries[id]={kind:"entry",id,type:ui.form.type,text:txt,title:ttl,prayerIds:ui.form.prayerIds.slice(),createdAt:Date.now()};persist(id);closeSheet();render();toast(ui.form.type==="exp"?"Опыт записан. Слава Богу ✨":"Сохранено в дневник");checkBadges()},
   openEntry:d=>entryView(d.id),
   delEntry:async d=>{const e0=S.entries[d.id];if(!await ask(e0&&e0.type==="session"?"Удалить эту молитву? Отметки за неё тоже снимутся.":"Удалить запись?","Удалить",true))return;
     if(e0&&e0.type==="session"){const k=dk(new Date(e0.createdAt));bump(S.meta.days,k,-1);persist("meta");(e0.prayerIds||[]).forEach(id=>{const p=S.prayers[id];if(p&&p.log){bump(p.log,k,-1);persist(id)}})}

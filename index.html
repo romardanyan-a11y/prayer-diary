@@ -936,7 +936,7 @@ const VERSES=[
  {t:"А Тому, Кто действием, действующею в нас, может сделать несравненно больше всего, чего мы просим, или о чем помышляем.",r:"Еф 3:20"}
 ];
 const MODES={
- cards:{name:"По карточкам",desc:"Нужды на сегодня — одна за другой",emoji:"🃏",c:"#FF6A8A",steps:[]},
+ cards:{name:"Мои нужды",desc:"Нужды на сегодня — одна за другой",emoji:"🤲",c:"#FF6A8A",steps:[]},
  full:{name:"Время с Богом",desc:"6 шагов · около 10 минут",emoji:"🕯️",c:"#FF9E4D",steps:[
   {k:"quiet",t:"Тишина",p:"Отложи всё на минуту. Сделай несколько медленных вдохов и выдохов. Ты пришёл к Отцу, Который ждёт тебя.",v:{t:"Остановитесь и познайте, что Я — Бог.",r:"Пс 45:11"}},
   {k:"praise",t:"Хвала",p:"Прославь Бога за то, Кто Он: Отец, Спаситель, Утешитель. Пока ничего не проси — просто поклонись.",v:{t:"Благослови, душа моя, Господа, и вся внутренность моя — святое имя Его. Благослови, душа моя, Господа и не забывай всех благодеяний Его.",r:"Пс 102:1–2"}},
@@ -2247,7 +2247,7 @@ function todaysList(){
 }
 function todayCard(){
   const L=todaysList();if(!L.length)return "";const t=today(),done=L.filter(p=>(p.log||{})[t]).length;
-  return `<section class="todayc"><div class="tc-h"><div><small>Сегодня в молитве</small><b>${done===L.length?"Все нужды дня ✓":done+" из "+L.length}</b></div><button class="btn sm" data-a="pmStart" data-v="cards">🃏 По карточкам</button></div>
+  return `<section class="todayc"><div class="tc-h"><div><small>Сегодня в молитве</small><b>${done===L.length?"Все нужды дня ✓":done+" из "+L.length}</b></div><button class="btn sm" data-a="pmStart" data-v="cards">🤲 Помолиться</button></div>
   <div class="tc-list">${L.map(p=>{const n=(p.log||{})[t]||0;return `<div class="tc-row" data-a="openPrayer" data-id="${p.id}" role="button" tabindex="0" style="--c:${p.color}"><span class="ic">${p.icon}</span><span class="tx"><b>${esc(p.title)}</b><span>${esc((ui.why||{})[p.id]||"по кругу")}${p.promise&&p.promise.r?" · "+esc(p.promise.r):""}</span></span><span class="tap ${n?"done":""}" data-a="quick" data-id="${p.id}" role="button" aria-label="Помолился">${n?ic("check"):ic("plus")}</span></div>`}).join("")}</div></section>`}
 function bdayCard(){const soon=peopleArr().map(p=>[p,bdayIn(p)]).filter(([,d])=>d!==null&&d<=3).sort((a,b)=>a[1]-b[1]);if(!soon.length)return "";const [p,d]=soon[0];
   return `<button class="bdc" data-a="openPerson" data-id="${p.id}"><span class="bd-e">🎂</span><span><small>${d===0?"Сегодня":d===1?"Завтра":"Через "+d+" "+plural(d,"день","дня","дней")}</small><b>День рождения · ${esc(p.name)}</b><span>Помолись и поблагодари Бога за этого человека</span></span>${ic("right")}</button>`}
@@ -2604,7 +2604,7 @@ function modeSheet(){const n=todaysList().length,more=!!ui.modeMore,bg=bgInfo(bg
   const row=(a,v,e,c,t,d)=>`<button class="mode" data-a="${a}" ${v?`data-v="${v}"`:""}><span class="mi" style="background:color-mix(in srgb,${c} 22%,transparent)">${e}</span><span><b>${t}</b><span>${d}</span></span><span class="go">${ic("right")}</span></button>`;
   const html=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Как помолимся?</h2><span style="width:40px"></span></div>
   <button class="mode-main" data-a="pmStart" data-v="full"><span class="mm-e">🙏</span><b>Время с Богом</b><span>Около 10 минут: тишина, хвала, покаяние, благодарность, просьбы и слушание</span></button>
-  <div class="mode2"><button class="mode-sm" data-a="pmStart" data-v="cards"><span class="ms-e">🃏</span><b>Мои нужды</b><small>${n?n+" "+plural(n,"нужда","нужды","нужд")+" на сегодня":"по карточкам"}</small></button>
+  <div class="mode2"><button class="mode-sm" data-a="pmStart" data-v="cards"><span class="ms-e">🤲</span><b>Мои нужды</b><small>${n?n+" "+plural(n,"нужда","нужды","нужд")+" на сегодня":"по карточкам"}</small></button>
   <button class="mode-sm" data-a="pmStart" data-v="quick"><span class="ms-e">⚡</span><b>Коротко</b><small>3 шага · 2 минуты</small></button></div>
   <button class="set" style="width:100%;text-align:left;margin-top:12px" data-a="bgChoose"><div><b>${bg[1]} Фон: ${bg[2]}</b><span>${bg[3]?bg[3]+" · ":""}нажми, чтобы сменить</span></div>${ic("right")}</button>
   <button class="more-btn" data-a="modeMore">${more?"Скрыть":"Ещё способы молиться"} <span>${more?"▴":"▾"}</span></button>

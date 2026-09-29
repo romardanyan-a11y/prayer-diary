@@ -1778,11 +1778,29 @@ function formeSheet(){const F=CH.forme;if(!F)return;const mx=Math.max(1,...F.ser
   ${F.anon?`<p class="small" style="margin:0 6px 12px">🤍 Ещё ${F.anon} ${plural(F.anon,"человек молится","человека молятся","человек молятся")} за тебя анонимно.</p>`:""}
   <p class="small" style="margin:0 6px">Когда кто-то отмечает тебя в своих молитвах, ты видишь это здесь. Что именно о тебе молятся — видит только тот, кто молится.</p>`;
   if(ui.sheetKind==="forme")redrawSheet(html);else openSheet(html,"forme")}
-async function pfCandidates(){const box=$("#pfCands");if(!box)return;box.innerHTML=`<p class="small">Загружаю…</p>`;
+async function pfCandidates(sel,a){const box=$(sel||"#pfCands");if(!box)return;box.innerHTML=`<p class="small">Загружаю…</p>`;
   let r;try{r=await call("person/candidates")}catch(e){box.innerHTML=`<p class="small">${esc(e.message)}</p>`;return}
-  box.innerHTML=r.items.length?`<div class="pick">${r.items.map(u=>`<button data-a="pfCand" data-id="${u.id}" data-n="${esc(u.name)}" data-u="${esc(u.username||"")}">${esc(u.name)}${u.username?" · @"+esc(u.username):""}</button>`).join("")}</div>`:`<p class="small">В твоих церквях пока нет других людей.</p>`}
+  box.innerHTML=r.items.length?`<div class="pick">${r.items.map(u=>`<button data-a="${a||"pfCand"}" data-id="${u.id}" data-n="${esc(u.name)}" data-u="${esc(u.username||"")}">${esc(u.name)}${u.username?" · @"+esc(u.username):""}</button>`).join("")}</div>`:`<p class="small">В твоих церквях пока нет других людей.</p>`}
 async function inviteSuggest(x){const r=await choose("@"+x.tg+" ещё не пользуется дневником. Пригласить? Когда придёт — увидит все молитвы за себя, даже прошлые.",[["inv","📨 Пригласить"],["no","Позже","ghost"]]);
   if(r==="inv")tgShare("Я молюсь за тебя 🙏 Загляни в «Молитвенный дневник» — там видно, сколько людей за тебя молятся, и можно вести свои молитвы и читать Библию.")}
+/* telegram nick of a person: "@Nick", "t.me/nick" -> "nick"; "" if empty; false if invalid */
+function normTg(v){v=String(v||"").trim().replace(/^https?:\/\//i,"").replace(/^(t\.me|telegram\.me)\//i,"").replace(/^@/,"").toLowerCase();return !v?"":/^[a-z0-9_]{4,32}$/.test(v)?v:false}
+function tgCheck(x,prev){if(!tgOn()||!x||!x.tg||x.tgId||x.tg===prev)return;x.tgChecked=x.tg;persist(x.id);
+  call("person/check",{uname:x.tg}).then(r=>{if(r.self){toast("Это твой собственный ник 🙂");return}if(!r.known)setTimeout(()=>inviteSuggest(x),900)}).catch(()=>{})}
+const relFor=c=>({"Семья":"Семья","Друзья":"Друг","Работа":"Работа","Служение":"Церковь"})[c]||"Другое";
+function fPerBox(){const f=ui.form,box=$("#fPerBox");if(!box)return;const x=f.personId&&f.personId!=="new"?S.people[f.personId]:null;
+  const tgRow=()=>tgOn()?`<label class="l" for="fpTg">Ник в Telegram — чтобы человек видел, что за него молятся</label><input class="in" id="fpTg" maxlength="45" autocapitalize="off" autocomplete="off" placeholder="@ник (необязательно)" value="${esc(f.pTg?"@"+f.pTg:"")}">
+    <div class="small" id="fpSel" style="margin:6px 4px 0">${f.pTgId?"✓ "+esc(f.pTgName||"")+" (из церкви)":""}</div>
+    <button class="textbtn" data-a="fpPick">или выбрать из моих церквей</button><div id="fpCands"></div>
+    <div class="set mt"><div><b>Показывать, что это я</b><span>Иначе увидит «кто-то молится за тебя» — молитва всё равно засчитается</span></div><button class="pill ${f.pShow===false?"":"on"}" data-a="fpShow">${f.pShow===false?"Нет":"Да"}</button></div>`:"";
+  let h="";
+  if(f.personId==="new")h=`<label class="l" for="fpName">Имя</label><input class="in" id="fpName" maxlength="40" placeholder="Например: Уля" value="${esc(f.pNew||"")}">${tgRow()}`;
+  else if(x&&(x.tg||x.tgId)&&!f.pTgEdit)h=`<div class="small" style="margin:8px 4px 0">📨 ${esc(x.tgName||x.name)}${x.tg?" · @"+esc(x.tg):""} — ${x.tgShow===false?"увидит «кто-то молится за тебя»":"увидит, что ты за него молишься"} <button class="textbtn" data-a="fpEdit">изменить</button></div>`;
+  else if(x)h=tgRow();
+  else if(tgOn())h=`<p class="small" style="margin:8px 4px 0">Отметь человека и его ник в Telegram — он увидит, что за него молятся.</p>`;
+  box.innerHTML=h;
+  const n=$("#fpName");if(n)n.addEventListener("input",()=>f.pNew=n.value);
+  const t=$("#fpTg");if(t)t.addEventListener("input",()=>{f.pTg=t.value.trim().replace(/^@/,"");if(f.pTgId){f.pTgId=null;f.pTgName="";const sl=$("#fpSel");if(sl)sl.textContent=""}})}
 function pfTgLabel(){const f=ui.pform;return f.tgId?"✓ "+esc(f.tgName||"")+(f.tg?" · @"+esc(f.tg):" (из церкви)"):""}
 /* ---------- молимся сейчас ---------- */
 function liveLoad(){if(!tgOn())return;call("live/get").then(r=>{CH.live=r;if((ui.tab==="home"||ui.tab==="church")&&$("#sheet").classList.contains("hidden")&&!PM)render()}).catch(()=>{})}
@@ -2536,7 +2554,7 @@ function prayerForm(p){
   <label class="l">Тема</label><div class="pick" id="fCats">${CATS.map(c=>`<button class="${c===f.cat?"on":""}" data-a="fCat" data-v="${c}">${c}</button>`).join("")}</div>
   <label class="l">Значок</label><div class="icons" id="fIcons">${ICONS.map(i=>`<button class="${i===f.icon?"on":""}" data-a="fIcon" data-v="${i}" aria-label="Значок ${i}">${i}</button>`).join("")}</div>
   <label class="l">Цвет</label><div class="colors" id="fColors">${COLORS.map(c=>`<button style="--c:${c}" class="${c===f.color?"on":""}" data-a="fColor" data-v="${c}" aria-label="Цвет"></button>`).join("")}</div>
-  ${peopleArr().length?`<label class="l">Человек</label><div class="pick" id="fPer"><button class="${!f.personId?"on":""}" data-a="fPer" data-v="">Никто</button>${peopleArr().map(x=>`<button class="${f.personId===x.id?"on":""}" data-a="fPer" data-v="${x.id}">${x.ava||""} ${esc(x.name)}</button>`).join("")}</div>`:""}
+  <label class="l">Человек</label><div class="pick" id="fPer"><button class="${!f.personId?"on":""}" data-a="fPer" data-v="">Никто</button>${peopleArr().map(x=>`<button class="${f.personId===x.id?"on":""}" data-a="fPer" data-v="${x.id}">${x.ava||""} ${esc(x.name)}${x.tg||x.tgId?" 📨":""}</button>`).join("")}<button class="${f.personId==="new"?"on":""}" data-a="fPer" data-v="new">＋ Новый</button></div><div id="fPerBox"></div>
   <label class="l">Как часто молиться</label><div class="pick" id="fSch">${[["rot","По кругу"],["daily","Каждый день"],["week","По дням недели"]].map(([k,l])=>`<button class="${f.sched===k?"on":""}" data-a="fSch" data-v="${k}">${l}</button>`).join("")}</div>
   <div id="fWdBox" class="${f.sched==="week"?"":"hidden"}" style="margin-top:8px"><div class="pick wdp" id="fWd">${WD.map((w,i)=>`<button class="${f.wd.includes(i)?"on":""}" data-a="fWd" data-v="${i}">${w}</button>`).join("")}</div></div>
   <p class="small" style="margin:8px 4px 0">«По кругу» — приложение само подставит нужду в «Сегодня в молитве», чтобы ты молился обо всех по очереди.</p>
@@ -2547,6 +2565,7 @@ function prayerForm(p){
   $("#fPt").addEventListener("input",e=>f.pt=e.target.value);$("#fPr").addEventListener("input",e=>f.pr=e.target.value);
   const ti=$("#fTitle");ti.addEventListener("input",()=>{f.title=ti.value;$("#spBtn").disabled=!ti.value.trim()});
   $("#fWho").addEventListener("input",e=>f.who=e.target.value);$("#fNote").addEventListener("input",e=>f.note=e.target.value);$("#fDue").addEventListener("change",e=>f.due=e.target.value);
+  fPerBox();
   if(!f.id)setTimeout(()=>ti.focus(),350);
 }
 function markPick(box,v){box.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.v===v))}
@@ -2820,7 +2839,13 @@ const act={
   cardSkip:()=>{PM.ci++;drawCards()},
   fSch:d=>{ui.form.sched=d.v;markPick($("#fSch"),d.v);$("#fWdBox").classList.toggle("hidden",d.v!=="week")},
   fWd:(d,el)=>{const a=ui.form.wd,i=+d.v,k=a.indexOf(i);if(k>=0)a.splice(k,1);else a.push(i);el.classList.toggle("on",k<0)},
-  fPer:d=>{ui.form.personId=d.v;markPick($("#fPer"),d.v)},
+  fPer:d=>{const f=ui.form;f.personId=d.v;f.pTgEdit=false;f.pTg="";f.pTgId=null;f.pTgName="";markPick($("#fPer"),d.v);
+    const x=S.people[d.v],w=$("#fWho");if(d.v==="new"&&!f.pNew)f.pNew=(f.who||"").trim();if(x){f.pShow=x.tgShow!==false;if(w&&!w.value.trim()){w.value=x.name;f.who=x.name}}fPerBox();const n=$("#fpName");if(n&&!n.value)n.focus()},
+  fpEdit:()=>{const f=ui.form,x=S.people[f.personId];if(!x)return;f.pTgEdit=true;f.pTg=x.tg||"";f.pTgId=x.tgId||null;f.pTgName=x.tgName||"";f.pShow=x.tgShow!==false;fPerBox()},
+  fpPick:()=>pfCandidates("#fpCands","fpCand"),
+  fpCand:d=>{const f=ui.form;f.pTgId=+d.id;f.pTgName=d.n;f.pTg=d.u||"";const i=$("#fpTg");if(i)i.value=d.u?"@"+d.u:"";const sl=$("#fpSel");if(sl)sl.textContent="✓ "+d.n+" (из церкви)";$("#fpCands").innerHTML="";
+    if(f.personId==="new"){const n=$("#fpName");if(n&&!n.value.trim()){n.value=d.n;f.pNew=d.n}}},
+  fpShow:d=>{const f=ui.form;f.pShow=f.pShow===false;const b=document.querySelector('[data-a="fpShow"]');if(b){b.textContent=f.pShow?"Да":"Нет";b.classList.toggle("on",f.pShow)}},
   fPromise:d=>{const v=findVerse(d.v);if(!v)return;ui.form.pt=v.t;ui.form.pr=v.r;$("#fPt").value=v.t;$("#fPr").value=v.r},
   rplanSet:d=>{const x=RPLANS.find(r=>r.id===d.v);if(!x)return;S.meta.rplan={id:x.id,start:today()};const per=Math.ceil(planChapters(x).length/x.days);S.meta.plan=Object.assign(plan(),{name:x.name,perDay:per,week:7});persist("meta");closeSheet();render();toast("План «"+x.name+"» начат 📖")},
   rplanOff:async()=>{if(!await ask("Остановить готовый план? Прочитанное сохранится.","Остановить"))return;S.meta.rplan=null;persist("meta");closeSheet();render()},
@@ -2835,7 +2860,7 @@ const act={
     const tgIn=$("#pfTg")?$("#pfTg").value.trim().replace(/^@/,"").toLowerCase():(old.tg||"");if(tgIn&&!/^[a-z0-9_]{4,32}$/.test(tgIn)){toast("Ник в Telegram: латиница, цифры и _");$("#pfTg").focus();return}
     const tgPatch=$("#pfTg")?{tg:tgIn,tgId:f.tgId&&(!tgIn||tgIn===(f.tg||""))?f.tgId:null,tgName:f.tgId?f.tgName:"",tgShow:$("#pfShow").textContent==="Да"}:{};
     S.people[id]=Object.assign(old,{name,rel:f.rel,note:$("#pfNote").value.trim(),ava:f.ava,color:f.color,bd:dd&&mm?pad(mm)+"-"+pad(dd):""},tgPatch);persist(id);render();ui.sheetKind="";personSheet(id);toast(f.id?"Сохранено":"Человек добавлен");
-    const x=S.people[id];if(tgOn()&&x.tg&&!x.tgId&&x.tg!==old.tgChecked){x.tgChecked=x.tg;persist(id);call("person/check",{uname:x.tg}).then(r=>{if(r.self){toast("Это твой собственный ник 🙂");return}if(!r.known)setTimeout(()=>inviteSuggest(x),900)}).catch(()=>{})}},
+    tgCheck(S.people[id],old.tgChecked)},
   delPerson:async d=>{if(!await ask("Удалить человека? Нужды останутся.","Удалить",true))return;active().concat(answered()).forEach(p=>{if(p.personId===d.id){p.personId="";persist(p.id)}});delete S.people[d.id];persist(d.id);closeSheet();render()},
   newPrayerFor:d=>{ui.prefPerson=d.id;const x=S.people[d.id];prayerForm(null);if(x){ui.form.who=x.name;$("#fWho").value=x.name}},
   prayPerson:d=>{const x=S.people[d.id];if(!x)return;const k=today();x.log=Object.assign({},x.log||{});bump(x.log,k,1);persist(x.id);personNeeds(x.id).forEach(p=>{p.log=p.log||{};bump(p.log,k,1);persist(p.id)});bump(S.meta.days,k,1);persist("meta");buzz();render();personSheet(x.id);toast("Помолился за "+x.name+" 🙏");checkBadges();pingPerson(x.id)},
@@ -3088,9 +3113,17 @@ const act={
   fIcon:d=>{ui.form.icon=d.v;markPick($("#fIcons"),d.v);$("#fIc").textContent=d.v},
   fColor:d=>{ui.form.color=d.v;markPick($("#fColors"),d.v);$("#fIc").style.setProperty("--c",d.v)},
   savePrayer:()=>{const f=ui.form;if(!f.title.trim())return;
+    let chk=null;
+    if(f.personId==="new"||(f.personId&&S.people[f.personId]&&(f.pTgEdit||!(S.people[f.personId].tg||S.people[f.personId].tgId)))){
+      const tg=tgOn()?normTg(f.pTg):"";if(tg===false){toast("Ник в Telegram: латиница, цифры и _");const i=$("#fpTg");if(i)i.focus();return}
+      if(f.personId==="new"){const name=(f.pNew||f.who||"").trim().slice(0,40);if(!name){toast("Напиши имя человека");const i=$("#fpName");if(i)i.focus();return}
+        const pid=rid("h_");S.people[pid]={kind:"person",id:pid,createdAt:Date.now(),thanks:[],log:{},name,rel:relFor(f.cat),note:"",ava:"🧑",color:COLORS[peopleArr().length%COLORS.length],bd:"",tg,tgId:f.pTgId||null,tgName:f.pTgId?f.pTgName:"",tgShow:f.pShow!==false};
+        persist(pid);f.personId=pid;if(!f.who.trim())f.who=name;chk=[S.people[pid],""]}
+      else if(tg||f.pTgId||f.pTgEdit){const x=S.people[f.personId],prev=x.tgChecked;const same=tg&&tg===(x.tg||"");
+        Object.assign(x,{tg,tgId:f.pTgId||(same?x.tgId:null)||null,tgName:f.pTgId?f.pTgName:(same?x.tgName:""),tgShow:f.pShow!==false});persist(x.id);chk=[x,prev]}}
     const id=f.id||rid("p_");const old=S.prayers[id]||{kind:"prayer",id,createdAt:Date.now(),status:"active",log:{},answer:"",answeredAt:null};
     S.prayers[id]=Object.assign(old,{title:f.title.trim(),who:f.who.trim(),note:f.note.trim(),cat:f.cat,icon:f.icon,color:f.color,sched:f.sched,wd:f.sched==="week"?f.wd.slice().sort():[],personId:f.personId||"",promise:f.pt.trim()?{t:f.pt.trim(),r:f.pr.trim()}:null,due:f.due||""});
-    persist(id);dueSync(S.prayers[id]);render();if(f.id){ui.detail=id;ui.sheetKind="";sheetDetail()}else{closeSheet();toast("Нужда добавлена")}},
+    persist(id);dueSync(S.prayers[id]);render();if(f.id){ui.detail=id;ui.sheetKind="";sheetDetail()}else{closeSheet();toast("Нужда добавлена")}if(chk)tgCheck(chk[0],chk[1])},
   editPrayer:d=>prayerForm(S.prayers[d.id]),
   delPrayer:async d=>{if(!await ask("Удалить эту нужду? Записи в дневнике останутся.","Удалить",true))return;if(S.prayers[d.id]&&S.prayers[d.id].dueSynced&&tgOn())call("due/del",{key:d.id}).catch(()=>{});delete S.prayers[d.id];persist(d.id);closeSheet();render();toast("Удалено")},
   openPrayer:d=>{const p=S.prayers[d.id];if(!p)return;const ref=new Date(p.answeredAt||Date.now());ui.detail=d.id;ui.dY=ref.getFullYear();ui.dM=ref.getMonth();ui.sheetKind="";sheetDetail()},

@@ -1701,7 +1701,7 @@ async function chLoad(quiet){if(!TG||CH.loading)return;CH.loading=true;CH.tried=
     let wall=w;if(sc!=="global"&&!(me.churches||[]).some(c=>c.id===sc)){setScope("global");wall=null}
     if(!wall||CH.scope!==sc)wall=await call("wall/list",{scope:CH.scope});return [me,wall,p]};
   try{let res;try{res=await get()}catch(e){await new Promise(r=>setTimeout(r,1500));res=await get()}
-    const [me,w,p]=res;CH.me=me;CH.wall=w.items;CH.pins=w.pins||[];CH.canAnn=!!w.canAnnounce;CH.plans=p.plans;CH.loaded=true;CH.err="";syncAnswered(w.items);
+    const [me,w,p]=res;CH.me=me;if(me&&!me.chatOk&&!JOIN0&&!waAsked()&&TG.initDataUnsafe&&TG.initDataUnsafe.start_param)setTimeout(()=>askWrite(true),2500);CH.wall=w.items;CH.pins=w.pins||[];CH.canAnn=!!w.canAnnounce;CH.plans=p.plans;CH.loaded=true;CH.err="";syncAnswered(w.items);
     try{localStorage.setItem("pj-ch",JSON.stringify({me,wall:w.items,plans:p.plans,scope:CH.scope}))}catch(e){}}
   catch(e){CH.err=e.message;if(CH.loaded&&ui.tab==="church"&&!quiet)toast("Не удалось обновить: "+e.message)}
   CH.loading=false;if((ui.tab==="church"||ui.tab==="home")&&(!$("#sheet")||$("#sheet").classList.contains("hidden")))render()}
@@ -1726,7 +1726,7 @@ function vChurch(){
     <div class="row2"><button class="btn sm" data-a="chInvite">${ic("share")}Пригласить</button><button class="btn sm ghost" data-a="chMembers">${ic("users")}Участники</button></div></section>`
     :(!myCh().length?`<button class="chc" data-a="chAdd"><span class="be">⛪</span><span><b>Найди свою церковь</b><small>Поиск по названию и городу, вступление по коду — или создай свою: у вас будет своя стена молитв и планы чтения</small></span>${ic("plus")}</button>`:"");
   const seg=`<div class="seg s3 ${CH.seg==="plans"?"p1":CH.seg==="tog"?"p2":""}"><span class="knob"></span><button class="${CH.seg!=="plans"&&CH.seg!=="tog"?"on":""}" data-a="chSeg" data-v="wall">🙏 Стена</button><button class="${CH.seg==="plans"?"on":""}" data-a="chSeg" data-v="plans">📖 Чтение</button><button class="${CH.seg==="tog"?"on":""}" data-a="chSeg" data-v="tog">🤝 Вместе</button></div>`;
-  const bot=`<button class="set" style="width:100%;text-align:left" data-a="botSheet"><div><b>🔔 Сообщения от бота</b><span>${CH.me&&CH.me.remind?"Каждый день в "+CH.me.remind+(CH.me.chatOk?"":" · нажми /start в боте"):"Стих дня, план чтения и кто молился за тебя"}</span></div>${ic("right")}</button>`;
+  const bot=`<button class="set" style="width:100%;text-align:left" data-a="botSheet"><div><b>🔔 Сообщения от бота</b><span>${CH.me&&CH.me.remind?"Каждый день в "+CH.me.remind+(CH.me.chatOk?"":" · разреши боту писать"):"Стих дня, план чтения и кто молился за тебя"}</span></div>${ic("right")}</button>`;
   const top=head+scopes+card+seg;
   if(CH.seg==="tog")return top+vTogether()+bot;
   if(CH.seg==="plans"){
@@ -1990,6 +1990,13 @@ async function requestsSheet(){const c=curCh();if(!c)return;const top=`<div clas
   let r;try{r=await call("church/requests",{id:c.id})}catch(e){redrawSheet(top+`<div class="empty">${esc(e.message)}</div>`);return}
   redrawSheet(top+(r.items.length?`<p class="small" style="margin:0 4px 8px">Эти люди хотят вступить в ${c.emoji} «${esc(c.name)}»</p>`+r.items.map(u=>`<div class="chr"><span class="che">👤</span><div class="tx"><b>${esc(u.name)}</b><span>${u.username?"@"+esc(u.username)+" · ":""}${ago(u.created)}</span></div><button class="btn sm green" data-a="chDecide" data-id="${u.id}" data-ok="1">Принять</button><button class="rb" data-a="chDecide" data-id="${u.id}" data-ok="" aria-label="Отклонить">${ic("x")}</button></div>`).join("")
     :`<div class="empty">Новых заявок нет 🙏</div>`))}
+/* permission for the bot to write — needed when the app is opened by a direct link (no /start in the chat) */
+const waAsked=()=>{try{return !!localStorage.getItem("pj-wa")}catch(e){return true}};
+function askWrite(silent){if(!TG)return;try{localStorage.setItem("pj-wa","1")}catch(e){}
+  const done=ok=>{if(!ok){if(!silent)toast("Без разрешения бот не сможет писать тебе");return}
+    call("chat/hello").then(r=>{if(CH.me)CH.me.chatOk=!!r.chatOk;toast(r.chatOk?"Готово — бот сможет писать тебе 🔔":"Не получилось — открой чат с ботом и нажми «Запустить»");if(ui.sheetKind==="bot")botSheet()}).catch(()=>{})};
+  if(TG.requestWriteAccess&&TG.isVersionAtLeast&&TG.isVersionAtLeast("6.9")){try{TG.requestWriteAccess(done)}catch(e){done(false)}}
+  else{try{TG.openTelegramLink(BOT_URL)}catch(e){window.open(BOT_URL,"_blank")}}}
 async function joinPrompt(code){code=String(code||"").toUpperCase().replace(/[^A-Z0-9]/g,"");if(!code||!TG)return;
   const top=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Приглашение</h2><span style="width:40px"></span></div>`;
   openSheet(top+`<div class="empty">Ищу церковь…</div>`,"join");
@@ -2040,7 +2047,7 @@ function botSheet(){const r=($("#botT")&&$("#botT").value)||(CH.me&&CH.me.remind
   <div class="set"><div><b>Когда за меня молятся</b><span>«🙏 Анна молится за тебя» — не чаще раза в день от человека</span></div><button class="pill ${CH.me&&CH.me.notifyPrayed!==false?"on":""}" data-a="botNP">${CH.me&&CH.me.notifyPrayed!==false?"Вкл":"Выкл"}</button></div>
   <div class="set"><div><b>Вечером напоминать о плане</b><span>В 19:00, если глава дня ещё не прочитана</span></div><button class="pill ${CH.me&&CH.me.planRemind!==false?"on":""}" data-a="botPR">${CH.me&&CH.me.planRemind!==false?"Вкл":"Выкл"}</button></div>
   <div class="set"><div><b>Поздравлять с субботой</b><span>По субботам — «Счастливой субботы! 🕊»</span></div><button class="pill ${CH.me&&CH.me.sabbath?"on":""}" data-a="botSab">${CH.me&&CH.me.sabbath?"Вкл":"Выкл"}</button></div>
-  ${CH.me&&!CH.me.chatOk?`<div class="answer-box gold"><div class="k">Важно</div><p>Чтобы бот мог писать, открой чат с @PrayerDiary_bot и нажми «Запустить» (/start).</p></div>`:""}
+  ${CH.me&&!CH.me.chatOk?`<div class="answer-box gold"><div class="k">Важно</div><p>Чтобы бот мог писать, разреши ему сообщения.</p><button class="btn wide mt" data-a="waAsk">🔔 Разрешить боту писать</button></div>`:""}
   <button class="btn wide mt" data-a="botSave">${ic("bell")}${on?"Сохранить":"Включить"}</button>${on?`<button class="btn danger wide mt" data-a="botOff">Выключить</button>`:""}`);
   if(ui.sheetKind==="bot")redrawSheet(html);else openSheet(html,"bot")}
 const PLAN_TPL=[
@@ -2970,7 +2977,7 @@ const act={
   chDecide:async(d,el)=>{const c=curCh();if(!c)return;if(el)el.disabled=true;try{await call("church/decide",{id:c.id,user:+d.id,ok:!!d.ok});toast(d.ok?"Принят(а) в церковь 🎉":"Заявка отклонена");await requestsSheet();chLoad(true)}catch(e){toast(e.message);if(el)el.disabled=false}},
   cfMode:d=>{ui.cf.mode=d.v;document.querySelectorAll("#cfM .cfm").forEach(b=>b.classList.toggle("on",b.dataset.v===d.v))},
   chJoinCode:()=>{const v=$("#jCode").value.trim();if(!v){$("#jCode").focus();return}joinPrompt(v)},
-  chJoin:async d=>{const b=document.querySelector('[data-a="chJoin"]');if(b)b.disabled=true;try{const r=await call("church/join",{code:d.v});setScope(r.id);CH.seg="wall";CH.wall=[];closeSheet();ui.tab="church";burst();await chLoad(true);render();window.scrollTo(0,0);const c=curCh();toast(c?"Добро пожаловать в «"+c.name+"» 🙏":"Ты в церкви 🙏")}catch(e){toast(e.message);if(b)b.disabled=false}},
+  chJoin:async d=>{const b=document.querySelector('[data-a="chJoin"]');if(b)b.disabled=true;try{const r=await call("church/join",{code:d.v});setScope(r.id);CH.seg="wall";CH.wall=[];closeSheet();ui.tab="church";burst();await chLoad(true);render();window.scrollTo(0,0);const c=curCh();toast(c?"Добро пожаловать в «"+c.name+"» 🙏":"Ты в церкви 🙏");if(CH.me&&!CH.me.chatOk&&!waAsked())setTimeout(()=>askWrite(true),1800)}catch(e){toast(e.message);if(b)b.disabled=false}},
   chCreate:()=>{closeSheet();setTimeout(()=>churchFormSheet(null),300)},
   cfEmoji:d=>{ui.cf.emoji=d.v;markPick($("#cfE"),d.v)},
   chSave:async()=>{const name=$("#cfN").value.trim();if(name.length<2){$("#cfN").focus();return}const about=$("#cfA").value.trim(),city=$("#cfC").value.trim(),f=ui.cf,mode=f.mode;const b=document.querySelector('[data-a="chSave"]');if(b)b.disabled=true;
@@ -2994,7 +3001,8 @@ const act={
     if(r==="leave"){if(!await ask(c.role==="owner"?"Ты хозяин. Если выйдешь, церковь перейдёт помощнику или самому давнему участнику. Выйти?":"Выйти из «"+c.name+"»?","Выйти",true))return;try{await call("church/leave",{id:c.id});setScope("global");CH.wall=[];await chLoad(true);toast("Ты вышел из церкви")}catch(e){toast(e.message)}}
     if(r==="del"){if(!await ask("Удалить «"+c.name+"» для всех участников? Стена и планы церкви пропадут.","Удалить",true))return;try{await call("church/delete",{id:c.id});setScope("global");CH.wall=[];await chLoad(true);toast("Церковь удалена")}catch(e){toast(e.message)}}},
   botSheet:()=>botSheet(),
-  botSave:()=>{const t=$("#botT").value||"08:00";closeSheet();chDo(()=>call("settings",{remind:t,verse:true}),"Бот будет писать в "+t+" 🔔")},
+  botSave:()=>{const t=$("#botT").value||"08:00";closeSheet();chDo(()=>call("settings",{remind:t,verse:true}),"Бот будет писать в "+t+" 🔔");if(CH.me&&!CH.me.chatOk)setTimeout(()=>askWrite(),1200)},
+  waAsk:()=>askWrite(),
   botNW:()=>{const v=!(CH.me&&CH.me.notifyWall!==false);if(CH.me)CH.me.notifyWall=v;botSheet();call("settings",{notifyWall:v}).then(()=>toast(v?"Будем сообщать о новых просьбах 🙏":"Уведомления о просьбах выключены")).catch(e=>{if(CH.me)CH.me.notifyWall=!v;toast(e.message)})},
   botPR:()=>{const v=!(CH.me&&CH.me.planRemind!==false);if(CH.me)CH.me.planRemind=v;botSheet();call("settings",{planRemind:v}).then(()=>toast(v?"Напомню вечером о чтении 📖":"Вечерние напоминания выключены")).catch(e=>{if(CH.me)CH.me.planRemind=!v;toast(e.message)})},
   botSab:()=>{const v=!(CH.me&&CH.me.sabbath);if(CH.me)CH.me.sabbath=v;botSheet();call("settings",{sabbath:v}).then(()=>toast(v?"Будем поздравлять с субботой 🕊":"Поздравление выключено")).catch(e=>{if(CH.me)CH.me.sabbath=!v;toast(e.message)})},

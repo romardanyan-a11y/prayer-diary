@@ -1037,7 +1037,7 @@ try{const r=localStorage.getItem(LSP);if(r)pending=new Set(JSON.parse(r))}catch(
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LSP,JSON.stringify([...pending]))}catch(e){}}
 function hasData(){return Object.keys(S.people||{}).length||Object.keys(S.marks||{}).length||Object.keys(S.prayers).length||Object.keys(S.entries).length||Object.keys(S.meta.days||{}).length}
 
-let col=null; const chains={},inflight={},busy={},bad={};const APPV="14";
+let col=null; const chains={},inflight={},busy={},bad={};const APPV="15";
 function current(id){if(id==="meta")return S.meta;return S.prayers[id]||S.entries[id]||S.marks[id]||S.people[id]||null}
 function write(id){
   pending.add(id);saveLocal();
@@ -1792,28 +1792,28 @@ async function call(path,body){if(!TG&&!SES)throw new Error("Открой дне
   try{r=await fetch(API+"/api/"+path,{method:"POST",signal:ac.signal,headers:Object.assign({"content-type":"application/json"},TG?{"x-init-data":TG.initData}:{"x-session":SES}),body:JSON.stringify(Object.assign({tz:new Date().getTimezoneOffset()},body||{}))})}
   catch(e){throw new Error("Нет связи с сервером — проверь интернет")}finally{clearTimeout(to)}
   const o=await r.json().catch(()=>({error:"Нет связи с сервером"}));if(!r.ok||o.error){const er=new Error(o.error||"Ошибка");er.status=r.status;throw er}return o}
-async function chLoad(quiet){if(!TG||CH.loading)return;CH.loading=true;CH.tried=true;if(!quiet&&!CH.loaded&&ui.tab==="church")render();
+async function chLoad(quiet){if(!tgOn()||CH.loading)return;CH.loading=true;CH.tried=true;if(!quiet&&!CH.loaded&&ui.tab==="church")render();
   call("forme/get").then(f=>{CH.forme=f;if(ui.tab==="home"&&$("#sheet").classList.contains("hidden"))render()}).catch(()=>{});
   liveLoad();worldLoad();aiStatus();
   const get=async()=>{const sc=CH.scope;const [me,w,p]=await Promise.all([call("me"),call("wall/list",{scope:sc}).catch(()=>null),call("plan/list")]);
     let wall=w;if(sc!=="global"&&!(me.churches||[]).some(c=>c.id===sc)){setScope("global");wall=null}
     if(!wall||CH.scope!==sc)wall=await call("wall/list",{scope:CH.scope});return [me,wall,p]};
   try{let res;try{res=await get()}catch(e){await new Promise(r=>setTimeout(r,1500));res=await get()}
-    const [me,w,p]=res;CH.me=me;if(me&&!me.chatOk&&!JOIN0&&!waAsked()&&TG.initDataUnsafe&&TG.initDataUnsafe.start_param)setTimeout(()=>askWrite(true),2500);CH.wall=w.items;CH.pins=w.pins||[];CH.canAnn=!!w.canAnnounce;CH.plans=p.plans;CH.loaded=true;CH.err="";syncAnswered(w.items);
+    const [me,w,p]=res;CH.me=me;if(me&&!me.chatOk&&!JOIN0&&!waAsked()&&TG&&TG.initDataUnsafe&&TG.initDataUnsafe.start_param)setTimeout(()=>askWrite(true),2500);CH.wall=w.items;CH.pins=w.pins||[];CH.canAnn=!!w.canAnnounce;CH.plans=p.plans;CH.loaded=true;CH.err="";syncAnswered(w.items);
     try{localStorage.setItem("pj-ch",JSON.stringify({me,wall:w.items,plans:p.plans,scope:CH.scope}))}catch(e){}}
   catch(e){CH.err=e.message;if(CH.loaded&&ui.tab==="church"&&!quiet)toast("Не удалось обновить: "+e.message)}
   CH.loading=false;if((ui.tab==="church"||ui.tab==="home")&&(!$("#sheet")||$("#sheet").classList.contains("hidden")))render()}
 const ago=t=>{const m=Math.round((Date.now()-t)/60000);if(m<1)return "только что";if(m<60)return m+" мин назад";const h=Math.round(m/60);if(h<24)return h+" "+plural(h,"час","часа","часов")+" назад";const d=Math.round(h/24);return d===1?"вчера":d+" "+plural(d,"день","дня","дней")+" назад"};
 const refsTxt=list=>{const out=[];(list||[]).forEach(([b,c])=>{const l=out[out.length-1];if(l&&l.b===b&&l.to===c-1)l.to=c;else out.push({b,from:c,to:c})});return out.map(x=>BOOKS[x.b][1]+" "+(x.from===x.to?x.from:x.from+"–"+x.to)).join(", ")};
 function planToday(p){return p.today>=0&&p.today<p.days.length?p.days[p.today]:null}
-function churchHome(){if(!TG||API.startsWith("__"))return (!TG&&!SES&&!S.meta.noLogin?`<section class="lg-card"><b>Пользуешься дневником в Telegram?</b><span>Войди — и все нужды, записи и чтение Библии будут здесь, на этом устройстве.</span><div class="row2"><button class="btn ghost" data-a="loginNo">Не сейчас</button><button class="btn" data-a="loginOpen">Войти</button></div></section>`:"")+`<button class="jbtn" style="width:100%;margin:0 0 12px" data-a="tab" data-v="stats"><span class="ti c-blue">${ic("chart")}</span>Мои итоги</button>`;if(!CH.tried&&!CH.loading)setTimeout(()=>chLoad(true),300);
+function churchHome(){if(!tgOn())return (!TG&&!SES&&!S.meta.noLogin?`<section class="lg-card"><b>Пользуешься дневником в Telegram?</b><span>Войди — и все нужды, записи и чтение Библии будут здесь, на этом устройстве.</span><div class="row2"><button class="btn ghost" data-a="loginNo">Не сейчас</button><button class="btn" data-a="loginOpen">Войти</button></div></section>`:"")+`<button class="jbtn" style="width:100%;margin:0 0 12px" data-a="tab" data-v="stats"><span class="ti c-blue">${ic("chart")}</span>Мои итоги</button>`;if(!CH.tried&&!CH.loading)setTimeout(()=>chLoad(true),300);
   const open=CH.wall.filter(w=>!w.answered).length,pl=CH.plans.find(p=>p.joined&&planToday(p));
   return `<button class="chc" data-a="tab" data-v="church"><span class="be">⛪</span><span><b>Церковь</b><small>${CH.loaded?`${open} ${plural(open,"просьба","просьбы","просьб")} о молитве${pl?` · ${esc(pl.title)}: ${refsTxt(planToday(pl))}${pl.myDone.includes(pl.today)?" ✓":""}`:""}`:"Молитвенная стена и чтение вместе"}</small></span>${ic("right")}</button>
   <button class="jbtn" style="width:100%;margin:0 0 12px" data-a="tab" data-v="stats"><span class="ti c-blue">${ic("chart")}</span>Мои итоги</button>`}
 function vChurch(){
   const head=`<header class="top"><div class="date">Вместе с другими христианами</div></header><h1>Церковь</h1>`;
   if(API.startsWith("__"))return head+`<div class="empty"><div class="ei">⛪</div><b>Скоро здесь</b>Молитвенная стена, общие планы чтения и утренние сообщения от бота. Подключаем сервер 🙏</div>`;
-  if(!TG)return head+`<div class="empty"><div class="ei">⛪</div><b>Открой через Telegram</b>Молитвенная стена, церкви и общие планы чтения работают в боте — там тебя узнают без регистрации.<br><br><a class="btn" href="${BOT_URL}" target="_blank" rel="noopener">Открыть @PrayerDiary_bot</a></div>`;
+  if(!tgOn())return head+`<div class="empty"><div class="ei">⛪</div><b>Войди через Telegram</b>Молитвенная стена, твоя церковь и общие планы чтения появятся здесь — без регистрации, через твой Telegram.<br><br><button class="btn" data-a="loginOpen">Войти через Telegram</button></div>`;
   if(!CH.loaded)return head+(CH.err?`<div class="empty"><b>Не получилось загрузить</b>${esc(CH.err)}<br><br><button class="btn sm" data-a="chReload">Повторить</button></div>`:`<div class="empty">Загружаю…</div>`);
   const g=CH.scope==="global",cc=curCh(),adm=chAdm(cc);
   const scopes=`<div class="filters scopes"><button class="${g?"on":""}" data-a="chScope" data-v="global">🌍 Все христиане</button>${myCh().map(c=>`<button class="${CH.scope===c.id?"on":""}" data-a="chScope" data-v="${c.id}">${c.emoji} ${esc(c.name)}</button>`).join("")}<button data-a="chAdd">${ic("plus")} Церковь</button></div>`;
@@ -1860,7 +1860,8 @@ function annNewSheet(){const g=CH.scope==="global",cc=curCh();
   <textarea class="in" id="anT" maxlength="800" style="min-height:150px" placeholder="${g?"Например: Что нового в дневнике…":"Например: Служение в субботу в 10:00, после — чаепитие"}"></textarea>
   <div class="set mt"><div><b>Отправить в бот</b><span>${g?"Каждому пользователю придёт сообщение":"Каждому участнику придёт сообщение"}</span></div><button class="pill on" id="anN" data-a="pnToggle" data-v="anN">Да</button></div>`,"ann");setTimeout(()=>$("#anT").focus(),350)}
 /* ---------- молюсь за тебя ---------- */
-const tgOn=()=>!!TG&&!API.startsWith("__");
+/* серверные функции: в Telegram — по initData, в браузере — после «Войти через Telegram» */
+const tgOn=()=>(!!TG||!!SES)&&!API.startsWith("__");
 function pingPerson(pid){const x=S.people[pid];if(!x||!(x.tg||x.tgId)||!tgOn())return;ui.pinged=ui.pinged||{};const now=Date.now();if(ui.pinged[pid]&&now-ui.pinged[pid]<30000)return;ui.pinged[pid]=now;
   call("person/pray",Object.assign(x.tgId?{uid:x.tgId}:{uname:x.tg},{anon:x.tgShow===false})).catch(()=>{})}
 function pingPeopleOf(prayerIds){const seen=new Set();(prayerIds||[]).forEach(id=>{const p=S.prayers[id];if(p&&p.personId&&!seen.has(p.personId)){seen.add(p.personId);pingPerson(p.personId)}})}
@@ -1960,7 +1961,7 @@ function aiDraw(){const t=ui.aiTab,R=ui.aiRes,ready=!CH.ai||CH.ai.ready!==false;
   <button class="btn wide mt" data-a="aiGo" ${ui.aiBusy?"disabled":""}>${ui.aiBusy?"✨ Думаю…":t==="prayer"?"✨ Помоги помолиться":t==="verse"?"✨ Найти слово из Библии":"✨ Разложить по полочкам"}</button>
   <div class="small" style="text-align:center;margin-top:8px">${aiLeftTxt()}</div>
   ${R&&R.tab===t?aiResult(t,R):""}`}
-  <p class="small" style="margin:16px 4px 0">🔒 Текст отправляется ИИ-сервису (DeepSeek) только чтобы получить ответ. Мы его не храним. Стихи берутся из Синодального перевода в приложении. ИИ может ошибаться — сверяй со Словом и с пастором.</p>`;
+  <p class="small" style="margin:16px 4px 0">🔒 Текст отправляется ИИ-сервису (Google Gemini, запасной — DeepSeek) только чтобы получить ответ. Мы его не храним. Стихи берутся из Синодального перевода в приложении. ИИ может ошибаться — сверяй со Словом и с пастором.</p>`;
   if(ui.sheetKind==="ai")redrawSheet(html);else openSheet(html,"ai");
   const ta=$("#aiT");if(ta)ta.addEventListener("input",()=>{ui.aiText=ta.value})}
 function aiResult(t,R){const vs=refsOf(R.refs);
@@ -1986,7 +1987,7 @@ function chapterAISheet(){const {b,c}=readerPos(),k=b+"_"+c;ui.aiCh=k;ui.aiHist=
   <div class="pick" style="margin:10px 0">${sug.map(q=>`<button data-a="aiChQ" data-v="${esc(q)}">${esc(q)}</button>`).join("")}</div>
   <div class="addline"><textarea class="in" id="aiQ" rows="2" maxlength="600" placeholder="Свой вопрос о главе…"></textarea><button class="btn" data-a="aiChAsk" aria-label="Спросить" ${ui.aiBusy?"disabled":""}>${ic("right")}</button></div>
   <div class="small" style="text-align:center;margin-top:8px">${aiLeftTxt()}</div>
-  <p class="small" style="margin:12px 4px 0">🔒 Вопрос и текст главы отправляются ИИ-сервису (DeepSeek) только для ответа. ИИ может ошибаться — сверяй со Словом.</p>`;
+  <p class="small" style="margin:12px 4px 0">🔒 Вопрос и текст главы отправляются ИИ-сервису (Google Gemini, запасной — DeepSeek) только для ответа. ИИ может ошибаться — сверяй со Словом.</p>`;
   if(ui.sheetKind==="aich")redrawSheet(html);else openSheet(html,"aich");const sh=$("#sheet");if(sh&&H.length)sh.scrollTop=sh.scrollHeight}
 async function chapterAsk(q){q=String(q||"").trim();if(!q||ui.aiBusy)return;const {b,c}=readerPos(),k=b+"_"+c,cm=cmtFor(b,c);
   const text=(BIB&&BIB[b]&&BIB[b][c-1]||[]).map((t,i)=>(i+1)+". "+t).join("\n");
@@ -1999,7 +2000,7 @@ function addWallToMine(w){if(!w||inMine(w.id))return;const id=rid("p_"),t=w.text
   S.prayers[id]={kind:"prayer",id,title:t.length>60?t.slice(0,57)+"…":t,who:w.name||"",note:w.text,cat:"Другое",icon:"⛪",color:COLORS[Object.keys(S.prayers).length%COLORS.length],createdAt:Date.now(),status:"active",log:{},answer:"",answeredAt:null,wallId:w.id};persist(id)}
 function syncAnswered(list){let n=0;(list||[]).forEach(w=>{const at=w.answered||(w.kind==="w"&&w.at);if(!at)return;const wid=w.id;
   Object.values(S.prayers).forEach(p=>{if(p.wallId===wid&&p.status!=="answered"){p.status="answered";p.ansType="yes";p.answer=w.answer||w.text||"";p.answeredAt=at;persist(p.id);n++;if(n===1)toast("🙌 Бог ответил на молитву «"+p.title+"», за которую ты молился!")}})})}
-async function togLoad(){if(!TG)return;const sc=CH.scope;CH.togLoading=true;
+async function togLoad(){if(!tgOn())return;const sc=CH.scope;CH.togLoading=true;
   try{const r=await call("together/get",{scope:sc});if(sc===CH.scope){CH.tog=r;syncAnswered(r.feed.filter(x=>x.kind==="w"))}}catch(e){if(sc===CH.scope)CH.tog={scope:sc,err:e.message,feed:[]}}
   CH.togLoading=false;if(ui.tab==="church"&&CH.seg==="tog"&&$("#sheet").classList.contains("hidden"))render()}
 const fDM=new Intl.DateTimeFormat("ru-RU",{day:"numeric",month:"long"}),fWD=new Intl.DateTimeFormat("ru-RU",{weekday:"short",day:"numeric",month:"short"});
@@ -2090,7 +2091,7 @@ async function requestsSheet(){const c=curCh();if(!c)return;const top=`<div clas
     :`<div class="empty">Новых заявок нет 🙏</div>`))}
 /* permission for the bot to write — needed when the app is opened by a direct link (no /start in the chat) */
 const waAsked=()=>{try{return !!localStorage.getItem("pj-wa")}catch(e){return true}};
-function askWrite(silent){if(!TG)return;try{localStorage.setItem("pj-wa","1")}catch(e){}
+function askWrite(silent){if(!TG){if(!silent){try{window.open(BOT_URL+"?start=hi","_blank")}catch(e){}toast("В боте нажми «Запустить» — и он сможет писать тебе")}return}try{localStorage.setItem("pj-wa","1")}catch(e){}
   const done=ok=>{if(!ok){if(!silent)toast("Без разрешения бот не сможет писать тебе");return}
     call("chat/hello").then(r=>{if(CH.me)CH.me.chatOk=!!r.chatOk;toast(r.chatOk?"Готово — бот сможет писать тебе 🔔":"Не получилось — открой чат с ботом и нажми «Запустить»");if(ui.sheetKind==="bot")botSheet()}).catch(()=>{})};
   if(TG.requestWriteAccess&&TG.isVersionAtLeast&&TG.isVersionAtLeast("6.9")){try{TG.requestWriteAccess(done)}catch(e){done(false)}}
@@ -2142,7 +2143,7 @@ async function devicesSheet(){const top=`<div class="sh-top"><button class="pill
   try{const r=await call("sessions/list");const box=$("#devList");if(!box)return;
     box.innerHTML=r.items.length?r.items.map(x=>`<div class="set"><div><b>${esc(x.ua||"Браузер")}</b><span>вход ${fDay.format(new Date(x.created))} · был ${dayLabel(dk(new Date(x.seen))).toLowerCase()}</span></div><button class="pill" data-a="devEnd" data-v="${esc(x.id)}">Выйти</button></div>`).join("")+`<button class="btn danger wide mt" data-a="devEndAll">Выйти на всех устройствах</button>`:`<p class="small">Пока ни одного — дневник открыт только в Telegram.</p>`}
   catch(e){const box=$("#devList");if(box)box.innerHTML=`<p class="small">${esc(e.message)}</p>`}}
-async function joinPrompt(code){code=String(code||"").toUpperCase().replace(/[^A-Z0-9]/g,"");if(!code||!TG)return;
+async function joinPrompt(code){code=String(code||"").toUpperCase().replace(/[^A-Z0-9]/g,"");if(!code||!tgOn())return;
   const top=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Приглашение</h2><span style="width:40px"></span></div>`;
   openSheet(top+`<div class="empty">Ищу церковь…</div>`,"join");
   let c;try{c=await call("church/info",{code})}catch(e){redrawSheet(top+`<div class="empty"><b>Не нашлось</b>${esc(e.message)}</div>`);return}
@@ -2175,7 +2176,7 @@ async function membersSheet(){const c=curCh();if(!c)return;const top=`<div class
   redrawSheet(top+(chAdm(c)&&c.pending?`<button class="btn sm green wide" style="margin-bottom:10px" data-a="chReqs">📥 Заявки на вступление: ${c.pending}</button>`:"")+`<p class="small" style="margin:0 4px 8px">${r.items.length} ${plural(r.items.length,"участник","участника","участников")}${r.role==="owner"?" · нажми на человека, чтобы назначить помощника или исключить":""}</p>`+
     r.items.map(u=>`<${can(u)?`button data-a="chMember" data-id="${u.id}"`:"div"} class="thx" style="width:100%;text-align:left"><span>${u.role==="owner"?"👑":u.role==="admin"?"⭐":"👤"} ${esc(u.name)}${u.me?" (ты)":""}${u.username?` <span class="small">@${esc(u.username)}</span>`:""}</span><span class="small">${u.role==="owner"?"хозяин":u.role==="admin"?"помощник":""}</span></${can(u)?"button":"div"}>`).join(""))}
 
-async function planAuto(){if(!TG||!CH.loaded)return;const read=new Set();bToday().forEach(e=>(e.chapters||[]).forEach(c=>read.add(e.book+":"+c)));
+async function planAuto(){if(!tgOn()||!CH.loaded)return;const read=new Set();bToday().forEach(e=>(e.chapters||[]).forEach(c=>read.add(e.book+":"+c)));
   for(const p of CH.plans){const td=planToday(p);if(!p.joined||!td||!td.length||p.myDone.includes(p.today))continue;
     if(td.every(([b,c])=>read.has(b+":"+c))){try{await call("plan/done",{id:p.id,day:p.today});p.myDone.push(p.today);toast("📖 «"+p.title+"»: день "+(p.today+1)+" прочитан!");burst()}catch(e){}}}}
 function wallNewSheet(){ui.wScope=CH.scope;const opts=[["global","🌍 Все христиане"]].concat(myCh().map(c=>[c.id,c.emoji+" "+c.name]));
@@ -2431,7 +2432,7 @@ function personSheet(id){const p=S.people[id];if(!p){closeSheet();return}ui.pers
   <div class="hero" style="--c:${p.color||"#9486FF"}"><span class="ic pav big">${p.ava||esc(p.name.charAt(0))}</span><h3>${esc(p.name)}</h3><p>${[p.rel,p.bd?"🎂 "+(+p.bd.split("-")[1])+" "+MON[+p.bd.split("-")[0]-1]+(d!==null?" · через "+d+" "+plural(d,"день","дня","дней"):""):""].filter(Boolean).join(" · ")}</p></div>
   ${p.note?`<p class="note">${esc(p.note)}</p>`:""}
   ${(p.tg||p.tgId)&&tgOn()?`<p class="small" style="text-align:center;margin:-6px 0 12px">📨 ${p.tg?"@"+esc(p.tg):esc(p.tgName||"")} увидит, что ${p.tgShow===false?"кто-то молится":"ты молишься"} за него</p>`:""}
-  ${tgOn()&&CH.me&&CH.me.inline&&TG.switchInlineQuery?`<button class="btn ghost wide" data-a="inlineSend" style="margin-bottom:10px">💌 Отправить «Я молюсь за тебя»</button>`:""}
+  ${tgOn()&&TG&&CH.me&&CH.me.inline&&TG.switchInlineQuery?`<button class="btn ghost wide" data-a="inlineSend" style="margin-bottom:10px">💌 Отправить «Я молюсь за тебя»</button>`:""}
   <button class="btn wide" data-a="prayPerson" data-id="${id}" style="margin-bottom:14px">${ic("heart")}${prayedToday?"Помолился сегодня ✓ · ещё раз":"Помолился за "+esc(p.name)}</button>
   <div class="sec-h"><h2 style="font-size:17px">Нужды</h2><button class="textbtn" data-a="newPrayerFor" data-id="${id}">+ Добавить</button></div>
   ${needs.length?`<div class="list" style="margin-bottom:16px">${needs.map(x=>prayerRow(x)).join("")}</div>`:`<p class="small" style="margin:0 4px 16px">Пока нет нужд. Добавь, о чём молишься для этого человека.</p>`}
@@ -2766,7 +2767,7 @@ function entryView(id){
   ${e.thanks?`<div class="answer-box gold"><div class="k">${ic("spark")}Благодарю</div><p>${esc(e.thanks)}</p></div>`:""}
   ${e.text?`<div class="full-text" style="padding:0 4px">${esc(e.text)}</div>`:""}
   ${names.length?`<label class="l">Молился за</label><div class="chips">${names.map(p=>`<span class="chip">${p.icon} ${esc(p.title)}</span>`).join("")}</div>`:""}
-  ${["exp","answer"].includes(e.type)&&e.text&&TG&&!API.startsWith("__")?`<button class="btn wide mt" data-a="shareChurch" data-id="${id}">🙌 Поделиться свидетельством</button>`:""}
+  ${["exp","answer"].includes(e.type)&&e.text&&tgOn()?`<button class="btn wide mt" data-a="shareChurch" data-id="${id}">🙌 Поделиться свидетельством</button>`:""}
   ${["exp","answer"].includes(e.type)&&e.text?`<button class="btn ghost wide mt" data-a="storyEntry" data-id="${id}">🖼 Сделать сторис</button>`:""}
   ${["exp","answer","thanks","word","sermon"].includes(e.type)&&e.text?`<button class="btn ghost wide mt" data-a="tgShare" data-v="${esc((e.type==="exp"?"✨ Мой опыт":e.type==="answer"?"🙌 Бог ответил на молитву":e.type==="thanks"?"🙏 Благодарю Бога":"📖")+(e.title?": "+e.title:"")+"\n\n"+e.text)}">${ic("share")}Поделиться в Telegram</button>`:""}
   <button class="btn danger wide mt" data-a="delEntry" data-id="${id}">Удалить запись</button>`,"view");
@@ -3417,7 +3418,7 @@ render();
 connect();
 loadBible();
 if(LOGIN0&&TG)setTimeout(()=>approveSheet(LOGIN0),600);
-if(JOIN0&&TG){try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}setTimeout(()=>joinPrompt(JOIN0),400)}
+if(JOIN0&&tgOn()){try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}setTimeout(()=>joinPrompt(JOIN0),400)}
 {let go=null;try{go=new URLSearchParams(location.search).get("go")||(TG&&TG.initDataUnsafe&&TG.initDataUnsafe.start_param)||null}catch(e){}
   if(go==="pray"&&!JOIN0){try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}setTimeout(()=>{if(!PM&&!TR&&$("#sheet").classList.contains("hidden"))act.startPrayer()},700)}}
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});

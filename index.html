@@ -360,6 +360,14 @@ input[type=time].in{width:auto;padding:9px 12px;font-weight:700}
 .sit{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:14px;border-radius:20px;text-align:left;min-height:96px;background:radial-gradient(120% 100% at 0% 0%,color-mix(in srgb,var(--c) 24%,transparent),transparent 70%),var(--card);border:1px solid var(--stroke);color:var(--text)}
 .sit span{font-size:28px;line-height:1}
 .sit b{font-size:15.5px;font-weight:750;line-height:1.2}
+.lg-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--card);border:1px solid var(--stroke)}
+.lg-card b{display:block;font-size:16.5px;font-weight:800}
+.lg-card span{display:block;font-size:14px;color:var(--muted);margin:4px 0 12px;line-height:1.35}
+.lg-card .btn{height:46px}
+.lg-steps p{margin:6px 4px}
+.lg-num{font-size:64px;font-weight:800;letter-spacing:.04em;text-align:center;margin:6px 0 10px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lg-pick{display:flex;gap:10px;justify-content:center}
+.lg-pick button{width:84px;height:72px;border-radius:20px;font-size:30px;font-weight:800;background:var(--card);border:1px solid var(--stroke);color:var(--text)}
 .rem-offer{margin:4px 0 8px;padding:16px;border-radius:22px;background:var(--card);border:1px solid var(--stroke);text-align:left;animation:rise .5s .6s both}
 .rem-offer b{display:block;font-size:16.5px;font-weight:800}
 .rem-offer span{display:block;font-size:13.5px;color:var(--muted);margin:4px 0 12px;line-height:1.35}
@@ -1029,7 +1037,7 @@ try{const r=localStorage.getItem(LSP);if(r)pending=new Set(JSON.parse(r))}catch(
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LSP,JSON.stringify([...pending]))}catch(e){}}
 function hasData(){return Object.keys(S.people||{}).length||Object.keys(S.marks||{}).length||Object.keys(S.prayers).length||Object.keys(S.entries).length||Object.keys(S.meta.days||{}).length}
 
-let col=null; const chains={},inflight={},busy={},bad={};const APPV="13";
+let col=null; const chains={},inflight={},busy={},bad={};const APPV="14";
 function current(id){if(id==="meta")return S.meta;return S.prayers[id]||S.entries[id]||S.marks[id]||S.people[id]||null}
 function write(id){
   pending.add(id);saveLocal();
@@ -1046,10 +1054,10 @@ function write(id){
     if(e&&(e.code==="invalid_argument"||e.code==="transform_error"))bad[id]=true;
     if(e&&["revoked","not_granted","capability_disabled","capability_removed"].includes(e.code)){col=null;ui.localOnly=true;setSync("local")}else setSync("err")}).then(()=>{busy[id]--}).then(()=>{if(!pending.size)setSync("ok")});
 }
-function persist(id){saveLocal();write(id)}
+function persist(id){const o=current(id);if(o){o._v=Date.now();if(TOMB[id]){delete TOMB[id];saveTomb()}}else{TOMB[id]=Date.now();saveTomb()}saveLocal();write(id);vMark(id)}
 function setSync(s){ui.sync=s;renderSync()}
 function renderSync(){document.querySelectorAll("[data-sync]").forEach(el=>{el.className="sync "+ui.sync;el.innerHTML=syncInner()})}
-function syncInner(){return "<i></i>"+({local:"На устройстве",syncing:"Сохраняю…",ok:TG?"В Telegram":"Сохранено",err:"Не сохранилось"}[ui.sync])}
+function syncInner(){return "<i></i>"+({local:"На устройстве",syncing:"Сохраняю…",ok:TG?"В Telegram":VT.key?"Синхронизировано":"Сохранено",err:"Не сохранилось"}[ui.sync])}
 
 function applyDocs(docs){
   const P={},E={},K={},H={};let M={id:"meta",kind:"meta",days:{}};
@@ -1070,6 +1078,7 @@ const CS=(()=>{if(!TG||!TG.CloudStorage||!TG.isVersionAtLeast||!TG.isVersionAtLe
   const N=4000,chunk=id=>/^(.+)--(\d+)$/.exec(id);
   return{
     async keys(){return await cb("getKeys")||[]},
+    async get(k){return await cb("getItem",k)},async put(k,v){await cb("setItem",k,v)},
     async getAll(){const ks=await this.keys(),vals={};for(let i=0;i<ks.length;i+=50)Object.assign(vals,await cb("getItems",ks.slice(i,i+50))||{});
       const docs=[];Object.keys(vals).forEach(k=>{if(chunk(k))return;let v=vals[k]||"";const m=/^~(\d+)\|/.exec(v);if(m){v=v.slice(m[0].length);for(let j=1;j<+m[1];j++)v+=vals[k+"--"+j]||""}
         try{const o=JSON.parse(v);docs.push({id:k,data:()=>o})}catch(e){}});return docs},
@@ -1079,7 +1088,7 @@ const CS=(()=>{if(!TG||!TG.CloudStorage||!TG.isVersionAtLeast||!TG.isVersionAtLe
       async delete(){const ks=[id].concat(await this._old());await cb("removeItems",ks)},
       async _old(){return(await CS.keys()).filter(k=>{const m=chunk(k);return m&&m[1]===id})}}}}})();
 async function connect(){
-  if(!CS){setSync("local");maybeWelcome();return}
+  if(!CS){setSync("local");if(!TG&&SES)VT.ready=vInitPWA();maybeWelcome();return}
   try{
     setSync("syncing");
     const docs=await CS.getAll();
@@ -1089,11 +1098,79 @@ async function connect(){
     }else if(docs.length){applyDocs(docs)}
     [...pending].forEach(write);
     if(!pending.size)setSync("ok");
+    VT.ready=vInitTG();
     CS.keys().then(ks=>{const tag=today()+":"+ks.length;let last="";try{last=localStorage.getItem("pj-ck")||""}catch(e){}
       if(last!==tag&&tgOn())call("usage/keys",{n:ks.length}).then(()=>{try{localStorage.setItem("pj-ck",tag)}catch(e){}}).catch(()=>{})}).catch(()=>{});
   }catch(e){setSync(col?"err":"local")}
   maybeWelcome();
 }
+/* ---------- зашифрованное хранилище: общее для Telegram и браузера ----------
+   Ключ данных живёт в CloudStorage пользователя («vault_key») и никогда не уходит на сервер в открытом виде.
+   На сервере — только AES-GCM шифр каждой записи (AAD = id) и версия _v; побеждает более свежая правка. */
+const VT={key:null,raw:null,mode:null,busy:false,pulling:false,dirty:new Set(),t:null,ready:null};
+let TOMB={};try{TOMB=JSON.parse(localStorage.getItem("pj-tomb")||"{}")}catch(e){}
+function saveTomb(){try{localStorage.setItem("pj-tomb",JSON.stringify(TOMB))}catch(e){}}
+let SES=null;try{SES=localStorage.getItem("pj-ses")||null}catch(e){}
+const vSt=()=>{try{return JSON.parse(localStorage.getItem("pj-vault")||"{}")}catch(e){return {}}};
+const vSave=st=>{try{localStorage.setItem("pj-vault",JSON.stringify(st))}catch(e){}};
+const vOK=()=>!!(window.crypto&&crypto.subtle&&window.TextEncoder&&window.indexedDB);
+const TE=new TextEncoder(),TD=new TextDecoder();
+const b64u=b=>{let x="";new Uint8Array(b).forEach(c=>x+=String.fromCharCode(c));return btoa(x).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")};
+const ub64=t=>{t=t.replace(/-/g,"+").replace(/_/g,"/");while(t.length%4)t+="=";const b=atob(t),o=new Uint8Array(b.length);for(let i=0;i<b.length;i++)o[i]=b.charCodeAt(i);return o};
+async function seal(key,aad,bytes){const iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv,additionalData:TE.encode(aad)},key,bytes)),o=new Uint8Array(12+ct.length);o.set(iv);o.set(ct,12);return b64u(o)}
+async function unseal(key,aad,t){const b=ub64(t);return new Uint8Array(await crypto.subtle.decrypt({name:"AES-GCM",iv:b.slice(0,12),additionalData:TE.encode(aad)},key,b.slice(12)))}
+const aesKey=raw=>crypto.subtle.importKey("raw",raw,"AES-GCM",false,["encrypt","decrypt"]);
+const ecdhPair=()=>crypto.subtle.generateKey({name:"ECDH",namedCurve:"P-256"},false,["deriveKey"]);
+async function ecdhKey(priv,pubRaw){const pub=await crypto.subtle.importKey("raw",pubRaw,{name:"ECDH",namedCurve:"P-256"},false,[]);return crypto.subtle.deriveKey({name:"ECDH",public:pub},priv,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
+async function matchNum(pub){const h=new Uint8Array(await crypto.subtle.digest("SHA-256",TE.encode(pub)));return 10+((h[0]<<8|h[1])%90)}
+const allIds=()=>Object.keys(S.prayers).concat(Object.keys(S.entries),Object.keys(S.marks),Object.keys(S.people),["meta"],Object.keys(TOMB));
+function vMark(id){if(!VT.key)return;VT.dirty.add(id);clearTimeout(VT.t);VT.t=setTimeout(vFlush,1200)}
+function vScanAll(){const st=vSt(),pu=st.pushed||{};allIds().forEach(id=>{const o=current(id),v=o?(o._v||1):(TOMB[id]||0);if(v&&(pu[id]||0)<v)VT.dirty.add(id)})}
+async function vFlush(){if(!VT.key||VT.busy)return;VT.busy=true;VT.t=null;const ids=[...VT.dirty];VT.dirty.clear();const st=vSt();st.pushed=st.pushed||{};
+  try{for(let i=0;i<ids.length;i+=40){const items=[];
+      for(const id of ids.slice(i,i+40)){const o=current(id),v=o?(o._v||1):(TOMB[id]||0);if(!v||(st.pushed[id]||0)>=v)continue;items.push({id,v,data:o?await seal(VT.key,id,TE.encode(JSON.stringify(o))):null})}
+      if(items.length){await call("vault/push",{items});items.forEach(x=>{st.pushed[x.id]=x.v});vSave(st)}}
+    if(VT.mode==="pwa")setSync("ok")}
+  catch(e){ids.forEach(id=>VT.dirty.add(id));if(VT.mode==="pwa")setSync("err");if(e&&e.status===401)vSignedOut();else{clearTimeout(VT.t);VT.t=setTimeout(vFlush,30000)}}
+  finally{VT.busy=false;if(VT.dirty.size&&!VT.t)VT.t=setTimeout(vFlush,1500)}}
+function vApply(id,o,v){o._v=v;o.id=id;const cols=[S.prayers,S.entries,S.marks,S.people];
+  if(id==="meta"){const days=Object.assign({},o.days||{});let extra=false;Object.entries(S.meta.days||{}).forEach(([k,c])=>{if((days[k]||0)<c){days[k]=c;extra=true}});
+    S.meta=Object.assign({id:"meta",kind:"meta"},o,{days});if(extra){S.meta._v=Date.now();vMark("meta")}}
+  else{cols.forEach(c=>{delete c[id]});const c=o.kind==="prayer"?S.prayers:o.kind==="mark"?S.marks:o.kind==="person"?S.people:o.kind==="entry"?S.entries:null;if(!c)return;c[id]=o}
+  if(TOMB[id]){delete TOMB[id];saveTomb()}if(col)write(id)}
+function vApplyDel(id,v){[S.prayers,S.entries,S.marks,S.people].forEach(c=>{delete c[id]});TOMB[id]=v;saveTomb();if(col)write(id)}
+async function vPull(){if(!VT.key||VT.pulling)return 0;VT.pulling=true;let n=0;const st=vSt();st.pushed=st.pushed||{};
+  try{for(let g=0;g<300;g++){const r=await call("vault/pull",{since:st.cur||0});
+      for(const x of r.items){const lo=current(x.id),lv=lo?(lo._v||0):(TOMB[x.id]||0);st.pushed[x.id]=Math.max(st.pushed[x.id]||0,x.v);if(x.v<=lv)continue;
+        if(x.data==null)vApplyDel(x.id,x.v);else{let o;try{o=JSON.parse(TD.decode(await unseal(VT.key,x.id,x.data)))}catch(e){continue}vApply(x.id,o,x.v)}n++}
+      st.cur=r.cursor;vSave(st);if(!r.more)break}}
+  finally{VT.pulling=false}
+  if(n){saveLocal();render()}return n}
+/* в Telegram: ключ из CloudStorage (или новый), проверка, догоняем изменения из браузера, заливаем своё */
+async function vInitTG(){if(!CS||!tgOn()||!vOK())return;try{
+    let raw=await CS.get("vault_key");const meta=await call("vault/meta");let key=null,good=false;
+    if(raw){key=await aesKey(ub64(raw));if(meta.kc){try{good=TD.decode(await unseal(key,"kc",meta.kc))==="pj-ok"}catch(e){}}}
+    else{const r=crypto.getRandomValues(new Uint8Array(32));raw=b64u(r);await CS.put("vault_key",raw);key=await aesKey(r)}
+    let kc=meta.kc;if(!good){kc=await seal(key,"kc",TE.encode("pj-ok"));await call("vault/reset",{kc});vSave({kc})}
+    if(vSt().kc!==kc)vSave({kc});
+    VT.key=key;VT.raw=raw;VT.mode="tg";
+    await vPull();vScanAll();await vFlush();
+  }catch(e){/* копия на сервере — дополнительная; если не вышло, дневник работает как раньше */}}
+/* в браузере: ключ хранится в IndexedDB как неизвлекаемый, вход — через подтверждение в Telegram */
+async function vInitPWA(){if(TG||!SES||!vOK())return;try{
+    const key=await IDB.get("vault-dk");if(!key){vSignedOut();return}
+    VT.key=key;VT.mode="pwa";setSync("syncing");
+    const meta=await call("vault/meta");let good=false;try{good=!!meta.kc&&TD.decode(await unseal(key,"kc",meta.kc))==="pj-ok"}catch(e){}
+    if(!good){vSignedOut();toast("Ключ в Telegram сменился — войди заново");return}
+    if(vSt().kc!==meta.kc)vSave({kc:meta.kc});
+    await vPull();vScanAll();await vFlush();setSync("ok");
+  }catch(e){if(e&&e.status===401)vSignedOut();else setSync("err")}}
+function vSignedOut(){SES=null;VT.key=null;VT.mode=null;try{localStorage.removeItem("pj-ses");localStorage.removeItem("pj-vault")}catch(e){}IDB.set("vault-dk",null).catch(()=>{});setSync("local");render()}
+function vWipeLocal(){S={prayers:{},entries:{},marks:{},people:{},meta:{id:"meta",kind:"meta",days:{}}};TOMB={};saveTomb();pending.clear();saveLocal()}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&VT.key&&!VT.pulling)vPull().catch(()=>{})});
+const devName=()=>{const u=navigator.userAgent;const d=/iPhone/.test(u)?"iPhone":/iPad/.test(u)?"iPad":/Android/.test(u)?"Android":/Mac/.test(u)?"Mac":/Windows/.test(u)?"Windows":"Компьютер";
+  const b=/YaBrowser/.test(u)?"Яндекс Браузер":/Edg\//.test(u)?"Edge":/Firefox/.test(u)?"Firefox":/Chrome|CriOS/.test(u)?"Chrome":/Safari/.test(u)?"Safari":"браузер";
+  const pwa=window.matchMedia&&matchMedia("(display-mode: standalone)").matches;return d+" · "+b+(pwa?" (приложение)":"")};
 if(TG){try{TG.ready();TG.expand();TG.setHeaderColor&&TG.setHeaderColor(getComputedStyle(document.body).backgroundColor||"#07080E");TG.setBackgroundColor&&TG.setBackgroundColor(getComputedStyle(document.body).backgroundColor||"#07080E");TG.disableVerticalSwipes&&TG.disableVerticalSwipes()}catch(e){}}
 
 /* ---------- derived ---------- */
@@ -1708,11 +1785,13 @@ const CH_MODES={open:["🔓","Все желающие","Видна в поиск
 const CH_EMOJI=["⛪","🕊️","✝️","🔥","🌿","🙏","📖","🌍","💒","🌅","⭐","💛","🎵","🏔️","🌊","🍞"];
 const JOIN0=(()=>{try{const q=new URLSearchParams(location.search).get("join");if(q)return q;const sp=TG&&TG.initDataUnsafe&&TG.initDataUnsafe.start_param;if(sp&&/^join_/.test(sp))return sp.slice(5)}catch(e){}return null})();
 try{const c=JSON.parse(localStorage.getItem("pj-ch")||"null");if(c&&c.me){CH.me=c.me;CH.wall=(c.scope||"global")===CH.scope?(c.wall||[]):[];CH.plans=c.plans||[];CH.loaded=true}}catch(e){}
-async function call(path,body){if(!TG)throw new Error("Открой дневник через Telegram");
+async function pcall(path,body){let r;try{r=await fetch(API+"/api/"+path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body||{})})}catch(e){throw new Error("Нет связи с сервером — проверь интернет")}
+  const o=await r.json().catch(()=>({error:"Нет связи с сервером"}));if(!r.ok||o.error){const er=new Error(o.error||"Ошибка");er.status=r.status;throw er}return o}
+async function call(path,body){if(!TG&&!SES)throw new Error("Открой дневник через Telegram");
   const ac=new AbortController(),to=setTimeout(()=>ac.abort(),12000);let r;
-  try{r=await fetch(API+"/api/"+path,{method:"POST",signal:ac.signal,headers:{"content-type":"application/json","x-init-data":TG.initData},body:JSON.stringify(Object.assign({tz:new Date().getTimezoneOffset()},body||{}))})}
+  try{r=await fetch(API+"/api/"+path,{method:"POST",signal:ac.signal,headers:Object.assign({"content-type":"application/json"},TG?{"x-init-data":TG.initData}:{"x-session":SES}),body:JSON.stringify(Object.assign({tz:new Date().getTimezoneOffset()},body||{}))})}
   catch(e){throw new Error("Нет связи с сервером — проверь интернет")}finally{clearTimeout(to)}
-  const o=await r.json().catch(()=>({error:"Нет связи с сервером"}));if(!r.ok||o.error)throw new Error(o.error||"Ошибка");return o}
+  const o=await r.json().catch(()=>({error:"Нет связи с сервером"}));if(!r.ok||o.error){const er=new Error(o.error||"Ошибка");er.status=r.status;throw er}return o}
 async function chLoad(quiet){if(!TG||CH.loading)return;CH.loading=true;CH.tried=true;if(!quiet&&!CH.loaded&&ui.tab==="church")render();
   call("forme/get").then(f=>{CH.forme=f;if(ui.tab==="home"&&$("#sheet").classList.contains("hidden"))render()}).catch(()=>{});
   liveLoad();worldLoad();aiStatus();
@@ -1727,7 +1806,7 @@ async function chLoad(quiet){if(!TG||CH.loading)return;CH.loading=true;CH.tried=
 const ago=t=>{const m=Math.round((Date.now()-t)/60000);if(m<1)return "только что";if(m<60)return m+" мин назад";const h=Math.round(m/60);if(h<24)return h+" "+plural(h,"час","часа","часов")+" назад";const d=Math.round(h/24);return d===1?"вчера":d+" "+plural(d,"день","дня","дней")+" назад"};
 const refsTxt=list=>{const out=[];(list||[]).forEach(([b,c])=>{const l=out[out.length-1];if(l&&l.b===b&&l.to===c-1)l.to=c;else out.push({b,from:c,to:c})});return out.map(x=>BOOKS[x.b][1]+" "+(x.from===x.to?x.from:x.from+"–"+x.to)).join(", ")};
 function planToday(p){return p.today>=0&&p.today<p.days.length?p.days[p.today]:null}
-function churchHome(){if(!TG||API.startsWith("__"))return `<button class="jbtn" style="width:100%;margin:0 0 12px" data-a="tab" data-v="stats"><span class="ti c-blue">${ic("chart")}</span>Мои итоги</button>`;if(!CH.tried&&!CH.loading)setTimeout(()=>chLoad(true),300);
+function churchHome(){if(!TG||API.startsWith("__"))return (!TG&&!SES&&!S.meta.noLogin?`<section class="lg-card"><b>Пользуешься дневником в Telegram?</b><span>Войди — и все нужды, записи и чтение Библии будут здесь, на этом устройстве.</span><div class="row2"><button class="btn ghost" data-a="loginNo">Не сейчас</button><button class="btn" data-a="loginOpen">Войти</button></div></section>`:"")+`<button class="jbtn" style="width:100%;margin:0 0 12px" data-a="tab" data-v="stats"><span class="ti c-blue">${ic("chart")}</span>Мои итоги</button>`;if(!CH.tried&&!CH.loading)setTimeout(()=>chLoad(true),300);
   const open=CH.wall.filter(w=>!w.answered).length,pl=CH.plans.find(p=>p.joined&&planToday(p));
   return `<button class="chc" data-a="tab" data-v="church"><span class="be">⛪</span><span><b>Церковь</b><small>${CH.loaded?`${open} ${plural(open,"просьба","просьбы","просьб")} о молитве${pl?` · ${esc(pl.title)}: ${refsTxt(planToday(pl))}${pl.myDone.includes(pl.today)?" ✓":""}`:""}`:"Молитвенная стена и чтение вместе"}</small></span>${ic("right")}</button>
   <button class="jbtn" style="width:100%;margin:0 0 12px" data-a="tab" data-v="stats"><span class="ti c-blue">${ic("chart")}</span>Мои итоги</button>`}
@@ -2016,6 +2095,53 @@ function askWrite(silent){if(!TG)return;try{localStorage.setItem("pj-wa","1")}ca
     call("chat/hello").then(r=>{if(CH.me)CH.me.chatOk=!!r.chatOk;toast(r.chatOk?"Готово — бот сможет писать тебе 🔔":"Не получилось — открой чат с ботом и нажми «Запустить»");if(ui.sheetKind==="bot")botSheet()}).catch(()=>{})};
   if(TG.requestWriteAccess&&TG.isVersionAtLeast&&TG.isVersionAtLeast("6.9")){try{TG.requestWriteAccess(done)}catch(e){done(false)}}
   else{try{TG.openTelegramLink(BOT_URL)}catch(e){window.open(BOT_URL,"_blank")}}}
+/* вход в браузере: одноразовая пара ключей ECDH, подтверждение в Telegram, ключ данных приходит упакованным */
+let LG=null;
+async function loginSheet(){if(!vOK()){toast("Этот браузер не умеет шифрование — обнови его");return}
+  const top=`<div class="sh-top"><button class="pill icon" data-a="loginCancel" aria-label="Закрыть">${ic("x")}</button><h2>Вход через Telegram</h2><span style="width:40px"></span></div>`;
+  openSheet(top+`<div class="empty">Готовлю вход…</div>`,"login");
+  try{const kp=await ecdhPair(),pub=b64u(await crypto.subtle.exportKey("raw",kp.publicKey)),sec=b64u(crypto.getRandomValues(new Uint8Array(24))),sh=b64u(await crypto.subtle.digest("SHA-256",TE.encode(sec)));
+    const r=await pcall("login/start",{pub,sh,ua:devName()});LG={kp,sec,code:r.code,num:await matchNum(pub),t0:Date.now()};
+    redrawSheet(top+`<div class="lg-steps"><p><b>1.</b> Нажми «Открыть Telegram» — там откроется дневник.</p><p><b>2.</b> Выбери там это число:</p><div class="lg-num">${LG.num}</div><p><b>3.</b> Вернись сюда — вход завершится сам.</p></div>
+      <a class="btn wide" href="${BOT_URL}?startapp=login_${LG.code}" target="_blank" rel="noopener">Открыть Telegram</a>
+      <p class="small" id="lgSt" style="text-align:center;margin-top:12px">Жду подтверждения…</p>
+      <p class="small" style="text-align:center;margin-top:6px">🔒 Записи передаются в зашифрованном виде — сервер их не читает.</p>`);
+    lgPoll()}catch(e){redrawSheet(top+`<div class="empty"><b>Не получилось</b>${esc(e.message)}</div>`)}}
+async function lgPoll(){const L=LG;if(!L||L.busy)return;if(Date.now()-L.t0>14*60000){LG=null;const el=$("#lgSt");if(el)el.textContent="Время вышло — начни вход заново";return}
+  L.busy=true;try{const r=await pcall("login/poll",{code:L.code,s:L.sec});
+    if(r.status==="approved"){await lgFinish(L,r);return}
+    if(r.status==="denied"||r.status==="expired"){LG=null;const el=$("#lgSt");if(el)el.textContent=r.status==="denied"?"Вход отклонён в Telegram":"Время вышло — начни вход заново";return}}catch(e){}
+  finally{L.busy=false}
+  if(LG===L)L.tm=setTimeout(lgPoll,2500)}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&LG){clearTimeout(LG.tm);lgPoll()}});
+async function lgFinish(L,r){LG=null;try{
+    const k=await ecdhKey(L.kp.privateKey,ub64(r.mpub)),raw=await unseal(k,"pj-dk",r.wrapped),key=await aesKey(raw);
+    await IDB.set("vault-dk",key);SES=r.token;try{localStorage.setItem("pj-ses",r.token);localStorage.setItem("pj-name",r.name||"")}catch(e){}
+    closeSheet();
+    if(hasData()){const c=await choose("На этом устройстве уже есть записи. Что с ними сделать?",[["merge","Добавить к записям из Telegram"],["replace","Заменить записями из Telegram","ghost"]]);if(c==="replace")vWipeLocal()}
+    vSave({});toast("Вход выполнен — загружаю записи…");VT.ready=vInitPWA();await VT.ready;render();if(VT.key)toast("Готово! Все записи из Telegram здесь 🙏")
+  }catch(e){toast("Не получилось завершить вход — попробуй ещё раз")}}
+/* в Telegram: подтвердить вход на другом устройстве */
+const LOGIN0=(()=>{try{const sp=TG&&TG.initDataUnsafe&&TG.initDataUnsafe.start_param;if(sp&&/^login_[A-Z2-9]{6,12}$/.test(sp))return sp.slice(6)}catch(e){}return null})();
+async function approveSheet(code){const top=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Вход на другом устройстве</h2><span style="width:40px"></span></div>`;
+  openSheet(top+`<div class="empty">Проверяю…</div>`,"approve");
+  let info;try{info=await call("login/info",{code})}catch(e){redrawSheet(top+`<div class="empty"><b>Не получилось</b>${esc(e.message)}</div>`);return}
+  const num=await matchNum(info.pub),opts=[num];while(opts.length<3){const x=10+Math.floor(Math.random()*90);if(!opts.includes(x))opts.push(x)}opts.sort(()=>Math.random()-.5);
+  ui.lg={code,num};
+  redrawSheet(top+`<div style="text-align:center"><div style="font-size:52px;line-height:1.1">${/iPhone|iPad|Android/.test(info.ua||"")?"📱":"💻"}</div><h3 style="font-size:22px;font-weight:800;margin:10px 0 4px">${esc(info.ua||"Браузер")}</h3><p class="small">Вход начат в ${fTime.format(new Date(info.created))}</p></div>
+    <p style="margin:14px 4px">Подтверждай, только если вход начат тобой. Какое число видно на экране того устройства?</p>
+    <div class="lg-pick">${opts.map(n=>`<button data-a="lgPick" data-v="${n}">${n}</button>`).join("")}</div>
+    <button class="btn ghost wide mt" data-a="lgDeny">Это не я — отклонить</button>
+    <p class="small" style="margin-top:12px">🔒 Устройство получит твои записи в зашифрованном виде и ключ, который подходит только ему.</p>`)}
+async function devicesSheet(){const top=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Дневник в браузере</h2><span style="width:40px"></span></div>`;
+  const link=(location.host+location.pathname).replace(/index\.html$/,"").replace(/\/$/,"");
+  openSheet(top+`<p>Открой <b>${esc(link)}</b> на компьютере или телефоне и нажми «Войти через Telegram». Все записи будут там, правки синхронизируются.</p>
+    <div class="row2" style="margin-bottom:10px"><button class="btn" data-a="openWeb">Открыть в браузере</button><button class="btn ghost" data-a="copyWeb">Скопировать ссылку</button></div>
+    <p class="small">На iPhone в Safari: «Поделиться» → «На экран „Домой“» — дневник станет обычным приложением.</p>
+    <label class="l">Устройства</label><div id="devList"><p class="small">Загружаю…</p></div>`,"devices");
+  try{const r=await call("sessions/list");const box=$("#devList");if(!box)return;
+    box.innerHTML=r.items.length?r.items.map(x=>`<div class="set"><div><b>${esc(x.ua||"Браузер")}</b><span>вход ${fDay.format(new Date(x.created))} · был ${dayLabel(dk(new Date(x.seen))).toLowerCase()}</span></div><button class="pill" data-a="devEnd" data-v="${esc(x.id)}">Выйти</button></div>`).join("")+`<button class="btn danger wide mt" data-a="devEndAll">Выйти на всех устройствах</button>`:`<p class="small">Пока ни одного — дневник открыт только в Telegram.</p>`}
+  catch(e){const box=$("#devList");if(box)box.innerHTML=`<p class="small">${esc(e.message)}</p>`}}
 async function joinPrompt(code){code=String(code||"").toUpperCase().replace(/[^A-Z0-9]/g,"");if(!code||!TG)return;
   const top=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Приглашение</h2><span style="width:40px"></span></div>`;
   openSheet(top+`<div class="empty">Ищу церковь…</div>`,"join");
@@ -2098,7 +2224,7 @@ function planNewSheet(){ui.pn={b:42,per:1};const o=BOOKS.map((x,i)=>`<option val
   <label class="l" for="pnC">Ссылка на чат для обсуждения (необязательно)</label><input class="in" id="pnC" placeholder="https://t.me/…">
   <div class="set mt"><div><b>${CH.scope==="global"?"Сообщить всем":"Сообщить участникам"}</b><span>${CH.scope==="global"?"Бот напишет каждому пользователю о новом плане":"Бот напишет участникам церкви о новом плане"}</span></div><button class="pill" id="pnA" data-a="pnA">Нет</button></div>`,"plan");
   ["pnK","pnB","pnP"].forEach(id=>$("#"+id).addEventListener("change",planTplInfo));planTplInfo()}
-function ping(kind){if(!TG||API.startsWith("__"))return;call("event",{kind}).catch(()=>{})}
+function ping(kind){if((!TG&&!SES)||API.startsWith("__"))return;call("event",{kind}).catch(()=>{})}
 const TOUR=[
   {t:"Мир тебе! 🕊️",x:"Это молитвенный дневник: твои молитвы, Библия с комментариями и молитва вместе с другими христианами.<br><br>Покажу за минуту, как тут всё устроено."},
   {tab:"home",sel:".cta",t:"Начать молитву",x:"Спокойное время с Богом: стих, благодарность, твои нужды и тихая музыка. Каждая молитва зажигает звезду на твоём небе."},
@@ -2684,6 +2810,13 @@ function hsRow(){if(!TG||!TG.addToHomeScreen||!TG.isVersionAtLeast||!TG.isVersio
 function hsCheck(){if(ui.hsChecked||!TG||!TG.checkHomeScreenStatus||!TG.isVersionAtLeast||!TG.isVersionAtLeast("8.0"))return;ui.hsChecked=true;
   try{TG.onEvent&&TG.onEvent("homeScreenAdded",()=>{ui.hs="added";toast("Иконка добавлена 📲");if(ui.sheetKind==="settings")settingsSheet(true)});
     TG.checkHomeScreenStatus(st=>{ui.hs=st;if(ui.sheetKind==="settings")settingsSheet(true)})}catch(e){}}
+function storeRows(){const badge=`<span data-sync class="sync ${ui.sync}">${syncInner()}</span>`;
+  if(TG)return `<div class="set"><div><b>${ui.sync==="local"?"На этом устройстве":"В твоём Telegram"}</b><span>${ui.sync==="local"?"Открой дневник через бота в Telegram — записи будут сохраняться в твоём аккаунте и не потеряются при смене телефона":"Записи видны только тебе. Копия на сервере зашифрована — прочитать её можешь только ты"}</span></div>${badge}</div>
+    <button class="set" style="width:100%;text-align:left" data-a="devices"><div><b>💻 Дневник в браузере</b><span>Открой дневник на компьютере или как приложение на телефоне — со всеми записями</span></div>${ic("right")}</button>`;
+  if(SES)return `<div class="set"><div><b>Вход через Telegram</b><span>${esc(localStorage.getItem("pj-name")||"Ты")} — записи синхронизируются с Telegram и зашифрованы</span></div>${badge}</div>
+    <button class="btn ghost wide" style="margin-bottom:10px" data-a="logout">Выйти на этом устройстве</button>`;
+  return `<div class="set"><div><b>На этом устройстве</b><span>Пользуешься дневником в Telegram? Войди — и все записи будут здесь</span></div>${badge}</div>
+    <button class="btn wide" style="margin-bottom:10px" data-a="loginOpen">Войти через Telegram</button>`}
 function settingsSheet(redraw){hsCheck();
   let th="auto";try{th=localStorage.getItem("pj-theme")||"auto"}catch(e){}
   const html=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Настройки</h2><span style="width:40px"></span></div>
@@ -2698,8 +2831,8 @@ function settingsSheet(redraw){hsCheck();
   <div class="set"><div><b>Оформление</b></div><div class="pick">${[["auto","Авто"],["dark","Тёмное"],["light","Светлое"]].map(([k,l])=>`<button class="${th===k?"on":""}" data-a="theme" data-v="${k}">${l}</button>`).join("")}</div></div>
   <button class="set" style="width:100%;text-align:left" data-a="welcomeOpen"><div><b>Как пользоваться дневником</b><span>Короткое знакомство с разделами</span></div>${ic("right")}</button>
   <label class="l">Сохранность</label>
-  <div class="set"><div><b>${ui.sync==="local"?"На этом устройстве":"В твоём Telegram"}</b><span>${ui.sync==="local"?"Открой дневник через бота в Telegram — записи будут сохраняться в твоём аккаунте и не потеряются при смене телефона":"Записи видны только тебе и доступны на всех твоих устройствах"}</span></div><span data-sync class="sync ${ui.sync}">${syncInner()}</span></div>
-  <p class="small" style="margin:2px 6px 12px">Версия ${APPV} · ожидают сохранения: ${pending.size}${ui.lastErr?" · ошибка: "+esc(ui.lastErr):""}${pending.size&&col?` · <button class="textbtn" data-a="syncNow" style="padding:0">Сохранить сейчас</button>`:""}</p>
+  ${storeRows()}
+  <p class="small" style="margin:2px 6px 12px">Версия ${APPV}${col?" · ожидают сохранения: "+pending.size:""}${ui.lastErr?" · ошибка: "+esc(ui.lastErr):""}${pending.size&&col?` · <button class="textbtn" data-a="syncNow" style="padding:0">Сохранить сейчас</button>`:""}</p>
   <div class="row2"><button class="btn ghost ${dl?"":"hidden"}" data-a="export">${ic("down")}Скачать копию</button><button class="btn ghost" data-a="import">${ic("up")}Загрузить</button></div>`;
   if(redraw||ui.sheetKind==="settings")redrawSheet(html);else openSheet(html,"settings");
   ui.sheetKind="settings";
@@ -3054,6 +3187,24 @@ const act={
   botSheet:()=>botSheet(),
   botSave:()=>{const t=$("#botT").value||"08:00";closeSheet();chDo(()=>call("settings",{remind:t,verse:true}),"Бот будет писать в "+t+" 🔔");if(CH.me&&!CH.me.chatOk)setTimeout(()=>askWrite(),1200)},
   waAsk:()=>askWrite(),
+  loginOpen:()=>{closeSheet();setTimeout(loginSheet,250)},
+  loginCancel:()=>{if(LG)clearTimeout(LG.tm);LG=null;closeSheet()},
+  loginNo:()=>{S.meta.noLogin=true;persist("meta");render()},
+  logout:async()=>{if(!await ask("Выйти на этом устройстве? Записи будут удалены отсюда, в Telegram они останутся.","Выйти",true))return;try{await call("session/end")}catch(e){}vSignedOut();vWipeLocal();closeSheet();render();toast("Ты вышел — записи остались в Telegram")},
+  lgPick:async d=>{const L=ui.lg;if(!L)return;ui.lg=null;
+    if(+d.v!==L.num){call("login/deny",{code:L.code}).catch(()=>{});closeSheet();toast("Число не совпало — вход отклонён");return}
+    try{await VT.ready;if(!VT.raw)throw new Error("Хранилище ещё не готово — проверь интернет и попробуй снова");
+      const info=await call("login/info",{code:L.code}),mp=await ecdhPair(),mpub=b64u(await crypto.subtle.exportKey("raw",mp.publicKey));
+      const wrapped=await seal(await ecdhKey(mp.privateKey,ub64(info.pub)),"pj-dk",ub64(VT.raw));
+      await call("login/approve",{code:L.code,mpub,wrapped});buzz();
+      redrawSheet(`<div class="sh-top"><span style="width:40px"></span><h2>Готово</h2><span style="width:40px"></span></div><div class="empty"><div class="ei">✅</div><b>Вход подтверждён</b>Вернись на то устройство — записи появятся там через пару секунд.</div><button class="btn wide" data-a="closeSheet">Хорошо</button>`)}
+    catch(e){toast(e.message)}},
+  lgDeny:()=>{const L=ui.lg;ui.lg=null;if(L)call("login/deny",{code:L.code}).catch(()=>{});closeSheet();toast("Вход отклонён")},
+  devices:()=>devicesSheet(),
+  openWeb:()=>{const u=location.origin+location.pathname;try{if(TG&&TG.openLink){TG.openLink(u);return}}catch(e){}window.open(u,"_blank")},
+  copyWeb:async()=>{const u=location.origin+location.pathname;try{await navigator.clipboard.writeText(u);toast("Ссылка скопирована")}catch(e){toast(u)}},
+  devEnd:async d=>{try{await call("sessions/end",{id:d.v});devicesSheet()}catch(e){toast(e.message)}},
+  devEndAll:async()=>{if(!await ask("Выйти на всех устройствах, кроме Telegram?","Выйти",true))return;try{await call("sessions/end",{all:true});devicesSheet();toast("Готово")}catch(e){toast(e.message)}},
   remYes:d=>{S.meta.remAsk="yes";persist("meta");ping("remYes");const el=$("#remOffer");if(el)el.remove();chDo(()=>call("settings",{remind:d.v,verse:true}),"Буду напоминать каждый день в "+d.v+" 🔔");if(CH.me&&!CH.me.chatOk)setTimeout(()=>askWrite(),900)},
   remNo:()=>{S.meta.remAsk="no";persist("meta");ping("remNo");const el=$("#remOffer");if(el)el.remove();toast("Хорошо. Включить можно в «Сообщениях от бота»")},
   hsAdd:()=>{try{TG.addToHomeScreen()}catch(e){toast("Не получилось — обнови Telegram")}},
@@ -3265,6 +3416,7 @@ document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.tar
 render();
 connect();
 loadBible();
+if(LOGIN0&&TG)setTimeout(()=>approveSheet(LOGIN0),600);
 if(JOIN0&&TG){try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}setTimeout(()=>joinPrompt(JOIN0),400)}
 {let go=null;try{go=new URLSearchParams(location.search).get("go")||(TG&&TG.initDataUnsafe&&TG.initDataUnsafe.start_param)||null}catch(e){}
   if(go==="pray"&&!JOIN0){try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}setTimeout(()=>{if(!PM&&!TR&&$("#sheet").classList.contains("hidden"))act.startPrayer()},700)}}

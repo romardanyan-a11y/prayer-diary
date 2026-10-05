@@ -864,6 +864,11 @@ p.reader .vs{font-size:var(--rs);line-height:1.7}
   .breath .lbl::before{animation:none;content:"Дыши спокойно"}
   .sheet,.shade,.toast,.seg .knob{transition:none}
 }
+/* зона нажатия не меньше ~40px у мелких кнопок — без изменения вида */
+.textbtn,.pg-swap,.pg-more,.vs .cm,.vs .vn,.r-intro .x{position:relative}
+.textbtn::after,.pg-swap::after,.pg-more::after,.vs .cm::after,.vs .vn::after,.r-intro .x::after{content:"";position:absolute;inset:-7px -6px}
+.pg-swap::after{inset:-4px}
+.vs .cm::after,.vs .vn::after{inset:-8px -5px}
 </style>
 </head>
 <body>
@@ -1038,7 +1043,7 @@ try{const r=localStorage.getItem(LSP);if(r)pending=new Set(JSON.parse(r))}catch(
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LSP,JSON.stringify([...pending]))}catch(e){}}
 function hasData(){return Object.keys(S.people||{}).length||Object.keys(S.marks||{}).length||Object.keys(S.prayers).length||Object.keys(S.entries).length||Object.keys(S.meta.days||{}).length}
 
-let col=null; const chains={},inflight={},busy={},bad={};const APPV="16";
+let col=null; const chains={},inflight={},busy={},bad={};const APPV="17";
 function current(id){if(id==="meta")return S.meta;return S.prayers[id]||S.entries[id]||S.marks[id]||S.people[id]||null}
 function write(id){
   pending.add(id);saveLocal();
@@ -1142,13 +1147,15 @@ function vApply(id,o,v){o._v=v;o.id=id;const cols=[S.prayers,S.entries,S.marks,S
 function vApplyDel(id,v){[S.prayers,S.entries,S.marks,S.people].forEach(c=>{delete c[id]});TOMB[id]=v;saveTomb();if(col)write(id)}
 async function vPull(){if(!VT.key||VT.pulling)return 0;VT.pulling=true;let n=0;const st=vSt();st.pushed=st.pushed||{};
   try{for(let g=0;g<300;g++){const r=await call("vault/pull",{since:st.cur||0});
-      for(const x of r.items){const lo=current(x.id),lv=lo?(lo._v||0):(TOMB[x.id]||0);st.pushed[x.id]=Math.max(st.pushed[x.id]||0,x.v);if(x.v<=lv)continue;
-        if(x.data==null)vApplyDel(x.id,x.v);else{let o;try{o=JSON.parse(TD.decode(await unseal(VT.key,x.id,x.data)))}catch(e){continue}vApply(x.id,o,x.v)}n++}
+      for(const x of r.items){const lo=current(x.id),lv=lo?(lo._v||0):(TOMB[x.id]||0);if(x.v<=lv){st.pushed[x.id]=Math.max(st.pushed[x.id]||0,x.v);continue}
+        if(x.data==null){st.pushed[x.id]=Math.max(st.pushed[x.id]||0,x.v);vApplyDel(x.id,x.v)}
+        else{let o;try{o=JSON.parse(TD.decode(await unseal(VT.key,x.id,x.data)))}catch(e){if(lo){lo._v=Math.max(lo._v||1,x.v)+1;delete st.pushed[x.id];VT.dirty.add(x.id)}continue}st.pushed[x.id]=Math.max(st.pushed[x.id]||0,x.v);vApply(x.id,o,x.v)}n++}
       st.cur=r.cursor;vSave(st);if(!r.more)break}}
   finally{VT.pulling=false}
+  if(VT.dirty.size){saveLocal();clearTimeout(VT.t);VT.t=setTimeout(vFlush,500)}
   if(n){saveLocal();render()}return n}
 /* в Telegram: ключ из CloudStorage (или новый), проверка, догоняем изменения из браузера, заливаем своё */
-async function vInitTG(){if(!CS||!tgOn()||!vOK())return;try{
+async function vInitTG(){if(!CS||!tgOn()||!vOK()||VT.initing)return;VT.initing=true;try{
     let raw=await CS.get("vault_key");const meta=await call("vault/meta");let key=null,good=false;
     if(raw){key=await aesKey(ub64(raw));if(meta.kc){try{good=TD.decode(await unseal(key,"kc",meta.kc))==="pj-ok"}catch(e){}}}
     else{const r=crypto.getRandomValues(new Uint8Array(32));raw=b64u(r);await CS.put("vault_key",raw);key=await aesKey(r)}
@@ -1156,7 +1163,7 @@ async function vInitTG(){if(!CS||!tgOn()||!vOK())return;try{
     if(vSt().kc!==kc)vSave({kc});
     VT.key=key;VT.raw=raw;VT.mode="tg";
     await vPull();vScanAll();await vFlush();
-  }catch(e){/* копия на сервере — дополнительная; если не вышло, дневник работает как раньше */}}
+  }catch(e){/* копия на сервере — дополнительная; если не вышло, дневник работает как раньше */}finally{VT.initing=false}}
 /* в браузере: ключ хранится в IndexedDB как неизвлекаемый, вход — через подтверждение в Telegram */
 async function vInitPWA(){if(TG||!SES||!vOK())return;try{
     const key=await IDB.get("vault-dk");if(!key){vSignedOut();return}
@@ -1168,7 +1175,7 @@ async function vInitPWA(){if(TG||!SES||!vOK())return;try{
   }catch(e){if(e&&e.status===401)vSignedOut();else setSync("err")}}
 function vSignedOut(){SES=null;VT.key=null;VT.mode=null;try{localStorage.removeItem("pj-ses");localStorage.removeItem("pj-vault")}catch(e){}IDB.set("vault-dk",null).catch(()=>{});setSync("local");render()}
 function vWipeLocal(){S={prayers:{},entries:{},marks:{},people:{},meta:{id:"meta",kind:"meta",days:{}}};TOMB={};saveTomb();pending.clear();saveLocal()}
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&VT.key&&!VT.pulling)vPull().catch(()=>{})});
+document.addEventListener("visibilitychange",()=>{if(document.hidden)return;if(VT.key&&!VT.pulling)vPull().catch(()=>{});else if(!VT.key&&TG&&CS&&col)VT.ready=vInitTG()});
 const devName=()=>{const u=navigator.userAgent;const d=/iPhone/.test(u)?"iPhone":/iPad/.test(u)?"iPad":/Android/.test(u)?"Android":/Mac/.test(u)?"Mac":/Windows/.test(u)?"Windows":"Компьютер";
   const b=/YaBrowser/.test(u)?"Яндекс Браузер":/Edg\//.test(u)?"Edge":/Firefox/.test(u)?"Firefox":/Chrome|CriOS/.test(u)?"Chrome":/Safari/.test(u)?"Safari":"браузер";
   const pwa=window.matchMedia&&matchMedia("(display-mode: standalone)").matches;return d+" · "+b+(pwa?" (приложение)":"")};

@@ -369,7 +369,7 @@ input[type=time].in{width:auto;padding:9px 12px;font-weight:700}
 .pl-plan.on{border-color:#E9B44A;background:color-mix(in srgb,#E9B44A 12%,var(--card))}
 .pl-plan b{font-size:14px;color:var(--muted)}.pl-plan strong{font-size:22px;font-weight:800}.pl-plan small{font-size:12.5px;color:var(--muted)}
 .pl-plan em{position:absolute;top:-9px;right:10px;font-style:normal;font-size:11.5px;font-weight:800;padding:3px 8px;border-radius:99px;background:var(--grad);color:var(--on-grad)}
-.pl-note{text-align:center;margin:8px 6px 10px}.pl-don{display:block;margin:6px auto 0}
+.pl-note{text-align:center;margin:8px 6px 10px}.pl-legal{text-align:center;margin:4px 6px 8px;color:var(--muted)}.pl-legal .textbtn{font-size:inherit;font-weight:600;padding:2px 0}.pl-don{display:block;margin:6px auto 0}
 .pl-on{text-align:center;font-weight:700;padding:14px;border-radius:16px;background:var(--card);margin:0 0 8px}
 .pl-don-g{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pl-don-g button{height:58px;border-radius:16px;background:var(--card);border:1px solid var(--stroke);font-size:19px;font-weight:800;color:var(--text)}
 .bgo.lock{opacity:.72}
@@ -1059,7 +1059,7 @@ try{const r=localStorage.getItem(LSP);if(r)pending=new Set(JSON.parse(r))}catch(
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LSP,JSON.stringify([...pending]))}catch(e){}}
 function hasData(){return Object.keys(S.people||{}).length||Object.keys(S.marks||{}).length||Object.keys(S.prayers).length||Object.keys(S.entries).length||Object.keys(S.meta.days||{}).length}
 
-let col=null; const chains={},inflight={},busy={},bad={};const APPV="19";
+let col=null; const chains={},inflight={},busy={},bad={};const APPV="20";
 function current(id){if(id==="meta")return S.meta;return S.prayers[id]||S.entries[id]||S.marks[id]||S.people[id]||null}
 function write(id){
   pending.add(id);saveLocal();
@@ -2131,7 +2131,7 @@ async function loginSheet(){if(!vOK()){toast("Этот браузер не ум�
     redrawSheet(top+`<div class="lg-steps"><p><b>1.</b> Нажми «Открыть Telegram» — там откроется дневник.</p><p><b>2.</b> Выбери там это число:</p><div class="lg-num">${LG.num}</div><p><b>3.</b> Вернись сюда — вход завершится сам.</p></div>
       <a class="btn wide" href="${BOT_URL}?startapp=login_${LG.code}" target="_blank" rel="noopener">Открыть Telegram</a>
       <p class="small" id="lgSt" style="text-align:center;margin-top:12px">Жду подтверждения…</p>
-      <p class="small" style="text-align:center;margin-top:6px">🔒 Записи передаются в зашифрованном виде — сервер их не читает.</p>`);
+      <p class="small" style="text-align:center;margin-top:6px">🔒 Записи передаются в зашифрованном виде — сервер их не читает.</p>${legalLinks("Входя, ты принимаешь ")}`);
     lgPoll()}catch(e){redrawSheet(top+`<div class="empty"><b>Не получилось</b>${esc(e.message)}</div>`)}}
 async function lgPoll(){const L=LG;if(!L||L.busy)return;if(Date.now()-L.t0>14*60000){LG=null;const el=$("#lgSt");if(el)el.textContent="Время вышло — начни вход заново";return}
   L.busy=true;try{const r=await pcall("login/poll",{code:L.code,s:L.sec});
@@ -2183,13 +2183,16 @@ async function plusSheet(why){ui.plan=ui.plan||"year";ping("plusView");const h=P
       trial?`<button class="btn wide" data-a="plusTrial">Попробовать 7 дней бесплатно</button><p class="small pl-note">Без карты и без автосписаний — просто включим Плюс на неделю.</p><button class="btn ghost wide" data-a="plusBuy">Оформить сразу · ${price(ui.plan)}</button>`
       :`<button class="btn wide" data-a="plusBuy">Оформить · ${price(ui.plan)}</button>`}`}
     <button class="textbtn pl-don" data-a="donateOpen">🤍 Поддержать служение любой суммой</button>
-    <p class="small pl-note">${tg?"Оплата звёздами Telegram. Подписку на месяц можно отменить в Telegram: Настройки → Звёзды.":"Оплата картой или через СБП. Без автопродления — продлишь, когда захочешь."}</p>`;
+    <p class="small pl-note">${tg?"Оплата звёздами Telegram. Подписку на месяц можно отменить в Telegram: Настройки → Звёзды.":"Оплата картой или через СБП. Без автопродления — продлишь, когда захочешь."}</p>${legalLinks("Оформляя Плюс, ты принимаешь ")}`;
   if(ui.sheetKind==="plus")redrawSheet(html);else openSheet(html,"plus")}
+/* оферта, политика, согласие — отдельные страницы рядом с приложением */
+const legalUrl=p=>new URL(p+".html",location.href.split(/[?#]/)[0]).href;
+const legalLinks=(pre)=>`<p class="small pl-legal">${pre?`${pre}<button class="textbtn" data-a="legal" data-v="oferta">условия</button> и <button class="textbtn" data-a="legal" data-v="privacy">политику конфиденциальности</button>.`:`<button class="textbtn" data-a="legal" data-v="oferta">Условия</button> · <button class="textbtn" data-a="legal" data-v="privacy">Конфиденциальность</button>`}</p>`;
 function donateSheet(){const tg=!!TG,list=tg?[50,150,300,700]:[99,299,499,990],unit=tg?" ⭐":" ₽",month=tg?PLUS_PRICE.month.stars:PLUS_PRICE.month.rub;
   const top=`<div class="sh-top"><button class="pill icon" data-a="plusOpen" aria-label="Назад">${ic("left")}</button><h2>Поддержать служение</h2><span style="width:40px"></span></div>`;
   openSheet(top+`<div class="pl-hero"><div class="pl-e">🤍</div><p>Дневник делается для церкви и для всех христиан. Твой дар помогает ему оставаться бесплатным, оплачивать сервер, голос и ИИ — и расти дальше.</p></div>
     ${!tg&&!SES?`<button class="btn wide" data-a="loginOpen">Войти через Telegram</button>`:`<div class="pl-don-g">${list.map(a=>`<button data-a="donatePay" data-v="${a}">${a.toLocaleString("ru-RU")}${unit}</button>`).join("")}</div>
-    <p class="small pl-note">От ${month}${unit} — в благодарность месяц Плюса.</p>`}`,"donate")}
+    <p class="small pl-note">От ${month}${unit} — в благодарность месяц Плюса.</p>`}${legalLinks()}`,"donate")}
 async function plusRefresh(){try{const me=await call("me");CH.me=Object.assign(CH.me||{},me);try{localStorage.setItem("pj-plus",String(me.plusUntil||0))}catch(e){}render();if(ui.sheetKind==="plus")plusSheet()}catch(e){}}
 async function payStart(kind,amount){try{
     if(TG){const r=await call("plus/stars",{kind,amount});if(!TG.openInvoice){TG.openTelegramLink(r.link);return}
@@ -2280,7 +2283,7 @@ function planNewSheet(){ui.pn={b:42,per:1};const o=BOOKS.map((x,i)=>`<option val
   ["pnK","pnB","pnP"].forEach(id=>$("#"+id).addEventListener("change",planTplInfo));planTplInfo()}
 function ping(kind){if((!TG&&!SES)||API.startsWith("__"))return;call("event",{kind}).catch(()=>{})}
 const TOUR=[
-  {t:"Мир тебе! 🕊️",x:"Это молитвенный дневник: твои молитвы, Библия с комментариями и молитва вместе с другими христианами.<br><br>Покажу за минуту, как тут всё устроено."},
+  {t:"Мир тебе! 🕊️",x:"Это молитвенный дневник: твои молитвы, Библия с комментариями и молитва вместе с другими христианами.<br><br>Покажу за минуту, как тут всё устроено.",legal:1},
   {tab:"home",sel:".cta",t:"Начать молитву",x:"Спокойное время с Богом: стих, благодарность, твои нужды и тихая музыка. Каждая молитва зажигает звезду на твоём небе."},
   {tab:"home",sel:"#fab",t:"Добавить нужду",x:"Запиши, за кого или о чём молишься. Потом просто отмечай «помолился»."},
   {tab:"prayers",sel:'#tabs [data-v="prayers"]',t:"Мои молитвы",x:"Все твои нужды здесь. Когда Бог ответит — открой молитву и нажми «Бог ответил». Так соберутся твои свидетельства."},
@@ -2297,7 +2300,7 @@ function tourShow(){const st=TOUR[TR.i],last=TR.i===TOUR.length-1;
   const pick=()=>{for(const q of (st.sel||"").split(",")){const x=q.trim()&&$(q.trim());if(x)return x}return null};
   if(st.tab==="bible"&&!$(".cm")&&(TR.wait||0)<6){TR.wait=(TR.wait||0)+1;setTimeout(()=>{if(TR)tourShow()},300);return}TR.wait=0;
   const h=$("#tourH"),tp=$("#tourT"),el=pick();
-  tp.innerHTML=`<div class="qz-dots" style="justify-content:flex-start;margin:0 0 10px">${TOUR.map((_,k)=>`<i class="${k<=TR.i?"on":""}" style="width:18px"></i>`).join("")}</div><b>${st.t}</b><p>${st.x}</p>
+  tp.innerHTML=`<div class="qz-dots" style="justify-content:flex-start;margin:0 0 10px">${TOUR.map((_,k)=>`<i class="${k<=TR.i?"on":""}" style="width:18px"></i>`).join("")}</div><b>${st.t}</b><p>${st.x}</p>${st.legal?`<p class="small" style="margin:-4px 0 10px">Продолжая, ты принимаешь <button class="textbtn" data-a="legal" data-v="oferta" style="padding:0">условия</button> и даёшь <button class="textbtn" data-a="legal" data-v="consent" style="padding:0">согласие на обработку данных</button>.</p>`:""}
     <div class="tour-b">${TR.i?`<button class="btn ghost sm" data-a="tourGo" data-v="-1">${ic("left")}</button>`:`<button class="btn ghost sm" data-a="tourEnd">Пропустить</button>`}<button class="btn sm" data-a="${last?"tourEnd":"tourGo"}" data-v="1">${last?"Начать 🙏":TR.i?"Дальше":"Показать"}${last?"":ic("right")}</button></div>`;
   tp.style.opacity="0";h.style.opacity="0";$("#tourC").style.background=el?"transparent":"rgba(4,5,12,.74)";
   if(el){el.scrollIntoView({block:"center",behavior:"instant"})}else window.scrollTo(0,0);
@@ -2913,7 +2916,8 @@ function settingsSheet(redraw){hsCheck();
   <label class="l">Сохранность</label>
   ${storeRows()}
   <p class="small" style="margin:2px 6px 12px">Версия ${APPV}${col?" · ожидают сохранения: "+pending.size:""}${ui.lastErr?" · ошибка: "+esc(ui.lastErr):""}${pending.size&&col?` · <button class="textbtn" data-a="syncNow" style="padding:0">Сохранить сейчас</button>`:""}</p>
-  <div class="row2"><button class="btn ghost ${dl?"":"hidden"}" data-a="export">${ic("down")}Скачать копию</button><button class="btn ghost" data-a="import">${ic("up")}Загрузить</button></div>`;
+  <div class="row2"><button class="btn ghost ${dl?"":"hidden"}" data-a="export">${ic("down")}Скачать копию</button><button class="btn ghost" data-a="import">${ic("up")}Загрузить</button></div>
+  <p class="small pl-legal"><button class="textbtn" data-a="legal" data-v="oferta">Оферта</button> · <button class="textbtn" data-a="legal" data-v="privacy">Конфиденциальность</button> · <button class="textbtn" data-a="legal" data-v="consent">Согласие на данные</button></p>`;
   if(redraw||ui.sheetKind==="settings")redrawSheet(html);else openSheet(html,"settings");
   ui.sheetKind="settings";
   const rt=$("#remT");if(rt)rt.addEventListener("change",()=>{S.meta.remind=rt.value;persist("meta")});
@@ -3328,6 +3332,7 @@ const act={
   donateOpen:()=>donateSheet(),
   donatePay:d=>payStart("donate",+d.v),
   closeTease:d=>{const el=d&&document.querySelector('.rem-offer');if(el)el.remove()},
+  legal:d=>act.annLink({v:legalUrl(d.v)}),
   inviteFriend:()=>{ping("invite");tgShare("Я молюсь с «Молитвенным дневником» 🙏 К каждому стиху там есть слова и подсказки, можно слушать голос и просить друзей помолиться за тебя. Загляни:",APP_LINK)},
   remYes:d=>{S.meta.remAsk="yes";persist("meta");ping("remYes");closeSheetIf("remask");const el=$("#remOffer");if(el)el.remove();chDo(()=>call("settings",{remind:d.v,verse:true}),"Буду напоминать каждый день в "+d.v+" 🔔");if(CH.me&&!CH.me.chatOk)setTimeout(()=>askWrite(),900)},
   remNo:()=>{S.meta.remAsk="no";remStamp();ping("remNo");const el=$("#remOffer");if(el)el.remove();toast("Хорошо. Включить можно в «Сообщениях от бота»")},

@@ -360,6 +360,19 @@ input[type=time].in{width:auto;padding:9px 12px;font-weight:700}
 .sit{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:14px;border-radius:20px;text-align:left;min-height:96px;background:radial-gradient(120% 100% at 0% 0%,color-mix(in srgb,var(--c) 24%,transparent),transparent 70%),var(--card);border:1px solid var(--stroke);color:var(--text)}
 .sit span{font-size:28px;line-height:1}
 .sit b{font-size:15.5px;font-weight:750;line-height:1.2}
+.pl-hero{text-align:center;margin:2px 0 14px}.pl-e{font-size:52px;line-height:1.1}
+.pl-hero h3{font-size:23px;font-weight:800;letter-spacing:-.02em;margin:8px 0 6px}.pl-hero p{margin:0 6px;color:var(--muted);font-size:15px;line-height:1.4}
+.pl-ben{display:flex;flex-direction:column;gap:10px;margin:0 0 16px}.pl-ben>div{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:16px;background:var(--card)}
+.pl-ben i{font-style:normal;font-size:22px;flex:none}.pl-ben b{display:block;font-size:15px}.pl-ben small{color:var(--muted);font-size:13px}
+.pl-plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}
+.pl-plan{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px;border-radius:18px;background:var(--card);border:2px solid var(--stroke);text-align:left;color:var(--text)}
+.pl-plan.on{border-color:#E9B44A;background:color-mix(in srgb,#E9B44A 12%,var(--card))}
+.pl-plan b{font-size:14px;color:var(--muted)}.pl-plan strong{font-size:22px;font-weight:800}.pl-plan small{font-size:12.5px;color:var(--muted)}
+.pl-plan em{position:absolute;top:-9px;right:10px;font-style:normal;font-size:11.5px;font-weight:800;padding:3px 8px;border-radius:99px;background:var(--grad);color:var(--on-grad)}
+.pl-note{text-align:center;margin:8px 6px 10px}.pl-don{display:block;margin:6px auto 0}
+.pl-on{text-align:center;font-weight:700;padding:14px;border-radius:16px;background:var(--card);margin:0 0 8px}
+.pl-don-g{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pl-don-g button{height:58px;border-radius:16px;background:var(--card);border:1px solid var(--stroke);font-size:19px;font-weight:800;color:var(--text)}
+.bgo.lock{opacity:.72}
 .lg-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--card);border:1px solid var(--stroke)}
 .lg-card b{display:block;font-size:16.5px;font-weight:800}
 .lg-card span{display:block;font-size:14px;color:var(--muted);margin:4px 0 12px;line-height:1.35}
@@ -1046,7 +1059,7 @@ try{const r=localStorage.getItem(LSP);if(r)pending=new Set(JSON.parse(r))}catch(
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LSP,JSON.stringify([...pending]))}catch(e){}}
 function hasData(){return Object.keys(S.people||{}).length||Object.keys(S.marks||{}).length||Object.keys(S.prayers).length||Object.keys(S.entries).length||Object.keys(S.meta.days||{}).length}
 
-let col=null; const chains={},inflight={},busy={},bad={};const APPV="18";
+let col=null; const chains={},inflight={},busy={},bad={};const APPV="19";
 function current(id){if(id==="meta")return S.meta;return S.prayers[id]||S.entries[id]||S.marks[id]||S.people[id]||null}
 function write(id){
   pending.add(id);saveLocal();
@@ -1811,7 +1824,7 @@ async function chLoad(quiet){if(!tgOn()||CH.loading)return;CH.loading=true;CH.tr
     let wall=w;if(sc!=="global"&&!(me.churches||[]).some(c=>c.id===sc)){setScope("global");wall=null}
     if(!wall||CH.scope!==sc)wall=await call("wall/list",{scope:CH.scope});return [me,wall,p]};
   try{let res;try{res=await get()}catch(e){await new Promise(r=>setTimeout(r,1500));res=await get()}
-    const [me,w,p]=res;CH.me=me;if(me&&!me.chatOk&&!JOIN0&&!waAsked()&&TG&&TG.initDataUnsafe&&TG.initDataUnsafe.start_param)setTimeout(()=>askWrite(true),2500);CH.wall=w.items;CH.pins=w.pins||[];CH.canAnn=!!w.canAnnounce;CH.plans=p.plans;CH.loaded=true;CH.err="";syncAnswered(w.items);setTimeout(remAskMaybe,2500);
+    const [me,w,p]=res;CH.me=me;try{localStorage.setItem("pj-plus",String(me.plusUntil||0))}catch(e){}if(me&&!me.chatOk&&!JOIN0&&!waAsked()&&TG&&TG.initDataUnsafe&&TG.initDataUnsafe.start_param)setTimeout(()=>askWrite(true),2500);CH.wall=w.items;CH.pins=w.pins||[];CH.canAnn=!!w.canAnnounce;CH.plans=p.plans;CH.loaded=true;CH.err="";syncAnswered(w.items);setTimeout(remAskMaybe,2500);
     try{localStorage.setItem("pj-ch",JSON.stringify({me,wall:w.items,plans:p.plans,scope:CH.scope}))}catch(e){}}
   catch(e){CH.err=e.message;if(CH.loaded&&ui.tab==="church"&&!quiet)toast("Не удалось обновить: "+e.message)}
   CH.loading=false;if((ui.tab==="church"||ui.tab==="home")&&(!$("#sheet")||$("#sheet").classList.contains("hidden")))render()}
@@ -1960,7 +1973,7 @@ function resolveRef(ref){const m=/^\s*(\d?)\s*([А-Яа-яЁё]+)\.?\s*(\d+)\s*[
   if(b<0)return null;const c=+m[3],v1=+m[4],v2=Math.min(+(m[5]||m[4]),v1+7);if(c<1||c>BOOKS[b][2]||v2<v1)return null;
   const vs=[];for(let v=v1;v<=v2;v++)vs.push(v);const t=BIB?vText(b,c,vs).trim():"";if(BIB&&!t)return null;return {b,c,v:v1,vs,r:vRef(b,c,vs),t}}
 const refsOf=list=>(list||[]).map(resolveRef).filter(Boolean);
-const aiLeftTxt=()=>CH.ai&&CH.ai.ready?`Осталось сегодня: ${CH.ai.left} из 5`:"";
+const aiLeftTxt=()=>CH.ai&&CH.ai.ready?`Осталось сегодня: ${CH.ai.left} из ${isPlus()?30:5}`+(isPlus()?"":` · <button class="textbtn" data-a="plusOpen" data-v="ai" style="padding:0">до 30 в Плюсе</button>`):"";
 function aiVerseCard(v,why){return `<div class="aiv" data-a="rOpen" data-b="${v.b}" data-c="${v.c}" data-v="${v.v}" role="button" tabindex="0">${v.t?`<p>«${esc(v.t)}»</p>`:""}<span>${esc(v.r)}</span>${why?`<small>${esc(why)}</small>`:""}</div>`}
 const AI_TABS=[["prayer","🙏 Молитва"],["verse","📖 Стих"],["notes","📝 Заметки"]];
 const AI_PH={prayer:"Расскажи своими словами, что на сердце. Например: «Завтра операция у мамы, мне очень страшно»",verse:"Опиши ситуацию или чувство. Например: «Поссорился с другом и не знаю, как помириться»",notes:"Вставь сюда заметки — например, конспект проповеди, записанный наспех. ИИ разложит по полочкам: главные мысли, стихи, что применить"};
@@ -2155,6 +2168,34 @@ async function devicesSheet(){const top=`<div class="sh-top"><button class="pill
   try{const r=await call("sessions/list");const box=$("#devList");if(!box)return;
     box.innerHTML=r.items.length?r.items.map(x=>`<div class="set"><div><b>${esc(x.ua||"Браузер")}</b><span>вход ${fDay.format(new Date(x.created))} · был ${dayLabel(dk(new Date(x.seen))).toLowerCase()}</span></div><button class="pill" data-a="devEnd" data-v="${esc(x.id)}">Выйти</button></div>`).join("")+`<button class="btn danger wide mt" data-a="devEndAll">Выйти на всех устройствах</button>`:`<p class="small">Пока ни одного — дневник открыт только в Telegram.</p>`}
   catch(e){const box=$("#devList");if(box)box.innerHTML=`<p class="small">${esc(e.message)}</p>`}}
+const PLUS_WHY={voice:["🔈","Слушай молитву живым голосом"],music:["🎵","Вся музыка и звуки природы"],ai:["✨","Больше вопросов ИИ-помощнику"],book:["📕","Книга ответов на молитвы"]};
+async function plusSheet(why){ui.plan=ui.plan||"year";ping("plusView");const h=PLUS_WHY[why]||["✨","Сделай молитву глубже"],tg=!!TG,P=PLUS_PRICE;
+  const top=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Дневник Плюс</h2><span style="width:40px"></span></div>`;
+  const ben=[["🔈","Живой голос для всех молитв","Стих, слова и подсказки читает Брайан"],["🎵","Вся музыка и природа","Дебюсси, Шопен, Бах, гимны, волны и птицы"],["✨","ИИ-помощник — до 30 вопросов в день","Молитва, стих под ситуацию, вопросы о главе"],["📕","Книга ответов на молитвы","Красивый PDF со всем, что сделал Бог"]];
+  const on=isPlus(),until=on?new Date((CH.me&&CH.me.plusUntil)||+(lsGet("pj-plus")||0)):null,trial=!(CH.me&&CH.me.trialUsed),login=!tg&&!SES;
+  const price=k=>tg?`${P[k].stars} ⭐`:`${P[k].rub.toLocaleString("ru-RU")} ₽`;
+  const plan=(k,t,sub,badge)=>`<button class="pl-plan ${ui.plan===k?"on":""}" data-a="plusPlan" data-v="${k}">${badge?`<em>${badge}</em>`:""}<b>${t}</b><strong>${price(k)}</strong><small>${sub}</small></button>`;
+  const html=top+`<div class="pl-hero"><div class="pl-e">${h[0]}</div><h3>${h[1]}</h3><p>Дневник бесплатный для всех — и таким останется. Плюс делает молитву глубже и помогает служению расти.</p></div>
+    <div class="pl-ben">${ben.map(b=>`<div><i>${b[0]}</i><span><b>${b[1]}</b><small>${b[2]}</small></span></div>`).join("")}</div>
+    ${on?`<div class="pl-on">✨ Плюс активен до ${fDayY.format(until)}${CH.me&&CH.me.plusUntil&&(CH.me.plusSrc||"")==="trial"?" · пробная неделя":""}</div>`:`
+    <div class="pl-plans">${plan("year","Год",tg?"оплата один раз":`${Math.round(P.year.rub/12)} ₽ в месяц`,"−38%")}${plan("month","Месяц",tg?"продлевается сама":"оплата один раз","")}</div>
+    ${login?`<button class="btn wide" data-a="loginOpen">Войти и оформить</button><p class="small pl-note">Плюс привязан к твоему Telegram — работает и в боте, и здесь.</p>`:
+      trial?`<button class="btn wide" data-a="plusTrial">Попробовать 7 дней бесплатно</button><p class="small pl-note">Без карты и без автосписаний — просто включим Плюс на неделю.</p><button class="btn ghost wide" data-a="plusBuy">Оформить сразу · ${price(ui.plan)}</button>`
+      :`<button class="btn wide" data-a="plusBuy">Оформить · ${price(ui.plan)}</button>`}`}
+    <button class="textbtn pl-don" data-a="donateOpen">🤍 Поддержать служение любой суммой</button>
+    <p class="small pl-note">${tg?"Оплата звёздами Telegram. Подписку на месяц можно отменить в Telegram: Настройки → Звёзды.":"Оплата картой или через СБП. Без автопродления — продлишь, когда захочешь."}</p>`;
+  if(ui.sheetKind==="plus")redrawSheet(html);else openSheet(html,"plus")}
+function donateSheet(){const tg=!!TG,list=tg?[50,150,300,700]:[99,299,499,990],unit=tg?" ⭐":" ₽",month=tg?PLUS_PRICE.month.stars:PLUS_PRICE.month.rub;
+  const top=`<div class="sh-top"><button class="pill icon" data-a="plusOpen" aria-label="Назад">${ic("left")}</button><h2>Поддержать служение</h2><span style="width:40px"></span></div>`;
+  openSheet(top+`<div class="pl-hero"><div class="pl-e">🤍</div><p>Дневник делается для церкви и для всех христиан. Твой дар помогает ему оставаться бесплатным, оплачивать сервер, голос и ИИ — и расти дальше.</p></div>
+    ${!tg&&!SES?`<button class="btn wide" data-a="loginOpen">Войти через Telegram</button>`:`<div class="pl-don-g">${list.map(a=>`<button data-a="donatePay" data-v="${a}">${a.toLocaleString("ru-RU")}${unit}</button>`).join("")}</div>
+    <p class="small pl-note">От ${month}${unit} — в благодарность месяц Плюса.</p>`}`,"donate")}
+async function plusRefresh(){try{const me=await call("me");CH.me=Object.assign(CH.me||{},me);try{localStorage.setItem("pj-plus",String(me.plusUntil||0))}catch(e){}render();if(ui.sheetKind==="plus")plusSheet()}catch(e){}}
+async function payStart(kind,amount){try{
+    if(TG){const r=await call("plus/stars",{kind,amount});if(!TG.openInvoice){TG.openTelegramLink(r.link);return}
+      TG.openInvoice(r.link,st=>{if(st==="paid"){ping(kind==="donate"?"donated":"plusPaid");toast(kind==="donate"?"Спасибо за поддержку! 🤍":"Спасибо! Включаю Плюс…");setTimeout(plusRefresh,1500);setTimeout(plusRefresh,5000)}else if(st==="failed")toast("Оплата не прошла")});return}
+    const r=await call("plus/card",{kind,amount});location.href=r.url}
+  catch(e){toast(e.message)}}
 async function joinPrompt(code){code=String(code||"").toUpperCase().replace(/[^A-Z0-9]/g,"");if(!code||!tgOn())return;
   const top=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Приглашение</h2><span style="width:40px"></span></div>`;
   openSheet(top+`<div class="empty">Ищу церковь…</div>`,"join");
@@ -2515,7 +2556,13 @@ const BGS=[["satie","🎹","Гимнопедия","Эрик Сати","m"],["deb
   ["grace","🕊","О, благодать","гимн, струнные","m"],["nearer","🎺","Ближе к Тебе","гимн, оркестр","m"],["music","✨","Эмбиент","тихие переливы","m"],
   ["rain","🌧","Дождь","за окном","n"],["waves","🌊","Волны","берег океана","n"],["birds","🐦","Птицы","раннее утро","n"],["off","🔇","Тишина","","n"]];
 const BG_OLD={fire:"rain",forest:"birds"};
-const bgPref=()=>{const k=S.meta.bg||(S.meta.music?"music":"off"),v=BG_OLD[k]||k;return BGS.some(b=>b[0]===v)?v:"off"};
+/* «Дневник Плюс»: молитва, Библия, дневник, церковь — бесплатно навсегда; Плюс — голос, вся музыка, больше ИИ, книга ответов */
+const PLUS_PRICE={month:{rub:199,stars:150},year:{rub:1490,stars:1100}};
+const BG_FREE=["music","satie","rain","off"];
+function isPlus(){const u=(CH.me&&CH.me.plusUntil)||+(lsGet("pj-plus")||0);return u>Date.now()}
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+const bgFree=k=>BG_FREE.includes(k)||isPlus();
+const bgPref=()=>{const k=S.meta.bg||(S.meta.music?"music":"off"),v=BG_OLD[k]||k,x=BGS.some(b=>b[0]===v)?v:"off";return bgFree(x)?x:"music"};
 const TRK={on:null,a:null,src:null,g:null,buf:null,bk:null,tm:null};
 let _volOK=null;const volOK=()=>_volOK!=null?_volOK:(_volOK=(()=>{try{const a=new Audio();a.volume=.3;return Math.abs(a.volume-.3)<.01}catch(e){return false}})());
 function elFade(a,to,ms,done){clearTimeout(a._f);if(!volOK()){if(done)done();return}const from=a.volume,t0=performance.now();
@@ -2546,7 +2593,7 @@ const bgNow=()=>AMB.on?"music":TRK.on||"off";
 const bgInfo=k=>BGS.find(x=>x[0]===k)||BGS[BGS.length-1];
 /* picker: `now` runs inside the tap itself, so iOS lets the sound start */
 function bgDialog(cur,now){return new Promise(res=>{const d=$("#dlg");
-  const btn=b=>`<button class="bgo ${cur===b[0]?"on":""}" data-k="${b[0]}"><i>${b[1]}</i><span><b>${b[2]}</b>${b[3]?`<small>${b[3]}</small>`:""}</span></button>`;
+  const btn=b=>`<button class="bgo ${cur===b[0]?"on":""} ${bgFree(b[0])?"":"lock"}" data-k="${b[0]}"><i>${b[1]}</i><span><b>${b[2]}${bgFree(b[0])?"":" 🔒"}</b>${b[3]?`<small>${b[3]}</small>`:""}</span></button>`;
   const grp=g=>BGS.filter(b=>b[4]===g).map(btn).join("");
   d.innerHTML=`<div class="dlg-card bgdlg" role="dialog" aria-modal="true"><p>Фон для молитвы</p>
     <div class="bg-h">Музыка</div><div class="bg-g">${grp("m")}</div>
@@ -2554,7 +2601,7 @@ function bgDialog(cur,now){return new Promise(res=>{const d=$("#dlg");
     <button class="btn ghost wide" data-k="" style="margin-top:14px">Закрыть</button>
     <div class="bg-cr">Записи — Wikimedia Commons, свободные лицензии.<br>Птицы — Robert EA Harvey, CC BY-SA 4.0 · Голос молитвы — ElevenLabs</div></div>`;
   d.classList.add("show");const done=v=>{d.classList.remove("show");d.innerHTML="";res(v)};
-  d.querySelectorAll("[data-k]").forEach(b=>b.onclick=e=>{e.stopPropagation();const k=b.dataset.k;if(k&&now)now(k);done(k)});d.onclick=e=>{if(e.target===d)done("")}})}
+  d.querySelectorAll("[data-k]").forEach(b=>b.onclick=e=>{e.stopPropagation();const k=b.dataset.k;if(k&&!bgFree(k)){done("");setTimeout(()=>plusSheet("music"),120);return}if(k&&now)now(k);done(k)});d.onclick=e=>{if(e.target===d)done("")}})}
 /* cards mode (Echo-style) */
 function drawCards(){
   const L=PM.list,i=PM.ci;if(i>=L.length){act.pmFinish();return}const p=L[i];
@@ -2580,7 +2627,7 @@ function swipeCard(){const card=$("#pmIn .pcard.sw");if(!card)return;let x0=null
 /* testimony book PDF */
 function loadScript(src){return new Promise((res,rej)=>{if(window.jspdf)return res();const s=document.createElement("script");s.src=src;s.onload=res;s.onerror=()=>rej(new Error("script"));document.head.appendChild(s)})}
 function wrapLines(ctx,text,maxW){const out=[];String(text||"").split(/\n+/).forEach(par=>{const L=wrapText(ctx,par,maxW);out.push(...(L.length?L:[""]))});return out}
-async function makeBook(){
+async function makeBook(){if(!isPlus()){plusSheet("book");return}
   const list=answered().slice().sort((a,b)=>a.answeredAt-b.answeredAt);if(!list.length){toast("Пока нет отвеченных молитв");return}
   if(!dl){toast("Сохранение файлов здесь недоступно");return}
   toast("Собираю книгу…");
@@ -2855,6 +2902,7 @@ function settingsSheet(redraw){hsCheck();
   <div class="set" style="flex-wrap:wrap"><div><b>Напоминание</b><span>Ежедневное событие в календаре телефона</span></div><div style="display:flex;gap:8px;align-items:center"><input type="time" class="in" id="remT" value="${esc(S.meta.remind||"08:00")}"><button class="pill pri" data-a="reminder" ${dl?"":"disabled"}>${ic("bell")}Добавить</button></div></div>
   <button class="set" style="width:100%;text-align:left" data-a="bgChoose"><div><b>Фон во время молитвы</b><span>${bgInfo(bgPref())[1]} ${bgInfo(bgPref())[2]}${bgInfo(bgPref())[3]?" · "+bgInfo(bgPref())[3]:""}</span></div>${ic("right")}</button>
   ${hsRow()}
+  <button class="set pl-row" style="width:100%;text-align:left" data-a="plusOpen"><div><b>✨ Дневник Плюс</b><span>${isPlus()?"Активен — спасибо за поддержку 🤍":"Голос, вся музыка, больше ИИ · 7 дней бесплатно"}</span></div>${ic("right")}</button>
   <button class="set" style="width:100%;text-align:left" data-a="inviteFriend"><div><b>💌 Пригласить друзей</b><span>Отправь ссылку на дневник — вместе молиться легче</span></div>${ic("right")}</button>
   <div class="set"><div><b>Нужд в день по кругу</b><span>Для «Сегодня в молитве»</span></div><div class="stepper"><button data-a="perDay" data-v="-1" aria-label="Меньше">${ic("minus")}</button><output>${perDayN()}</output><button data-a="perDay" data-v="1" aria-label="Больше">${ic("plus")}</button></div></div>
   <div class="set"><div><b>Стих дня</b><span>${BIB?"Из всей Библии или о молитве":"Загрузи Библию, чтобы брать из всей"}</span></div><div class="pick">${[["bible","Вся Библия"],["prayer","О молитве"]].map(([k,l])=>`<button class="${(S.meta.votd||"bible")===k?"on":""}" data-a="votd" data-v="${k}">${l}</button>`).join("")}</div></div>
@@ -2903,7 +2951,7 @@ async function shareVerse(ref){
 function tod(){const h=new Date().getHours();return h<5?"n":h<12?"m":h<18?"d":"e"}
 const tmOk=(v,t)=>!v.tm||v.tm===t||(v.tm==="e"&&t==="n");
 function pickGuide(key,not){const L=GUIDE[key];if(!Array.isArray(L)||!L.length)return -1;const t=tod();
-  let ok=L.map((_,i)=>i).filter(i=>tmOk(L[i],t)&&i!==not);if(S.meta.pmVoice){const vo=ok.filter(i=>vName(key,i,"m"));if(vo.length)ok=vo}if(!ok.length)return not==null?-1:not;
+  let ok=L.map((_,i)=>i).filter(i=>tmOk(L[i],t)&&i!==not);if(S.meta.pmVoice&&isPlus()){const vo=ok.filter(i=>vName(key,i,"m"));if(vo.length)ok=vo}if(!ok.length)return not==null?-1:not;
   let seen={};try{seen=JSON.parse(localStorage.getItem("pj-lastg")||"{}")}catch(e){}const rec=Array.isArray(seen[key])?seen[key]:[];
   let pool=ok.filter(i=>!rec.includes(i));if(!pool.length)pool=ok;
   const tp=pool.filter(i=>L[i].tm),i=tp.length&&Math.random()<.4?tp[Math.floor(Math.random()*tp.length)]:pool[Math.floor(Math.random()*pool.length)];
@@ -2936,7 +2984,7 @@ async function voUrl(name){if(VO.cache[name])return VO.cache[name];const r=await
 async function voPlay(name){const a=voEl(),tok=++VO.tok;VO.busy=true;
   try{const url=await voUrl(name);if(tok!==VO.tok)return;a.src=url;duck(true);const p=a.play();if(p&&p.catch)p.catch(()=>duck(false))}catch(e){duck(false)}finally{if(tok===VO.tok)VO.busy=false}}
 function voPrefetch(key,i){for(let n=1;n<5;n++){const nm=vName(key,i,"q"+n);if(!nm)break;voUrl(nm).catch(()=>{})}}
-function pgSpeak(clip,texts,key,i){pgHush();if(clip){voPlay(clip);if(key)voPrefetch(key,i)}else pgSay(texts)}
+function pgSpeak(clip,texts,key,i){pgHush();if(clip&&!isPlus())clip=null;if(clip){voPlay(clip);if(key)voPrefetch(key,i)}else pgSay(texts)}
 /* music gets quieter while the voice speaks */
 function duck(on){try{if(TRK.a&&volOK())elFade(TRK.a,on?.25:.85,500)}catch(e){}
   try{if(TRK.g&&AMB.ctx){const C=AMB.ctx;TRK.g.gain.cancelScheduledValues(C.currentTime);TRK.g.gain.setTargetAtTime(on?.35:1,C.currentTime,.25)}}catch(e){}
@@ -3018,6 +3066,10 @@ function remAskMaybe(){if(ui.remAsked||!remDue()||PM||TR||JOIN0||LOGIN0||!(S.met
   <div class="sit-g" style="grid-template-columns:repeat(3,1fr)">${slots.map(([e,l,t])=>`<button class="sit" data-a="remYes" data-v="${t}" style="--c:#E9B44A;min-height:84px;align-items:center;text-align:center"><span>${e}</span><b>${l}</b><small style="color:var(--muted)">${t}</small></button>`).join("")}</div>
   <div class="set mt"><div><b>Другое время</b></div><div style="display:flex;gap:8px;align-items:center"><input type="time" class="in" id="remOwn" value="20:00"><button class="pill pri" data-a="remOwnSave">Включить</button></div></div>
   <button class="btn ghost wide mt" data-a="remLater">Не сейчас</button>`,"remask")}
+/* мягкое предложение Плюса на экране «Аминь»: не раньше 3-го дня молитвы, не чаще раза в 2 недели, не вместе с вопросом о напоминании */
+function plusTease(){if(isPlus()||!tgOn()&&!SES||Object.keys(S.meta.days||{}).length<3||Date.now()-(S.meta.ptT||0)<14*864e5||$("#remOffer"))return "";
+  S.meta.ptT=Date.now();persist("meta");ping("plusTease");
+  return `<div class="rem-offer"><b>✨ Нравится молиться с дневником?</b><span>Попробуй Плюс: живой голос для всех молитв, вся музыка, больше вопросов ИИ. ${CH.me&&CH.me.trialUsed?"":"7 дней бесплатно, без карты."}</span><div class="row2"><button class="btn ghost" data-a="closeTease">Не сейчас</button><button class="btn" data-a="plusOpen" data-v="tease">Посмотреть</button></div></div>`}
 function remOffer(){if(!remDue())return "";const d=new Date(),t=pad(d.getHours())+":"+pad(Math.floor(d.getMinutes()/15)*15);
   return `<div class="rem-offer" id="remOffer"><b>🔔 Напоминать каждый день в ${t}?</b><span>Бот пришлёт стих и напомнит найти минутку с Богом. Время можно поменять в «Сообщениях от бота».</span><div class="row2"><button class="btn ghost" data-a="remNo">Не надо</button><button class="btn" data-a="remYes" data-v="${t}">🔔 Напоминать</button></div></div>`}
 function drawPMDone(){
@@ -3027,6 +3079,7 @@ function drawPMDone(){
   <p class="pv" style="text-align:center">${esc(v.t)}</p><div style="text-align:center"><span class="pvr">${esc(v.r)}</span></div>
   ${g?`<p class="pr pg-say" style="text-align:center">${esc(g.s)}</p>`:""}
   <p class="pr" style="text-align:center">На твоём небе зажглась новая звезда. Всё записано в дневник.</p>${remOffer()}
+  ${plusTease()}
   <div style="text-align:center;margin:0 0 6px"><button class="textbtn" data-a="inviteFriend">💌 Позвать друга молиться вместе</button></div>
   <div class="pm-foot"><button class="btn" data-a="pmClose">Готово</button></div>`;
   $("#pm").scrollTop=0;
@@ -3268,6 +3321,13 @@ const act={
     <p class="small" style="margin:0 4px 12px">Лучше короткий отрывок, прочитанный медленно, чем вся глава бегом. Можно и выделить свои стихи в тексте.</p>
     <div class="pick">${parts.map(([a,e])=>`<button data-a="rPrayGo" data-v="${a}-${e}">${esc(BOOKS[b][1])} ${c}:${a}–${e}</button>`).join("")}</div>`,"rpray")},
   rPrayGo:d=>{const {b,c}=readerPos(),[a,e]=d.v.split("-").map(Number);startLectio(b,c,Array.from({length:e-a+1},(_,i)=>a+i))},
+  plusOpen:d=>{closeSheetIf("donate");plusSheet(d&&d.v)},
+  plusPlan:d=>{ui.plan=d.v;plusSheet()},
+  plusTrial:async()=>{try{await call("plus/trial");ping("plusTrial");buzz();burst();await plusRefresh();toast("✨ Плюс включён на 7 дней — пусть молитва будет глубже 🙏")}catch(e){toast(e.message)}},
+  plusBuy:()=>payStart(ui.plan||"year"),
+  donateOpen:()=>donateSheet(),
+  donatePay:d=>payStart("donate",+d.v),
+  closeTease:d=>{const el=d&&document.querySelector('.rem-offer');if(el)el.remove()},
   inviteFriend:()=>{ping("invite");tgShare("Я молюсь с «Молитвенным дневником» 🙏 К каждому стиху там есть слова и подсказки, можно слушать голос и просить друзей помолиться за тебя. Загляни:",APP_LINK)},
   remYes:d=>{S.meta.remAsk="yes";persist("meta");ping("remYes");closeSheetIf("remask");const el=$("#remOffer");if(el)el.remove();chDo(()=>call("settings",{remind:d.v,verse:true}),"Буду напоминать каждый день в "+d.v+" 🔔");if(CH.me&&!CH.me.chatOk)setTimeout(()=>askWrite(),900)},
   remNo:()=>{S.meta.remAsk="no";remStamp();ping("remNo");const el=$("#remOffer");if(el)el.remove();toast("Хорошо. Включить можно в «Сообщениях от бота»")},
@@ -3439,6 +3499,7 @@ const act={
   pmSwap:()=>{ping("pmSwap");const st=PM.steps[PM.step];PM.gi[PM.step]=pickGuide(st.k,PM.gi[PM.step]);PM.rv=0;PM.pOpen=false;drawPM(true);const x=$("#pmIn .pg");if(x){x.classList.remove("pg-in");void x.offsetWidth;x.classList.add("pg-in")}pgArm();const g=gAt(PM.step);if(PM.voice&&g)pgSpeak(vName(st.k,PM.gi[PM.step],"m"),[g.t,g.s,pgQ(g)[0]],st.k,PM.gi[PM.step])},
   pmVoice:()=>{PM.voice=!PM.voice;S.meta.pmVoice=PM.voice;persist("meta");if(!PM.voice){pgHush();drawPM(true);return}
     voUnlock();
+    if(!isPlus()&&VOICED.size&&!S.meta.voUp){S.meta.voUp=Date.now();persist("meta");setTimeout(()=>plusSheet("voice"),1600)}
     /* switch to recorded variants where they exist (this and the next steps, and the blessing) */
     for(let k=PM.step;k<PM.steps.length;k++){const st=PM.steps[k],gi=PM.gi&&PM.gi[k];if(gi>=0&&!vName(st.k,gi,"m")){const n=pickGuide(st.k);if(n>=0&&vName(st.k,n,"m")){PM.gi[k]=n;if(k===PM.step){PM.rv=0;PM.pOpen=false}}}}
     if(PM.endGi>=0&&!vName("done",PM.endGi,"m")){const n=pickGuide("done");if(n>=0&&vName("done",n,"m")){PM.endGi=n;PM.endG=GUIDE.done[n]}}
@@ -3482,6 +3543,7 @@ connect();
 setTimeout(guideLoad,600);
 loadBible();
 if(LOGIN0&&TG)setTimeout(()=>approveSheet(LOGIN0),600);
+try{if(new URLSearchParams(location.search).get("paid")){history.replaceState(null,"",location.pathname+location.hash);setTimeout(()=>{toast("Проверяю оплату…");plusRefresh();setTimeout(plusRefresh,4000);setTimeout(()=>{if(isPlus())toast("✨ Плюс включён. Спасибо за поддержку!")},4500)},1200)}}catch(e){}
 if(JOIN0&&tgOn()){try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}setTimeout(()=>joinPrompt(JOIN0),400)}
 {let go=null;try{go=new URLSearchParams(location.search).get("go")||(TG&&TG.initDataUnsafe&&TG.initDataUnsafe.start_param)||null}catch(e){}
   if(go==="pray"&&!JOIN0){try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}setTimeout(()=>{if(!PM&&!TR&&$("#sheet").classList.contains("hidden"))act.startPrayer()},700)}}

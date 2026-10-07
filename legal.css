@@ -45,4 +45,15 @@ a{color:var(--gold)}
 .req dt{color:var(--muted)}.req dd{margin:0}
 .foot{margin-top:34px;color:var(--muted);font-size:14px}
 @media (max-width:520px){.top{flex-direction:column;align-items:flex-start;gap:10px}.req dl{grid-template-columns:1fr}.req dd{margin-bottom:6px}ol.n>li{padding-left:2.2em;text-indent:-2.2em}ol.n>li>b:first-child{width:2.2em}}
+/* на телефоне таблицы — карточками: подпись столбца берётся из заголовка (legal.js) */
+@media (max-width:560px){
+  .scroll{overflow:visible}
+  .tbl,.tbl tbody,.tbl tr,.tbl td{display:block;width:100%}
+  .tbl tr:first-child{display:none}
+  .tbl tr{background:var(--card);border:1px solid var(--stroke);border-radius:14px;padding:10px 14px;margin:0 0 10px}
+  .tbl td{border:0;padding:3px 0;display:flex;gap:10px}
+  .tbl td::before{content:attr(data-l);flex:0 0 38%;color:var(--muted);font-size:13px;font-weight:600;padding-top:2px}
+  .tbl td:not([data-l])::before{display:none}
+}
+.tbl.price td:nth-child(3){white-space:nowrap}
 @media print{nav.docs,.back{display:none}body{background:#fff;color:#000}}

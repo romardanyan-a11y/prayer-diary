@@ -23,6 +23,8 @@ window.LEGAL = {
       if (v) { el.textContent = v; el.classList.remove("todo"); }
       else { el.textContent = "[" + (label[k] || k) + "]"; el.classList.add("todo"); }
     });
+    q(".tbl").forEach(function (t) { var h = [].map.call(t.querySelectorAll("tr:first-child th"), function (x) { return x.textContent; });
+      [].forEach.call(t.querySelectorAll("tr"), function (r) { [].forEach.call(r.querySelectorAll("td"), function (d, i) { if (h[i]) d.setAttribute("data-l", h[i]); }); }); });
     q("[data-if-ip]").forEach(function (el) { el.hidden = L.status !== "ip"; });
     q("[data-if-npd]").forEach(function (el) { el.hidden = L.status === "ip"; });
     q("a[data-mail]").forEach(function (a) { if (L.email) a.href = "mailto:" + L.email; });

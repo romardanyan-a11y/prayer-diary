@@ -1016,7 +1016,7 @@ const MODES={
 let GUIDE={cat:{}},GUIDE_OK=false;
 function guideLoad(){if(GUIDE_OK)return Promise.resolve();if(guideLoad.p)return guideLoad.p;
   return guideLoad.p=fetch("guide.json").then(r=>{if(!r.ok)throw new Error("guide");return r.json()}).then(g=>{GUIDE=g;GUIDE_OK=true}).catch(()=>{}).finally(()=>{guideLoad.p=null})};
-const VOICED=new Set(["ask-0-m-39942", "ask-0-q1-33982", "ask-1-m-72724", "ask-1-q1-88144", "ask-2-m-17564", "ask-2-q1-70723", "ask-3-m-10371", "ask-3-q1-94888", "ask-4-m-97519", "done-0-m-57385", "done-1-m-8595", "done-5-m-21553", "done-7-m-20952", "listen-0-m-99388", "listen-0-q1-54584", "listen-1-m-11475", "listen-1-q1-95060", "listen-2-m-1489", "listen-2-q1-26556", "listen-3-m-98331", "listen-3-q1-17158", "listen-4-m-24797", "listen-4-q1-23390", "praise-0-m-97619", "praise-0-q1-55651", "praise-0-q2-66276", "praise-1-m-94434", "praise-1-q1-40247", "praise-2-m-98524", "praise-2-q1-18103", "praise-3-m-26468", "praise-3-q1-48438", "praise-4-m-30216", "praise-4-q1-96400", "quiet-0-m-43925", "quiet-0-q1-15834", "quiet-0-q2-47041", "quiet-1-m-96951", "quiet-1-q1-70390", "quiet-1-q2-11408", "quiet-2-m-91919", "quiet-2-q1-34989", "quiet-2-q2-66214", "quiet-3-m-55961", "quiet-3-q1-21550", "quiet-3-q2-70862", "quiet-4-m-14295", "quiet-4-q1-64348", "quiet-4-q2-56176", "repent-0-m-50490", "repent-0-q1-11711", "repent-0-q2-34841", "repent-1-m-11822", "repent-1-q1-65929", "repent-2-m-37147", "repent-2-q1-15338", "repent-3-m-77747", "repent-3-q1-97908", "repent-4-m-14069", "repent-4-q1-40239", "thanks-0-m-71790", "thanks-0-q1-85901", "thanks-1-m-42046", "thanks-1-q1-47604", "thanks-2-m-42488", "thanks-2-q1-27333", "thanks-2-q2-31549", "thanks-3-m-43137", "thanks-4-m-65436", "thanks-4-q1-78022"]);
+const VOICED=new Set([]);
 const CATS=["Семья","Здоровье","Друзья","Работа","Служение","Моя жизнь","Страна и мир","Другое"];
 const ICONS=["🙏","❤️","✝️","🕊️","🏠","👨‍👩‍👧","🩺","💼","🎓","🌍","🔥","⛪","💍","🚗","💰","🌱","✨","🛡️"];
 const COLORS=["#E9B44A","#EC7680","#6BB6E8","#72C495","#A58BE8","#F0A15E","#4FC2B5","#D95B63"];
@@ -1059,7 +1059,7 @@ try{const r=localStorage.getItem(LSP);if(r)pending=new Set(JSON.parse(r))}catch(
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LSP,JSON.stringify([...pending]))}catch(e){}}
 function hasData(){return Object.keys(S.people||{}).length||Object.keys(S.marks||{}).length||Object.keys(S.prayers).length||Object.keys(S.entries).length||Object.keys(S.meta.days||{}).length}
 
-let col=null; const chains={},inflight={},busy={},bad={};const APPV="21";
+let col=null; const chains={},inflight={},busy={},bad={};const APPV="22";
 function current(id){if(id==="meta")return S.meta;return S.prayers[id]||S.entries[id]||S.marks[id]||S.people[id]||null}
 function write(id){
   pending.add(id);saveLocal();
@@ -2371,7 +2371,7 @@ function vReader(){
     const tx=n===1&&R.layout==="flow"&&t?`<span class="dc">${esc(t.charAt(0))}</span>${esc(t.slice(1))}`:esc(t);
     return `<span class="vs ${h?"hl":""} ${TTS.on&&TTS.i+1===n?"speak":""} ${sel.includes(n)?"sel":""} ${ui.flash===n?"flash":""}" id="v${n}" data-a="vtap" data-v="${n}" style="${h?`--h:${HL[h]}`:""}">${n===1&&R.layout==="flow"?"":`<sup>${n}</sup>`}${tx}${note?`<button class="vn" data-a="vnote" data-v="${n}" aria-label="Заметка к стиху ${n}">${ic("pen")}</button>`:""}${cmE[n]?`<button class="cm" data-a="cmt" data-v="${n}" aria-label="Комментарий к стиху ${n}">${[...new Set(cmE[n].map(x=>(CK[x.kind]||CK.fact)[0]))].join("")}</button>`:""}</span>`}).join(R.layout==="flow"?" ":"");
   const soap=(m&&m.soap)||[];
-  return `<div class="rbar"><button class="rpick" data-a="rPick">${esc(BOOKS[b][0])} ${c}${ic("chev")}</button>${VOICE_ON?`<button class="rb ${TTS.on?"play":""}" data-a="rListen" aria-label="${TTS.on?"Остановить чтение":"Слушать главу"}">${TTS.on?"⏸":"🎧"}</button>`:""}<button class="rb" data-a="rSearch" aria-label="Поиск по Библии">${ic("search")}</button><button class="rb" data-a="rSettings" aria-label="Настройки текста"><b style="font-family:var(--serif);font-size:18px">Аа</b></button></div>
+  return `<div class="rbar"><button class="rpick" data-a="rPick">${esc(BOOKS[b][0])} ${c}${ic("chev")}</button>${READ_TTS?`<button class="rb ${TTS.on?"play":""}" data-a="rListen" aria-label="${TTS.on?"Остановить чтение":"Слушать главу"}">${TTS.on?"⏸":"🎧"}</button>`:""}<button class="rb" data-a="rSearch" aria-label="Поиск по Библии">${ic("search")}</button><button class="rb" data-a="rSettings" aria-label="Настройки текста"><b style="font-family:var(--serif);font-size:18px">Аа</b></button></div>
   <article class="reader t-${R.theme} f-${R.font} l-${R.layout}" style="--rs:${R.size}px">
     <div class="r-book">${esc(BOOKS[b][0])}</div><h2 class="r-ch">Глава ${c}</h2>
     ${cm&&cm.intro&&!ui.introOff?`<div class="r-intro"><small>✦ О чём эта глава</small>${esc(cm.intro)}<button class="x" data-a="introOff" aria-label="Скрыть">${ic("x")}</button></div>`:""}
@@ -2390,7 +2390,7 @@ function vReader(){
     <button class="btn ghost wide mt" data-a="soapNew">${ic("pen")}${soap.length?"Добавить ещё":"Написать размышление"}</button></section>
   ${sel.length?`<div class="vbar" role="toolbar" aria-label="Действия со стихами"><div class="vb-top"><b>${vRef(b,c,sel)}</b><button class="rb" data-a="vClear" aria-label="Снять выделение">${ic("x")}</button></div>
     <div class="vb-colors">${Object.entries(HL).map(([k,col])=>`<button style="--h:${col}" data-a="vHl" data-v="${k}" aria-label="Выделить цветом"></button>`).join("")}<button class="nohl" data-a="vHl" data-v="" aria-label="Убрать выделение">${ic("x")}</button></div>
-    <div class="vb-acts six"><button data-a="vLectio">📜<span>Лекцио</span></button><button data-a="vNoteNew">${ic("pen")}<span>Заметка</span></button><button data-a="vFav">${ic("heart")}<span>В мои</span></button><button data-a="vShare">${ic("share")}<span>Картинка</span></button><button data-a="vLearn">🧠<span>Учить</span></button><button data-a="vCopy">${ic("book")}<span>Копия</span></button></div>${VOICE_ON?`<button class="btn ghost wide" style="height:40px;margin-top:8px;font-size:14px" data-a="rListen">🎧 Слушать отсюда</button>`:""}</div>`:""}`;
+    <div class="vb-acts six"><button data-a="vLectio">📜<span>Лекцио</span></button><button data-a="vNoteNew">${ic("pen")}<span>Заметка</span></button><button data-a="vFav">${ic("heart")}<span>В мои</span></button><button data-a="vShare">${ic("share")}<span>Картинка</span></button><button data-a="vLearn">🧠<span>Учить</span></button><button data-a="vCopy">${ic("book")}<span>Копия</span></button></div>${READ_TTS?`<button class="btn ghost wide" style="height:40px;margin-top:8px;font-size:14px" data-a="rListen">🎧 Слушать отсюда</button>`:""}</div>`:""}`;
 }
 function vNotes(){
   const ms=Object.values(S.marks).sort((a,b)=>a.b-b.b||a.c-b.c),f=ui.nf||"all",items=[];
@@ -2619,7 +2619,7 @@ function drawCards(){
   <span class="sw-st sw-l" id="swL">ПОЗЖЕ</span><span class="sw-st sw-r" id="swR">🙏 АМИНЬ</span></div>
   <div class="cd-t"><i></i></div><div class="sw-hint"><span>← позже</span><span>побудь минуту с этой нуждой</span><span>помолился →</span></div>
   <div class="pm-foot"><button class="btn ghost" data-a="cardSkip" aria-label="Пропустить" style="flex:0 0 auto;padding:0 18px">Пропустить</button><button class="btn" data-a="cardDone">🙏 Помолился</button></div>`;
-  $("#pm").scrollTop=0;swipeCard();if(PM.voice)pgSay([p.title,cv.t,cg.q])}
+  $("#pm").scrollTop=0;swipeCard();if(PM.voice)pgNeed(cv,cg)}
 function swipeCard(){const card=$("#pmIn .pcard.sw");if(!card)return;let x0=null,y0=0,dx=0,drag=false;
   const set=()=>{card.style.transform=`translateX(${dx}px) rotate(${dx/20}deg)`;const r=$("#swR"),l=$("#swL");if(r)r.style.opacity=dx>0?Math.min(1,dx/90):0;if(l)l.style.opacity=dx<0?Math.min(1,-dx/90):0};
   card.addEventListener("pointerdown",e=>{x0=e.clientX;y0=e.clientY;dx=0;drag=false;card.style.transition="none"});
@@ -2975,8 +2975,6 @@ function pgReveal(){const q=pgQ(gAt(PM.step));if(!q||PM.rv>=q.length-1)return;PM
   const li=document.querySelectorAll("#pmIn .pg-q li")[PM.rv];if(li){li.hidden=false;li.classList.add("on","new")}
   if(PM.rv>=q.length-1){const b=$("#pmIn .pg-more");if(b)b.remove()}
   if(PM.voice){const st=PM.steps[PM.step],gi=PM.gi[PM.step];pgSpeak(vName(st.k,gi,"q"+PM.rv),[q[PM.rv]])}pgArm()}
-function pgSay(parts){if(!VOICE_ON||!("speechSynthesis" in window))return;try{speechSynthesis.cancel()}catch(e){}
-  parts.filter(Boolean).forEach(t=>{try{const u=new SpeechSynthesisUtterance(String(t).replace(/[«»]/g,""));u.lang="ru-RU";const v=ttsVoice();if(v)u.voice=v;u.rate=.92;speechSynthesis.speak(u)}catch(e){}})}
 function pgHush(){try{if("speechSynthesis" in window)speechSynthesis.cancel()}catch(e){}VO.tok++;try{if(VO.el&&!VO.el.paused){VO.el.pause();duck(false)}}catch(e){}}
 /* recorded voice (ElevenLabs · Brian): audio/v/{key}-{i}-{part}-{hash}.mp3; device speech is only a fallback */
 const VO={el:null,tok:0,cache:{},unlocked:false};
@@ -2984,18 +2982,28 @@ function voText(key,i,part){const v=GUIDE[key]&&GUIDE[key][i];if(!v)return "";re
 function vName(key,i,part){if(i==null||i<0)return null;const t=voText(key,i,part);if(!t)return null;const n=key+"-"+i+"-"+part+"-"+hash(t);return VOICED.has(n)?n:null}
 function voEl(){if(!VO.el){const a=new Audio();a.setAttribute("playsinline","");a.preload="auto";a.onended=()=>duck(false);a.onerror=()=>duck(false);VO.el=a}return VO.el}
 function voUnlock(){if(VO.unlocked)return;VO.unlocked=true;try{const a=voEl();a.src=URL.createObjectURL(new Blob([silentWav()],{type:"audio/wav"}));const p=a.play();if(p&&p.then)p.then(()=>{if(!VO.busy)a.pause()}).catch(()=>{VO.unlocked=false})}catch(e){VO.unlocked=false}}
-async function voUrl(name){if(VO.cache[name])return VO.cache[name];const r=await fetch("audio/v/"+name+".mp3");if(!r.ok)throw new Error("voice");return VO.cache[name]=URL.createObjectURL(await r.blob())}
+async function voUrl(name){if(VO.cache[name])return VO.cache[name];const r=await fetch(VOICE_DIR+name+".mp3");if(!r.ok)throw new Error("voice");return VO.cache[name]=URL.createObjectURL(await r.blob())}
 async function voPlay(name){const a=voEl(),tok=++VO.tok;VO.busy=true;
   try{const url=await voUrl(name);if(tok!==VO.tok)return;a.src=url;duck(true);const p=a.play();if(p&&p.catch)p.catch(()=>duck(false))}catch(e){duck(false)}finally{if(tok===VO.tok)VO.busy=false}}
 function voPrefetch(key,i){for(let n=1;n<5;n++){const nm=vName(key,i,"q"+n);if(!nm)break;voUrl(nm).catch(()=>{})}}
-function pgSpeak(clip,texts,key,i){pgHush();if(!VOICE_ON)return;if(clip&&!isPlus())clip=null;if(clip){voPlay(clip);if(key)voPrefetch(key,i)}else pgSay(texts)}
+function pgSpeak(clip,texts,key,i){pgHush();if(!VOICE_ON||!clip||!isPlus())return;voPlay(clip);if(key)voPrefetch(key,i)}
+/* карточка нужды: записанный стих-обещание, затем подсказка «как молиться»; название нужды не читаем — его пишет сам человек */
+const vClip=n=>VOICED.has(n)?n:null;
+function pgNeed(v,g){pgHush();if(!VOICE_ON||!isPlus())return;voPlaySeq([v&&v.t?vClip("pr-"+hash(v.t)):null,g&&g.q?vClip("cg-"+hash(g.q)):null].filter(Boolean))}
+async function voPlaySeq(names){if(!names.length)return;const a=voEl(),tok=++VO.tok;VO.busy=true;
+  try{for(const n of names){const url=await voUrl(n);if(tok!==VO.tok)return;a.src=url;duck(true);
+      await new Promise(r=>{const done=()=>{["ended","error","pause"].forEach(e=>a.removeEventListener(e,done));r()};["ended","error","pause"].forEach(e=>a.addEventListener(e,done));const pl=a.play();if(pl&&pl.catch)pl.catch(done)});
+      if(tok!==VO.tok)return;await new Promise(r=>setTimeout(r,500))}}
+  catch(e){}finally{if(tok===VO.tok){VO.busy=false;duck(false)}}}
 /* music gets quieter while the voice speaks */
 function duck(on){try{if(TRK.a&&volOK())elFade(TRK.a,on?.25:.85,500)}catch(e){}
   try{if(TRK.g&&AMB.ctx){const C=AMB.ctx;TRK.g.gain.cancelScheduledValues(C.currentTime);TRK.g.gain.setTargetAtTime(on?.35:1,C.currentTime,.25)}}catch(e){}
   try{if(AMB.on&&AMB.master&&AMB.ctx){const C=AMB.ctx;AMB.master.gain.cancelScheduledValues(C.currentTime);AMB.master.gain.setTargetAtTime(on?.08:.24,C.currentTime,.25)}}catch(e){}}
 /* озвучка выключена, пока голос не записан полностью; вернуть — VOICE_ON=true */
-const VOICE_ON=false;
-const voiceBtn=()=>VOICE_ON&&(("speechSynthesis" in window)||VOICED.size)?`<button class="pill icon vbtn ${PM&&PM.voice?"on":""}" data-a="pmVoice" aria-label="${PM&&PM.voice?"Не читать вслух":"Читать вслух"}" aria-pressed="${PM&&PM.voice?"true":"false"}">${ic("voice")}</button>`:"";
+const VOICE_ON=false,VOICE_DIR="audio/v2/";
+/* чтение главы голосом телефона — выключено */
+const READ_TTS=false;
+const voiceBtn=()=>VOICE_ON&&VOICED.size?`<button class="pill icon vbtn ${PM&&PM.voice?"on":""}" data-a="pmVoice" aria-label="${PM&&PM.voice?"Не читать вслух":"Читать вслух"}" aria-pressed="${PM&&PM.voice?"true":"false"}">${ic("voice")}</button>`:"";
 function pmTop(){return `<div class="pm-top"><button class="pill icon" data-a="pmClose" aria-label="Выйти">${ic("x")}</button><div class="grow"><span class="timer" id="pmTimer">${elapsed()}</span></div>${voiceBtn()}${musicBtn()}</div>`}
 function afList(){return PM.checked.size?[...PM.checked].filter(id=>S.prayers[id]&&S.prayers[id].status!=="answered"):(todaysList().length?todaysList():active().slice(0,7)).map(p=>p.id)}
 function afEnd(){const n=PM.af?PM.af.n:0;PM.af=null;PM.afN=(PM.afN||0)+n;drawPM();pgArm()}
@@ -3010,7 +3018,7 @@ function drawAskFlow(keep){const F=PM.af,st=PM.steps[PM.step];let p=S.prayers[F.
   <div class="pg-how"><small>Как молиться</small><p>${esc(cg.q)}</p>${p.wait?`<p class="pg-wait">⏳ Ты ждёшь ответа на эту молитву. Бог не забыл — продолжай доверять.</p>`:""}<details class="pg-pray"><summary>🙏 Можно сказать так</summary><p>${esc(cg.p)}</p></details></div></div>
   <button class="pg-more" style="margin:14px auto 0" data-a="afStop">Вернуться к списку</button>
   <div class="pm-foot"><button class="btn ghost" data-a="afSkip" style="flex:0 0 auto;padding:0 18px">Позже</button><button class="btn" data-a="afDone">🙏 Аминь</button></div>`;
-  if(!keep){$("#pm").scrollTop=0;if(PM.voice)pgSay([p.title,v.t,cg.q])}}
+  if(!keep){$("#pm").scrollTop=0;if(PM.voice)pgNeed(v,cg)}}
 
 /* ---------- prayer mode ---------- */
 let PM=null,tick=null;
@@ -3021,7 +3029,7 @@ function startPM(mode){
   PM={mode,steps:MODES[mode].steps,step:0,start:Date.now(),checked:new Set(),thanks:"",text:"",word:"",passage:null,done:false,list:mode==="cards"?(todaysList().length?todaysList():active()):[],ci:0};
   if(mode==="cards"&&!PM.list.length){PM=null;toast("Сначала добавь нужды");return}
   PM.vv=PM.steps.map(st=>st.v&&!st.lord?freshVerse(st.k,st.v):null);PM.endV=freshVerse("done",VERSES[5]);
-  PM.gi=PM.steps.map(st=>(st.v||st.g)&&!st.lord&&GUIDE[st.k]?pickGuide(st.k):-1);if(MODES[mode].sit)ping("pmSit");{const ge=pickGuide("done");PM.endGi=ge;PM.endG=ge>=0?GUIDE.done[ge]:null}if(VOICE_ON&&S.meta.pmVoice)voUnlock();PM.voice=VOICE_ON&&!!S.meta.pmVoice;PM.rv=0;PM.rvStep=0;if(mode==="lectio"){const li=pickGuide("lectio");if(li>=0)PM.passage=GUIDE.lectio[li]}
+  PM.gi=PM.steps.map(st=>(st.v||st.g)&&!st.lord&&GUIDE[st.k]?pickGuide(st.k):-1);if(MODES[mode].sit)ping("pmSit");{const ge=pickGuide("done");PM.endGi=ge;PM.endG=ge>=0?GUIDE.done[ge]:null}if(VOICE_ON&&S.meta.pmVoice)voUnlock();PM.voice=VOICE_ON&&isPlus()&&!!S.meta.pmVoice;PM.rv=0;PM.rvStep=0;if(mode==="lectio"){const li=pickGuide("lectio");if(li>=0)PM.passage=GUIDE.lectio[li]}
   ping("pmStart");$("#pm").classList.add("show");document.body.style.overflow="hidden";if(bgPref()!=="off")bgStart(bgPref());drawPM();if(tgOn())call("live/start",{minutes:30}).catch(()=>{});tick=setInterval(()=>{const el=$("#pmTimer");if(el)el.textContent=elapsed()},1000)}
 function elapsed(){const s=Math.floor((Date.now()-PM.start)/1000);return pad(Math.floor(s/60))+":"+pad(s%60)}
 function closePM(){clearInterval(tick);if(PM){clearTimeout(PM.rvT);if(!PM.done)ping(PM.mode==="full"&&PM.step<6?"pmQuit"+(PM.step+1):"pmQuit")}pgHush();bgStop();if(PM&&tgOn())call("live/stop").catch(()=>{});PM=null;$("#pm").classList.remove("show");document.body.style.overflow="";render();checkBadges()}
@@ -3504,14 +3512,13 @@ const act={
   pmNext:()=>{PM.step++;drawPM()},
   pmMore:()=>pgReveal(),
   pmSwap:()=>{ping("pmSwap");const st=PM.steps[PM.step];PM.gi[PM.step]=pickGuide(st.k,PM.gi[PM.step]);PM.rv=0;PM.pOpen=false;drawPM(true);const x=$("#pmIn .pg");if(x){x.classList.remove("pg-in");void x.offsetWidth;x.classList.add("pg-in")}pgArm();const g=gAt(PM.step);if(PM.voice&&g)pgSpeak(vName(st.k,PM.gi[PM.step],"m"),[g.t,g.s,pgQ(g)[0]],st.k,PM.gi[PM.step])},
-  pmVoice:()=>{PM.voice=!PM.voice;S.meta.pmVoice=PM.voice;persist("meta");if(!PM.voice){pgHush();drawPM(true);return}
+  pmVoice:()=>{if(!PM.voice&&!isPlus()){ping("pmVoice");plusSheet("voice");return}PM.voice=!PM.voice;S.meta.pmVoice=PM.voice;persist("meta");if(!PM.voice){pgHush();drawPM(true);return}
     voUnlock();
-    if(!isPlus()&&VOICED.size&&!S.meta.voUp){S.meta.voUp=Date.now();persist("meta");setTimeout(()=>plusSheet("voice"),1600)}
     /* switch to recorded variants where they exist (this and the next steps, and the blessing) */
     for(let k=PM.step;k<PM.steps.length;k++){const st=PM.steps[k],gi=PM.gi&&PM.gi[k];if(gi>=0&&!vName(st.k,gi,"m")){const n=pickGuide(st.k);if(n>=0&&vName(st.k,n,"m")){PM.gi[k]=n;if(k===PM.step){PM.rv=0;PM.pOpen=false}}}}
     if(PM.endGi>=0&&!vName("done",PM.endGi,"m")){const n=pickGuide("done");if(n>=0&&vName("done",n,"m")){PM.endGi=n;PM.endG=GUIDE.done[n]}}
     drawPM(true);ping("pmVoice");toast("Буду читать стих и подсказки вслух");const g=gAt(PM.step),st=PM.steps[PM.step];
-    if(PM.af){const p=S.prayers[PM.af.ids[PM.af.i]];if(p)pgSay([p.title,catGuide(p).q]);return}
+    if(PM.af){const p=S.prayers[PM.af.ids[PM.af.i]];if(p)pgNeed(null,catGuide(p));return}
     if(PM.mode==="cards"||PM.done)return;pgSpeak(g?vName(st.k,PM.gi[PM.step],"m"):null,g?[g.t,g.s,pgQ(g)[0]]:[st.lord||(st.v&&st.v.t),st.p],st.k,PM.gi[PM.step])},
   pmFlow:()=>{const ids=afList();if(!ids.length)return;ping("pmFlow");PM.af={ids,i:0,n:0};clearTimeout(PM.rvT);drawPM()},
   afDone:()=>{const F=PM.af;if(!F)return;PM.checked.add(F.ids[F.i]);F.n++;buzz();F.i++;if(F.i>=F.ids.length)afEnd();else drawPM()},

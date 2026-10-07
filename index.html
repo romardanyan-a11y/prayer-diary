@@ -14,6 +14,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,500;1,600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>/* эмодзи как на всех платформах одинаково: вне iPhone/iPad/Mac — Noto Color Emoji (Google Fonts грузит только нужные символы) */
+if(!/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)){document.documentElement.classList.add("emj");document.write('<link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">')}</script>
 <style>
 :root{
   --bg:#F3F2F8; --card:rgba(255,255,255,.8); --card2:rgba(20,22,44,.055); --stroke:rgba(20,22,44,.08);
@@ -27,6 +29,7 @@
   color-scheme:light; box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
+:root.emj{--sans:"Onest","Noto Color Emoji", -apple-system, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#07080E; --card:rgba(255,255,255,.045); --card2:rgba(255,255,255,.075); --stroke:rgba(255,255,255,.075);
   --glass:rgba(20,21,34,.62); --text:#F6F3EC; --muted:rgba(235,235,245,.56); --faint:rgba(235,235,245,.28);
@@ -1059,7 +1062,7 @@ try{const r=localStorage.getItem(LSP);if(r)pending=new Set(JSON.parse(r))}catch(
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LSP,JSON.stringify([...pending]))}catch(e){}}
 function hasData(){return Object.keys(S.people||{}).length||Object.keys(S.marks||{}).length||Object.keys(S.prayers).length||Object.keys(S.entries).length||Object.keys(S.meta.days||{}).length}
 
-let col=null; const chains={},inflight={},busy={},bad={};const APPV="22";
+let col=null; const chains={},inflight={},busy={},bad={};const APPV="23";
 function current(id){if(id==="meta")return S.meta;return S.prayers[id]||S.entries[id]||S.marks[id]||S.people[id]||null}
 function write(id){
   pending.add(id);saveLocal();
@@ -1387,7 +1390,7 @@ function vHome(){
   <button class="cta" data-a="startPrayer"><span class="orb">${ic("flame")}</span><span><b>Начать молитву</b><small>Молитва, покаяние или пост</small></span><span class="go">${ic("play")}</span></button>
   ${answerCard()}${firstNeedCard()}
   ${tgOn()&&(!CH.ai||CH.ai.ready)?`<button class="aic" data-a="aiOpen" data-v="prayer"><span class="be">✨</span><span><b>ИИ-помощник</b><small>Помолиться своими словами · стих под ситуацию · разобрать заметки</small></span>${ic("right")}</button>`:""}
-  ${fastCard()}${capsuleHome()}${bdayCard()}${todayCard()}${dueCard()}${hoursCard()}${srsCard()}${forMeCard()}${worldCard()}${churchHome()}
+  ${fastCard()}${capsuleHome()}${bdayCard()}${todayCard()}${dueCard()}${hoursCard()}${srsCard()}${forMeCard()}${WORLD_ON?worldCard():""}${churchHome()}
   ${(new Date().getMonth()===11&&new Date().getDate()>=15)||(new Date().getMonth()===0&&new Date().getDate()<=15)?`<button class="weekc" data-a="yearOpen" style="background:radial-gradient(100% 120% at 0% 0%,#FFB35C,transparent 60%),radial-gradient(100% 120% at 100% 100%,#6B5CF0,transparent 60%),#2A1030"><span class="wk-orb">🎆</span><span><small>Итоги года</small><b>Твой год с Богом</b></span>${ic("right")}</button>`:""}
   ${(wd===0||wd===1)?`<button class="weekc" data-a="storyOpen"><span class="wk-orb">✨</span><span><small>${wd===0?"Неделя подходит к концу":"Новая неделя"}</small><b>Твоя неделя с Богом</b></span>${ic("right")}</button>`:""}
   ${h>=17&&!confDone?`<button class="confc" data-a="confStart"><span class="cf-orb">🤍</span><span><small>Вечерний разбор</small><b>Посмотри на день с Богом</b><span>Покайся — и засыпай прощённым</span></span>${ic("right")}</button>`:""}
@@ -1936,6 +1939,8 @@ function worldToday(){if(!WORLD||!WORLD.length)return null;return WORLD[Math.flo
 function worldJson(){if(WORLD||ui.worldTry)return;ui.worldTry=true;fetch("world.json").then(r=>r.json()).then(j=>{WORLD=j;if(ui.tab==="home"&&$("#sheet").classList.contains("hidden")&&!PM)render()}).catch(()=>{setTimeout(()=>{ui.worldTry=false},60000)})}
 function worldLoad(){worldJson();
   if(tgOn())call("world/get",{day:today()}).then(r=>{CH.world=Object.assign({day:today()},r);if(ui.tab==="home"&&$("#sheet").classList.contains("hidden")&&!PM)render()}).catch(()=>{})}
+/* «Сегодня весь дневник молится за…» — скрыто с главной (меньше перегруза); вернуть — WORLD_ON=true */
+const WORLD_ON=false;
 function worldCard(){if(!WORLD){worldJson();return ""}const c=worldToday();if(!c)return "";const W=CH.world&&CH.world.day===today()?CH.world:null,mine=(S.meta.world||{})[today()]||(W&&W.mine);
   return `<button class="wcard" data-a="worldOpen"><span class="be">${c.f}</span><span><small>🌍 Сегодня весь дневник молится за</small><b>${esc(c.n)}</b><span>${W&&W.n?W.n+" "+plural(W.n,"человек уже помолился","человека уже помолились","человек уже помолились"):"Помолись вместе со всеми"}${mine?" · ✓ ты тоже":""}</span></span>${ic("right")}</button>`}
 function worldSheet(){const c=worldToday();if(!c)return;const W=CH.world&&CH.world.day===today()?CH.world:null,mine=(S.meta.world||{})[today()]||(W&&W.mine);

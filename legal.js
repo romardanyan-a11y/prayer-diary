@@ -2,11 +2,11 @@
    status: "npd" — самозанятый (налог на профессиональный доход), "ip" — индивидуальный предприниматель. */
 window.LEGAL = {
   status: "npd",
-  fio: "",          // Фамилия Имя Отчество полностью
+  fio: "Марданян Роман Ованесович", // Фамилия Имя Отчество полностью
   inn: "371122273306", // ИНН, 12 цифр
   ogrnip: "",       // только для ИП
-  email: "",        // почта для обращений и претензий
-  tg: "",           // Telegram для связи, например @username
+  email: "romardanyan@gmail.com", // почта для обращений и претензий
+  tg: "",           // Telegram для связи, например @username (пусто — строки с Telegram скрыты)
   edition: "6 октября 2026 г.",
 };
 (function () {
@@ -25,6 +25,7 @@ window.LEGAL = {
     });
     q(".tbl").forEach(function (t) { var h = [].map.call(t.querySelectorAll("tr:first-child th"), function (x) { return x.textContent; });
       [].forEach.call(t.querySelectorAll("tr"), function (r) { [].forEach.call(r.querySelectorAll("td"), function (d, i) { if (h[i]) d.setAttribute("data-l", h[i]); }); }); });
+    q(".tg-opt").forEach(function (el) { el.hidden = !L.tg; });
     q("[data-if-ip]").forEach(function (el) { el.hidden = L.status !== "ip"; });
     q("[data-if-npd]").forEach(function (el) { el.hidden = L.status === "ip"; });
     q("a[data-mail]").forEach(function (a) { if (L.email) a.href = "mailto:" + L.email; });

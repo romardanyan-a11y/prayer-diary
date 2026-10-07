@@ -1062,7 +1062,7 @@ try{const r=localStorage.getItem(LSP);if(r)pending=new Set(JSON.parse(r))}catch(
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LSP,JSON.stringify([...pending]))}catch(e){}}
 function hasData(){return Object.keys(S.people||{}).length||Object.keys(S.marks||{}).length||Object.keys(S.prayers).length||Object.keys(S.entries).length||Object.keys(S.meta.days||{}).length}
 
-let col=null; const chains={},inflight={},busy={},bad={};const APPV="23";
+let col=null; const chains={},inflight={},busy={},bad={};const APPV="24";
 function current(id){if(id==="meta")return S.meta;return S.prayers[id]||S.entries[id]||S.marks[id]||S.people[id]||null}
 function write(id){
   pending.add(id);saveLocal();
@@ -2178,31 +2178,35 @@ async function plusSheet(why){ui.plan=ui.plan||"year";ping("plusView");const h=P
   const top=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Дневник Плюс</h2><span style="width:40px"></span></div>`;
   const ben=[...(VOICE_ON?[["🔈","Живой голос для всех молитв","Спокойный голос читает стих, слова и подсказки"]]:[]),["🎵","Вся музыка и природа","Дебюсси, Шопен, Бах, гимны, волны и птицы"],["✨","ИИ-помощник — до 30 вопросов в день","Молитва, стих под ситуацию, вопросы о главе"],["📕","Книга ответов на молитвы","Красивый PDF со всем, что сделал Бог"]];
   const on=isPlus(),until=on?new Date((CH.me&&CH.me.plusUntil)||+(lsGet("pj-plus")||0)):null,trial=!(CH.me&&CH.me.trialUsed),login=!tg&&!SES;
-  const price=k=>tg?`${P[k].stars} ⭐`:`${P[k].rub.toLocaleString("ru-RU")} ₽`;
+  const price=k=>`${P[k].rub.toLocaleString("ru-RU")} ₽`,stars=tg?`<button class="textbtn pl-don" data-a="plusStars">или звёздами Telegram · ${P[ui.plan].stars} ⭐</button>`:"";
   const plan=(k,t,sub,badge)=>`<button class="pl-plan ${ui.plan===k?"on":""}" data-a="plusPlan" data-v="${k}">${badge?`<em>${badge}</em>`:""}<b>${t}</b><strong>${price(k)}</strong><small>${sub}</small></button>`;
   const html=top+`<div class="pl-hero"><div class="pl-e">${h[0]}</div><h3>${h[1]}</h3><p>Дневник бесплатный для всех — и таким останется. Плюс делает молитву глубже и помогает служению расти.</p></div>
     <div class="pl-ben">${ben.map(b=>`<div><i>${b[0]}</i><span><b>${b[1]}</b><small>${b[2]}</small></span></div>`).join("")}</div>
     ${on?`<div class="pl-on">✨ Плюс активен до ${fDayY.format(until)}${CH.me&&CH.me.plusUntil&&(CH.me.plusSrc||"")==="trial"?" · пробная неделя":""}</div>`:`
-    <div class="pl-plans">${plan("year","Год",tg?"оплата один раз":`${Math.round(P.year.rub/12)} ₽ в месяц`,"−38%")}${plan("month","Месяц",tg?"продлевается сама":"оплата один раз","")}</div>
+    <div class="pl-plans">${plan("year","Год",`${Math.round(P.year.rub/12)} ₽ в месяц`,"−38%")}${plan("month","Месяц","оплата один раз","")}</div>
     ${login?`<button class="btn wide" data-a="loginOpen">Войти и оформить</button><p class="small pl-note">Плюс привязан к твоему Telegram — работает и в боте, и здесь.</p>`:
-      trial?`<button class="btn wide" data-a="plusTrial">Попробовать 7 дней бесплатно</button><p class="small pl-note">Без карты и без автосписаний — просто включим Плюс на неделю.</p><button class="btn ghost wide" data-a="plusBuy">Оформить сразу · ${price(ui.plan)}</button>`
-      :`<button class="btn wide" data-a="plusBuy">Оформить · ${price(ui.plan)}</button>`}`}
+      trial?`<button class="btn wide" data-a="plusTrial">Попробовать 7 дней бесплатно</button><p class="small pl-note">Без карты и без автосписаний — просто включим Плюс на неделю.</p><button class="btn ghost wide" data-a="plusBuy">Оформить сразу · ${price(ui.plan)}</button>${stars}`
+      :`<button class="btn wide" data-a="plusBuy">Оформить · ${price(ui.plan)}</button>${stars}`}`}
     <button class="textbtn pl-don" data-a="donateOpen">🤍 Поддержать служение любой суммой</button>
-    <p class="small pl-note">${tg?"Оплата звёздами Telegram. Подписку на месяц можно отменить в Telegram: Настройки → Звёзды.":"Оплата картой или через СБП. Без автопродления — продлишь, когда захочешь."}</p>${legalLinks("Оформляя Плюс, ты принимаешь ")}`;
+    <p class="small pl-note">${tg?"Оплата картой через ЮKassa — страница оплаты откроется в браузере. Без автопродления. Звёздами месяц продлевается сам (отменить: Настройки → Звёзды).":"Оплата картой через ЮKassa. Без автопродления — продлишь, когда захочешь."}</p>${legalLinks("Оформляя Плюс, ты принимаешь ")}`;
   if(ui.sheetKind==="plus")redrawSheet(html);else openSheet(html,"plus")}
 /* оферта, политика, согласие — отдельные страницы рядом с приложением */
 const legalUrl=p=>new URL(p+".html",location.href.split(/[?#]/)[0]).href;
 const legalLinks=(pre)=>`<p class="small pl-legal">${pre?`${pre}<button class="textbtn" data-a="legal" data-v="oferta">условия</button> и <button class="textbtn" data-a="legal" data-v="privacy">политику конфиденциальности</button>.`:`<button class="textbtn" data-a="legal" data-v="oferta">Условия</button> · <button class="textbtn" data-a="legal" data-v="privacy">Конфиденциальность</button>`}</p>`;
-function donateSheet(){const tg=!!TG,list=tg?[50,150,300,700]:[99,299,499,990],unit=tg?" ⭐":" ₽",month=tg?PLUS_PRICE.month.stars:PLUS_PRICE.month.rub;
+function donateSheet(){const tg=!!TG,st=tg&&ui.donStars,list=st?[50,150,300,700]:[99,299,499,990],unit=st?" ⭐":" ₽",month=st?PLUS_PRICE.month.stars:PLUS_PRICE.month.rub;
   const top=`<div class="sh-top"><button class="pill icon" data-a="plusOpen" aria-label="Назад">${ic("left")}</button><h2>Поддержать служение</h2><span style="width:40px"></span></div>`;
-  openSheet(top+`<div class="pl-hero"><div class="pl-e">🤍</div><p>Дневник делается для церкви и для всех христиан. Твой дар помогает ему оставаться бесплатным, оплачивать сервер, голос и ИИ — и расти дальше.</p></div>
+  const html=top+`<div class="pl-hero"><div class="pl-e">🤍</div><p>Дневник делается для церкви и для всех христиан. Твой дар помогает ему оставаться бесплатным, оплачивать сервер, голос и ИИ — и расти дальше.</p></div>
     ${!tg&&!SES?`<button class="btn wide" data-a="loginOpen">Войти через Telegram</button>`:`<div class="pl-don-g">${list.map(a=>`<button data-a="donatePay" data-v="${a}">${a.toLocaleString("ru-RU")}${unit}</button>`).join("")}</div>
-    <p class="small pl-note">От ${month}${unit} — в благодарность месяц Плюса.</p>`}${legalLinks()}`,"donate")}
+    <p class="small pl-note">От ${month}${unit} — в благодарность месяц Плюса.</p>${tg?`<button class="textbtn pl-don" data-a="donStars">${st?"Оплатить картой":"или звёздами Telegram"}</button>`:""}`}${legalLinks()}`;
+  if(ui.sheetKind==="donate")redrawSheet(html);else openSheet(html,"donate")}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&ui.payPending&&Date.now()-ui.payPending<30*60e3){plusRefresh();setTimeout(plusRefresh,4000)}});
 async function plusRefresh(){try{const me=await call("me");CH.me=Object.assign(CH.me||{},me);try{localStorage.setItem("pj-plus",String(me.plusUntil||0))}catch(e){}render();if(ui.sheetKind==="plus")plusSheet()}catch(e){}}
-async function payStart(kind,amount){try{
-    if(TG){const r=await call("plus/stars",{kind,amount});if(!TG.openInvoice){TG.openTelegramLink(r.link);return}
+async function payStart(kind,amount,via){try{
+    if(TG&&via==="stars"){const r=await call("plus/stars",{kind,amount});if(!TG.openInvoice){TG.openTelegramLink(r.link);return}
       TG.openInvoice(r.link,st=>{if(st==="paid"){ping(kind==="donate"?"donated":"plusPaid");toast(kind==="donate"?"Спасибо за поддержку! 🤍":"Спасибо! Включаю Плюс…");setTimeout(plusRefresh,1500);setTimeout(plusRefresh,5000)}else if(st==="failed")toast("Оплата не прошла")});return}
-    const r=await call("plus/card",{kind,amount});location.href=r.url}
+    const r=await call("plus/card",{kind,amount,tg:!!TG});ping("payCard");
+    if(TG){ui.payPending=Date.now();try{TG.openLink(r.url)}catch(e){window.open(r.url,"_blank")}toast("Открываю оплату. После оплаты вернись сюда — Плюс включится сам");return}
+    location.href=r.url}
   catch(e){toast(e.message)}}
 async function joinPrompt(code){code=String(code||"").toUpperCase().replace(/[^A-Z0-9]/g,"");if(!code||!tgOn())return;
   const top=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><h2>Приглашение</h2><span style="width:40px"></span></div>`;
@@ -2295,7 +2299,8 @@ const TOUR=[
   {tab:"bible",sel:".cm, .r-intro, .rbar",t:"Библия с комментариями",x:"Значки у стихов — короткие интересные комментарии. Нажми на любой стих, чтобы выделить его, написать заметку или сделать картинку. В конце главы — вопросы и викторина."},
   {tab:"church",sel:'#tabs [data-v="church"]',t:"Вместе с другими",x:"Молитвенная стена — общая для всех христиан и своя для твоей церкви. Создай церковь или вступи по приглашению. «Читаем вместе» — общие планы чтения Библии."},
   {tab:"journal",sel:".expbtn",t:"Дневник и опыты",x:"Мысли, благодарности, проповеди и опыты — как Бог действовал в твоей жизни. Всё личное видишь только ты."},
-  {tab:"home",sel:'[data-a="settings"]',t:"Настройки",x:"Оформление, напоминания, код для покаяния. Здесь же можно снова пройти это знакомство."}];
+  {t:"Дневник Плюс ✨",x:"Всё главное бесплатно навсегда: молитва, Библия, дневник, церковь и напоминания.<br><br>Плюс — по желанию: вся музыка и звуки природы, больше вопросов ИИ-помощнику, книга ответов на молитвы. Первые 7 дней — бесплатно, без карты. Оплата — картой."},
+  {tab:"home",sel:'[data-a="settings"]',t:"Настройки",x:"Оформление, напоминания, код для покаяния и «Дневник Плюс». Здесь же можно снова пройти это знакомство."}];
 let TR=null;
 function tourStart(){closeSheet();TR={i:0};document.body.style.overflow="hidden";
   if(!$("#tourC")){document.body.insertAdjacentHTML("beforeend",`<div id="tourC" class="tour-c"></div><div id="tourH" class="tour-h"></div><div id="tourT" class="tour-t" role="dialog" aria-live="polite"></div>`)}
@@ -3344,8 +3349,10 @@ const act={
   plusPlan:d=>{ui.plan=d.v;plusSheet()},
   plusTrial:async()=>{try{await call("plus/trial");ping("plusTrial");buzz();burst();await plusRefresh();toast("✨ Плюс включён на 7 дней — пусть молитва будет глубже 🙏")}catch(e){toast(e.message)}},
   plusBuy:()=>payStart(ui.plan||"year"),
+  plusStars:()=>payStart(ui.plan||"year",undefined,"stars"),
+  donStars:()=>{ui.donStars=!ui.donStars;donateSheet()},
   donateOpen:()=>donateSheet(),
-  donatePay:d=>payStart("donate",+d.v),
+  donatePay:d=>payStart("donate",+d.v,ui.donStars?"stars":"card"),
   closeTease:d=>{const el=d&&document.querySelector('.rem-offer');if(el)el.remove()},
   legal:d=>act.annLink({v:legalUrl(d.v)}),
   inviteFriend:()=>{ping("invite");tgShare("Я молюсь с «Молитвенным дневником» 🙏 К каждому стиху там есть слова и подсказки, можно слушать голос и просить друзей помолиться за тебя. Загляни:",APP_LINK)},
@@ -3562,7 +3569,7 @@ connect();
 setTimeout(guideLoad,600);
 loadBible();
 if(LOGIN0&&TG)setTimeout(()=>approveSheet(LOGIN0),600);
-try{if(new URLSearchParams(location.search).get("paid")){history.replaceState(null,"",location.pathname+location.hash);setTimeout(()=>{toast("Проверяю оплату…");plusRefresh();setTimeout(plusRefresh,4000);setTimeout(()=>{if(isPlus())toast("✨ Плюс включён. Спасибо за поддержку!")},4500)},1200)}}catch(e){}
+try{const pq=new URLSearchParams(location.search).get("paid");if(pq||(TG&&TG.initDataUnsafe&&TG.initDataUnsafe.start_param==="paid")){if(pq)history.replaceState(null,"",location.pathname+location.hash);setTimeout(()=>{toast("Проверяю оплату…");plusRefresh();setTimeout(plusRefresh,4000);setTimeout(()=>{if(isPlus())toast("✨ Плюс включён. Спасибо за поддержку!")},4500)},1200)}}catch(e){}
 if(JOIN0&&tgOn()){try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}setTimeout(()=>joinPrompt(JOIN0),400)}
 {let go=null;try{go=new URLSearchParams(location.search).get("go")||(TG&&TG.initDataUnsafe&&TG.initDataUnsafe.start_param)||null}catch(e){}
   if(go==="pray"&&!JOIN0){try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}setTimeout(()=>{if(!PM&&!TR&&$("#sheet").classList.contains("hidden"))act.startPrayer()},700)}}

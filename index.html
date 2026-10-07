@@ -336,7 +336,11 @@ input[type=time].in{width:auto;padding:9px 12px;font-weight:700}
 
 /* prayer mode */
 .pm{position:fixed;inset:0;z-index:60;background:var(--bg);overflow-y:auto;display:none}
-.pm.show{display:block}
+.pm.show{display:block;animation:pmIn .4s cubic-bezier(.2,.8,.2,1) both}
+.pm.out{animation:pmOut .23s ease-in both;pointer-events:none}
+@keyframes pmIn{from{opacity:0;transform:translateY(18px) scale(.99)}to{opacity:1;transform:none}}
+@keyframes pmOut{from{opacity:1}to{opacity:0;transform:translateY(14px)}}
+@media (prefers-reduced-motion: reduce){.pm.show,.pm.out{animation:none}}
 .pm .aurora{position:fixed;opacity:calc(var(--aur) + .15)}
 .pm-in{position:relative;z-index:1;max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top,0px)) 20px calc(64px + env(safe-area-inset-bottom,0px))}
 .pm-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
@@ -1062,7 +1066,7 @@ try{const r=localStorage.getItem(LSP);if(r)pending=new Set(JSON.parse(r))}catch(
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LSP,JSON.stringify([...pending]))}catch(e){}}
 function hasData(){return Object.keys(S.people||{}).length||Object.keys(S.marks||{}).length||Object.keys(S.prayers).length||Object.keys(S.entries).length||Object.keys(S.meta.days||{}).length}
 
-let col=null; const chains={},inflight={},busy={},bad={};const APPV="24";
+let col=null; const chains={},inflight={},busy={},bad={};const APPV="25";
 function current(id){if(id==="meta")return S.meta;return S.prayers[id]||S.entries[id]||S.marks[id]||S.people[id]||null}
 function write(id){
   pending.add(id);saveLocal();
@@ -1689,8 +1693,8 @@ const CSTEPS=[
  {t:"Прими прощение",v:{t:"Тогда придите — и рассудим, говорит Господь. Если будут грехи ваши, как багряное, — как снег убелю; если будут красны, как пурпур, — как волну убелю.",r:"Ис 1:18"},p:"Бог говорит: «грехов их и беззаконий их не воспомяну более». Можешь отпустить записи — они сотрутся навсегда, останется только отметка, что ты покаялся."}
 ];
 const AREAS=["Мысли","Слова","Поступки","Отношения","Упущенное добро","Сердце и мотивы"];
-function startConfess(){closeSheet();$("#toast").classList.remove("show");cancelAnimationFrame(SKY.raf);CF={step:0,items:[],steps:[],start:Date.now()};$("#pm").classList.add("show");document.body.style.overflow="hidden";drawCF()}
-function closeCF(){CF=null;$("#pm").classList.remove("show");document.body.style.overflow="";render();checkBadges()}
+function startConfess(){closeSheet();$("#toast").classList.remove("show");cancelAnimationFrame(SKY.raf);CF={step:0,items:[],steps:[],start:Date.now()};pmShow();document.body.style.overflow="hidden";drawCF()}
+function closeCF(){CF=null;pmHide();document.body.style.overflow="";render();checkBadges()}
 function drawCF(keep){
   const st=CSTEPS[CF.step],last=CF.step===CSTEPS.length-1;let mid="";
   if(CF.step===1)mid=`<div class="pick" style="margin-bottom:10px">${AREAS.map(a=>`<button data-a="cfArea" data-v="${a}">${a}</button>`).join("")}</div>
@@ -2980,7 +2984,11 @@ function pmCtx(st){
   if(st.k==="listen")return "Не спеши нажимать «Дальше». Минута тишины — тоже молитва.";
   return ""}
 function pgQ(g){return g&&g.q?(MODES[PM.mode].short?g.q.slice(0,1):g.q):null}
-function pgArm(){if(!PM)return;clearTimeout(PM.rvT);const q=pgQ(gAt(PM.step));if(!q||PM.af||PM.rv>=q.length-1)return;PM.rvT=setTimeout(()=>{if(PM&&!PM.done)pgReveal()},PM.rv?24000:16000)}
+/* следующая подсказка по таймеру — но не перебивая голос: ждём, пока договорит, и ещё 4 секунды тишины */
+const voBusy=()=>!!(VO.busy||(VO.el&&!VO.el.paused&&!VO.el.ended));
+function pgArm(){if(!PM)return;clearTimeout(PM.rvT);const q=pgQ(gAt(PM.step));if(!q||PM.af||PM.rv>=q.length-1)return;
+  const fire=()=>{if(!PM||PM.done)return;if(voBusy()){PM.rvT=setTimeout(fire,800);return}const gap=4000-(Date.now()-(VO.endAt||0));if(gap>0){PM.rvT=setTimeout(fire,gap);return}pgReveal()};
+  PM.rvT=setTimeout(fire,PM.rv?24000:16000)}
 function pgReveal(){const q=pgQ(gAt(PM.step));if(!q||PM.rv>=q.length-1)return;PM.rv++;
   const li=document.querySelectorAll("#pmIn .pg-q li")[PM.rv];if(li){li.hidden=false;li.classList.add("on","new")}
   if(PM.rv>=q.length-1){const b=$("#pmIn .pg-more");if(b)b.remove()}
@@ -2990,7 +2998,7 @@ function pgHush(){try{if("speechSynthesis" in window)speechSynthesis.cancel()}ca
 const VO={el:null,tok:0,cache:{},unlocked:false};
 function voText(key,i,part){const v=GUIDE[key]&&GUIDE[key][i];if(!v)return "";return part==="m"?[v.t,v.s,(v.q||[])[0]].filter(Boolean).join("\n\n"):/^q\d$/.test(part)?(v.q||[])[+part.slice(1)]||"":""}
 function vName(key,i,part){if(i==null||i<0)return null;const t=voText(key,i,part);if(!t)return null;const n=key+"-"+i+"-"+part+"-"+hash(t);return VOICED.has(n)?n:null}
-function voEl(){if(!VO.el){const a=new Audio();a.setAttribute("playsinline","");a.preload="auto";a.onended=()=>duck(false);a.onerror=()=>duck(false);VO.el=a}return VO.el}
+function voEl(){if(!VO.el){const a=new Audio();a.setAttribute("playsinline","");a.preload="auto";a.onended=()=>{VO.endAt=Date.now();duck(false)};a.onerror=()=>duck(false);VO.el=a}return VO.el}
 function voUnlock(){if(VO.unlocked)return;VO.unlocked=true;try{const a=voEl();a.src=URL.createObjectURL(new Blob([silentWav()],{type:"audio/wav"}));const p=a.play();if(p&&p.then)p.then(()=>{if(!VO.busy)a.pause()}).catch(()=>{VO.unlocked=false})}catch(e){VO.unlocked=false}}
 async function voUrl(name){if(VO.cache[name])return VO.cache[name];const r=await fetch(VOICE_DIR+name+".mp3");if(!r.ok)throw new Error("voice");return VO.cache[name]=URL.createObjectURL(await r.blob())}
 async function voPlay(name){const a=voEl(),tok=++VO.tok;VO.busy=true;
@@ -3040,9 +3048,12 @@ function startPM(mode){
   if(mode==="cards"&&!PM.list.length){PM=null;toast("Сначала добавь нужды");return}
   PM.vv=PM.steps.map(st=>st.v&&!st.lord?freshVerse(st.k,st.v):null);PM.endV=freshVerse("done",VERSES[5]);
   PM.gi=PM.steps.map(st=>(st.v||st.g)&&!st.lord&&GUIDE[st.k]?pickGuide(st.k):-1);if(MODES[mode].sit)ping("pmSit");{const ge=pickGuide("done");PM.endGi=ge;PM.endG=ge>=0?GUIDE.done[ge]:null}if(VOICE_ON&&S.meta.pmVoice)voUnlock();PM.voice=VOICE_ON&&isPlus()&&!!S.meta.pmVoice;PM.rv=0;PM.rvStep=0;if(mode==="lectio"){const li=pickGuide("lectio");if(li>=0)PM.passage=GUIDE.lectio[li]}
-  ping("pmStart");$("#pm").classList.add("show");document.body.style.overflow="hidden";if(bgPref()!=="off")bgStart(bgPref());drawPM();if(tgOn())call("live/start",{minutes:30}).catch(()=>{});tick=setInterval(()=>{const el=$("#pmTimer");if(el)el.textContent=elapsed()},1000)}
+  ping("pmStart");pmShow();document.body.style.overflow="hidden";if(bgPref()!=="off")bgStart(bgPref());drawPM();if(tgOn())call("live/start",{minutes:30}).catch(()=>{});tick=setInterval(()=>{const el=$("#pmTimer");if(el)el.textContent=elapsed()},1000)}
 function elapsed(){const s=Math.floor((Date.now()-PM.start)/1000);return pad(Math.floor(s/60))+":"+pad(s%60)}
-function closePM(){clearInterval(tick);if(PM){clearTimeout(PM.rvT);if(!PM.done)ping(PM.mode==="full"&&PM.step<6?"pmQuit"+(PM.step+1):"pmQuit")}pgHush();bgStop();if(PM&&tgOn())call("live/stop").catch(()=>{});PM=null;$("#pm").classList.remove("show");document.body.style.overflow="";render();checkBadges()}
+/* экран молитвы и покаяния: мягко появляется и исчезает (без анимации при «Уменьшить движение») */
+function pmShow(){const el=$("#pm");clearTimeout(pmShow.t);el.classList.remove("out");el.classList.add("show")}
+function pmHide(){const el=$("#pm");clearTimeout(pmShow.t);if(RM||!el.classList.contains("show")){el.classList.remove("show","out");return}el.classList.add("out");pmShow.t=setTimeout(()=>el.classList.remove("show","out"),230)}
+function closePM(){clearInterval(tick);if(PM){clearTimeout(PM.rvT);if(!PM.done)ping(PM.mode==="full"&&PM.step<6?"pmQuit"+(PM.step+1):"pmQuit")}pgHush();bgStop();if(PM&&tgOn())call("live/stop").catch(()=>{});PM=null;pmHide();document.body.style.overflow="";render();checkBadges()}
 function musicBtn(){const k=bgNow(),b=BGS.find(x=>x[0]===k);return `<button class="music ${k!=="off"?"on":""}" data-a="pmMusic" aria-label="Фон">${k!=="off"?`<span class="eq"><i></i><i></i><i></i></span>${b[2]}`:ic("music")+"Фон"}</button>`}
 function drawPM(keep){
   if(PM.done)return drawPMDone();

@@ -15,12 +15,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,500;1,600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script>/* эмодзи как на всех платформах одинаково: вне iPhone/iPad/Mac — Noto Color Emoji (Google Fonts грузит только нужные символы) */
-if(!/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)){document.documentElement.classList.add("emj");document.write('<link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">')}</script>
+if(!/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)){document.documentElement.classList.add("emj");document.write('<link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet" media="print" onload="this.media=\'all\'">')}</script>
 <style>
 :root{
   --bg:#F3F2F8; --card:rgba(255,255,255,.8); --card2:rgba(20,22,44,.055); --stroke:rgba(20,22,44,.08);
-  --glass:rgba(255,255,255,.74); --text:#11121A; --muted:rgba(38,40,60,.70); --faint:rgba(38,40,60,.42);
-  --gold:#9A5C02; --green:#17975C; --danger:#D93D52; --violet:#6B5CF0; --shade:rgba(20,22,44,.35);
+  --glass:rgba(255,255,255,.74); --text:#11121A; --muted:rgba(38,40,60,.76); --faint:rgba(38,40,60,.42);
+  --gold:#9A5C02; --green:#0E7A48; --danger:#D93D52; --violet:#6B5CF0; --shade:rgba(20,22,44,.35);
   --aur:.34; --shadow:0 10px 30px -18px rgba(30,30,70,.35);
   --grad:linear-gradient(135deg,#FFD27A 0%,#FF9E4D 48%,#FF6A8A 100%);
   --on-grad:#23110A;
@@ -32,14 +32,14 @@ if(!/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)){document.documentEle
 :root.emj{--sans:"Onest","Noto Color Emoji", -apple-system, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#07080E; --card:rgba(255,255,255,.045); --card2:rgba(255,255,255,.075); --stroke:rgba(255,255,255,.075);
-  --glass:rgba(20,21,34,.62); --text:#F6F3EC; --muted:rgba(235,235,245,.56); --faint:rgba(235,235,245,.28);
+  --glass:rgba(20,21,34,.62); --text:#F6F3EC; --muted:rgba(235,235,245,.72); --faint:rgba(235,235,245,.28);
   --gold:#FFC75A; --green:#5CD89B; --danger:#FF6B7A; --violet:#9486FF; --shade:rgba(0,0,0,.6);
-  --aur:.6; --shadow:none; color-scheme:dark;}}
+  --aur:.6; --shadow:none; color-scheme:dark; --kmx:100%; --plate:rgba(10,8,22,.4);}}
 :root[data-theme="dark"]{
   --bg:#07080E; --card:rgba(255,255,255,.045); --card2:rgba(255,255,255,.075); --stroke:rgba(255,255,255,.075);
-  --glass:rgba(20,21,34,.62); --text:#F6F3EC; --muted:rgba(235,235,245,.56); --faint:rgba(235,235,245,.28);
+  --glass:rgba(20,21,34,.62); --text:#F6F3EC; --muted:rgba(235,235,245,.72); --faint:rgba(235,235,245,.28);
   --gold:#FFC75A; --green:#5CD89B; --danger:#FF6B7A; --violet:#9486FF; --shade:rgba(0,0,0,.6);
-  --aur:.6; --shadow:none; color-scheme:dark;}
+  --aur:.6; --shadow:none; color-scheme:dark; --kmx:100%; --plate:rgba(10,8,22,.4);}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 html,body{margin:0}
@@ -63,7 +63,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 .date{color:var(--muted);font-size:14px;font-weight:600}
 h1{font-size:34px;font-weight:800;letter-spacing:-.035em;line-height:1.05;margin:4px 2px 18px}
 h2{font-size:20px;font-weight:700;margin:0;letter-spacing:-.02em}
-.sync{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--muted);background:var(--card);border:1px solid var(--stroke);padding:7px 11px;border-radius:99px;white-space:nowrap}
+.sync{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--muted);background:linear-gradient(var(--card),var(--card)),var(--plate,transparent);border:1px solid var(--stroke);padding:7px 11px;border-radius:99px;white-space:nowrap}
 .sync i{width:7px;height:7px;border-radius:50%;background:var(--faint)}
 .sync.ok i{background:var(--green);box-shadow:0 0 8px var(--green)}.sync.syncing i{background:var(--gold)}.sync.err i{background:var(--danger)}
 
@@ -74,6 +74,7 @@ h2{font-size:20px;font-weight:700;margin:0;letter-spacing:-.02em}
 .sky::after{content:"";position:absolute;inset:0;border-radius:inherit;border:1px solid rgba(255,255,255,.12);pointer-events:none;z-index:3}
 .sky-top{position:absolute;z-index:2;left:20px;right:14px;top:16px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .sky-date{font-size:14px;font-weight:600;opacity:.78}
+h1.sky-greet{margin:4px 0 0}
 .sky-greet{font-size:36px;font-weight:800;letter-spacing:-.04em;line-height:1.02;margin-top:4px;text-shadow:0 2px 20px rgba(0,0,0,.25)}
 .sky-cap{font-size:13px;font-weight:500;opacity:.85;text-shadow:0 1px 8px rgba(0,0,0,.4);margin-top:8px;max-width:240px;line-height:1.35}
 .sky-cap b{color:#FFD58A;font-weight:700}
@@ -110,7 +111,7 @@ h2{font-size:20px;font-weight:700;margin:0;letter-spacing:-.02em}
 .tile.goal{grid-row:span 2;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px}
 .tile.goal .ring{width:108px;height:108px}
 .tile.goal .ring div b{font-size:32px;color:var(--text)}
-.tile.goal .ring div b small{display:block;font-size:11.5px;font-weight:600;color:var(--muted);letter-spacing:0;margin-top:4px}
+.tile.goal .ring div b small{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0;margin-top:4px}
 .tile.sm{display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center;padding:13px 14px}
 .tile.sm .ti{grid-row:span 2;margin:0}
 .tile.sm b{font-size:26px}
@@ -171,7 +172,7 @@ h2{font-size:20px;font-weight:700;margin:0;letter-spacing:-.02em}
 .btn svg.i{width:20px;height:20px}
 .mt{margin-top:16px}
 
-.seg{position:relative;display:grid;grid-template-columns:1fr 1fr;background:var(--card);border:1px solid var(--stroke);border-radius:16px;padding:4px;margin-bottom:16px}
+.seg{position:relative;display:grid;grid-template-columns:1fr 1fr;background:linear-gradient(var(--card),var(--card)),var(--plate,transparent);border:1px solid var(--stroke);border-radius:16px;padding:4px;margin-bottom:16px}
 .seg button{position:relative;z-index:1;height:40px;border-radius:12px;font-weight:700;font-size:14.5px;color:var(--muted)}
 .seg button.on{color:var(--text)}
 .seg .knob{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:12px;background:var(--card2);transition:transform .25s cubic-bezier(.3,.8,.3,1)}
@@ -207,6 +208,7 @@ h2{font-size:20px;font-weight:700;margin:0;letter-spacing:-.02em}
 .ent.answer{background:linear-gradient(135deg,color-mix(in srgb,#43C985 16%,transparent),transparent 70%),var(--card)}
 .ent .k{font-size:13px;font-weight:700;display:flex;justify-content:space-between;gap:8px;align-items:center}
 .ent .k em{font-style:normal;color:var(--k)}
+.ent .k em{color:color-mix(in srgb,var(--k) var(--kmx,55%),var(--text))}/* светлая тема: цвет типа темнее, чтобы читался */
 .ent .k span{color:var(--muted);font-weight:600}
 .ent p{margin:7px 0 0;white-space:pre-wrap;font-size:15.5px;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
@@ -239,11 +241,11 @@ h2{font-size:20px;font-weight:700;margin:0;letter-spacing:-.02em}
 .bar .n{text-align:right;font-weight:800}
 .heat{display:grid;grid-template-rows:repeat(7,auto);grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;margin-top:14px}
 .heat i{aspect-ratio:1;border-radius:3px;background:var(--card2)}
-.heat-l{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);font-weight:600;margin-top:8px}
-.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
-.badge{aspect-ratio:1;border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8px;background:var(--card2);gap:6px}
+.heat-l{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:600;margin-top:8px}
+.badges{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.badge{aspect-ratio:1;border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8px;background:linear-gradient(var(--card2),var(--card2)),var(--plate,transparent);gap:6px}
 .badge .e{font-size:30px;line-height:1;filter:grayscale(1);opacity:.3}
-.badge b{font-size:12px;font-weight:700;line-height:1.2;color:var(--muted)}
+.badge b{font-size:12px;font-weight:700;line-height:1.2;color:var(--muted);overflow-wrap:anywhere}
 .badge small{font-size:12px;color:var(--muted);font-weight:600}
 .badge.on{background:radial-gradient(circle at 50% 30%,color-mix(in srgb,#FFB65C 30%,transparent),color-mix(in srgb,#FF6A8A 8%,transparent));box-shadow:inset 0 0 0 1px color-mix(in srgb,#FFB65C 35%,transparent)}
 .badge.on .e{filter:none;opacity:1;text-shadow:0 0 18px rgba(255,180,90,.6)}
@@ -255,9 +257,9 @@ h2{font-size:20px;font-weight:700;margin:0;letter-spacing:-.02em}
 .nav{width:36px;height:36px;border-radius:50%;background:var(--card2);display:grid;place-items:center}
 .nav svg.i{width:18px;height:18px}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.cal .wd{font-size:11.5px;font-weight:600;color:var(--muted);text-align:center;padding-bottom:4px}
+.cal .wd{font-size:12px;font-weight:600;color:var(--muted);text-align:center;padding-bottom:4px}
 .cal .d{aspect-ratio:1;border-radius:12px;background:var(--card2);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13.5px;font-weight:600;line-height:1.05}
-.cal .d small{font-size:11.5px;font-weight:800;opacity:.8}
+.cal .d small{font-size:12px;font-weight:800;opacity:.8}
 .cal .d.x{background:transparent}
 .cal .d.on{color:var(--on-grad);font-weight:800}
 .cal .d.today{box-shadow:inset 0 0 0 2px var(--text)}
@@ -268,7 +270,9 @@ h2{font-size:20px;font-weight:700;margin:0;letter-spacing:-.02em}
 .tabs{flex:1;display:grid;grid-template-columns:repeat(5,1fr);padding:6px;border-radius:30px;background:var(--glass);border:1px solid var(--stroke);backdrop-filter:blur(26px) saturate(160%);-webkit-backdrop-filter:blur(26px) saturate(160%);box-shadow:0 16px 40px -12px rgba(0,0,0,.45);pointer-events:auto}
 .tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 6px;border-radius:24px;font-size:12px;min-width:0;white-space:nowrap;font-weight:700;color:var(--muted);transition:background .2s,color .2s}
 .tabs button.on{background:var(--card2);color:var(--text)}
-.bigtext .tabs button{font-size:0;gap:0;padding:10px 0}.bigtext .tabs button svg.i{width:26px;height:26px}/* подписи остаются для экранного диктора */
+.bigtext .tabs button{font-size:0;gap:0;padding:10px 0}.bigtext .tabs button svg.i{width:26px;height:26px}
+@media (max-width:359px){.tabs button{font-size:0;gap:0;padding:10px 0}.tabs button svg.i{width:26px;height:26px}}
+@media (min-width:360px) and (max-width:389px){.dock{padding-left:10px;padding-right:10px}.dock-in{gap:8px}.tabs{padding:4px}.tabs button{letter-spacing:-.03em}}/* подписи остаются для экранного диктора */
 .tabs button.on svg.i{color:var(--gold)}
 .fab{flex:none;width:62px;height:62px;border-radius:50%;background:var(--grad);color:var(--on-grad);display:grid;place-items:center;box-shadow:0 14px 32px -10px rgba(255,120,80,.7);pointer-events:auto}
 .fab svg.i{width:26px;height:26px;stroke-width:2.4}
@@ -376,7 +380,7 @@ input[type=time].in{width:auto;padding:9px 12px;font-weight:700}
 .pl-plan{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px;border-radius:18px;background:var(--card);border:2px solid var(--stroke);text-align:left;color:var(--text)}
 .pl-plan.on{border-color:#E9B44A;background:color-mix(in srgb,#E9B44A 12%,var(--card))}
 .pl-plan b{font-size:14px;color:var(--muted)}.pl-plan strong{font-size:22px;font-weight:800}.pl-plan small{font-size:12.5px;color:var(--muted)}
-.pl-plan em{position:absolute;top:-9px;right:10px;font-style:normal;font-size:11.5px;font-weight:800;padding:3px 8px;border-radius:99px;background:var(--grad);color:var(--on-grad)}
+.pl-plan em{position:absolute;top:-9px;right:10px;font-style:normal;font-size:12px;font-weight:800;padding:3px 8px;border-radius:99px;background:var(--grad);color:var(--on-grad)}
 .pl-note{text-align:center;margin:8px 6px 10px}.pl-legal{text-align:center;margin:4px 6px 8px;color:var(--muted)}.pl-legal .textbtn{font-size:inherit;font-weight:600;padding:2px 0}.pl-don{display:block;margin:6px auto 0}
 .pl-on{text-align:center;font-weight:700;padding:14px;border-radius:16px;background:var(--card);margin:0 0 8px}
 .pl-don-g{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pl-don-g button{height:58px;border-radius:16px;background:var(--card);border:1px solid var(--stroke);font-size:19px;font-weight:800;color:var(--text)}
@@ -509,7 +513,7 @@ input[type=time].in{width:auto;padding:9px 12px;font-weight:700}
 .tc-h small{display:block;font-size:12.5px;font-weight:700;color:var(--muted)}
 .tc-h b{display:block;font-size:20px;font-weight:800;letter-spacing:-.02em}
 .tc-list{display:flex;flex-direction:column;gap:8px}
-.tc-row{display:flex;align-items:center;gap:12px;padding:8px;border-radius:18px;background:var(--card2)}
+.tc-row{display:flex;align-items:center;gap:12px;padding:8px;border-radius:18px;background:linear-gradient(var(--card2),var(--card2)),var(--plate,transparent)}
 .tc-row .ic{width:42px;height:42px;border-radius:14px;font-size:20px}
 .tc-row .tx{flex:1;min-width:0}
 .tc-row .tx b{display:block;font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -559,7 +563,7 @@ input[type=time].in{width:auto;padding:9px 12px;font-weight:700}
 .bgo i{font-style:normal;font-size:20px;flex:none}
 .bgo span{display:flex;flex-direction:column;min-width:0}
 .bgo b{font-size:14px;font-weight:650;line-height:1.2}
-.bgo small{font-size:11.5px;color:var(--muted);line-height:1.2;margin-top:2px}
+.bgo small{font-size:12px;color:var(--muted);line-height:1.2;margin-top:2px}
 .bgo.on{background:var(--text);color:var(--bg);border-color:transparent}
 .bgo.on small{color:inherit;opacity:.7}
 .bg-cr{font-size:12px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.4}
@@ -603,7 +607,7 @@ p.reader .vs{font-size:var(--rs);line-height:1.7}
 .dc{font-family:var(--serif);font-size:3.4em;float:left;line-height:.8;margin:8px 10px 0 0;color:var(--gold);font-weight:600}
 .l-lines .vs{display:block;margin-bottom:8px}
 .vs{border-radius:6px;padding:1px 2px;transition:background .2s;-webkit-box-decoration-break:clone;box-decoration-break:clone}
-.vs sup{font-family:var(--sans);font-size:.55em;font-weight:800;color:var(--gold);margin-right:3px;vertical-align:.55em}
+.vs sup{font-family:var(--sans);font-size:max(12px,.55em);font-weight:800;color:var(--gold);margin-right:3px;vertical-align:.55em}
 .vs.hl{background:color-mix(in srgb,var(--h) 42%,transparent)}
 .t-paper .vs.hl{background:color-mix(in srgb,var(--h) 55%,transparent)}
 .vs.sel{text-decoration:underline dashed;text-decoration-color:var(--gold);text-underline-offset:5px;background:color-mix(in srgb,var(--gold) 14%,transparent)}
@@ -660,7 +664,7 @@ p.reader .vs{font-size:var(--rs);line-height:1.7}
 .cmt{padding:12px 0;border-bottom:1px solid var(--stroke)}.cmt-h{display:flex;align-items:center;gap:8px}.cmt-h b{font-size:14.5px}.cmt-h span{font-size:12.5px;color:var(--muted);font-weight:600}.cmt-h .rb{margin-left:auto;width:28px;height:28px}.cmt p{margin:6px 0 0;font-size:15.5px;white-space:pre-wrap}
 .chr{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--stroke)}.chr .tx{flex:1;min-width:0}.chr b{display:block;font-size:16px;font-weight:700}.chr span{display:block;font-size:12.5px;color:var(--muted);font-weight:600}.chr small{display:block;font-size:13px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chr .che{width:44px;height:44px;font-size:22px;border-radius:15px}.chr .btn{flex:none}
 .cfm .rad{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--faint)}.cfm.on{border-color:color-mix(in srgb,var(--gold) 60%,transparent)}.cfm.on .rad{border:7px solid var(--gold)}
-.wk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.wk-grid div{padding:10px;border-radius:16px;background:var(--card2)}.wk-grid b{display:block;font-size:17px;font-weight:800}.wk-grid span{font-size:11.5px;color:var(--muted);font-weight:600}
+.wk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.wk-grid div{padding:10px;border-radius:16px;background:var(--card2)}.wk-grid b{display:block;font-size:17px;font-weight:800}.wk-grid span{font-size:12px;color:var(--muted);font-weight:600}
 .chain-h{display:flex;align-items:flex-start;gap:10px}.chain-h>div{flex:1;min-width:0}.chain-h b{display:block;font-size:17px;font-weight:800}.chain-h span{font-size:13px;color:var(--muted);font-weight:600}.chain-h .rb{width:32px;height:32px}
 .slots-d{font-size:12.5px;font-weight:700;color:var(--muted);margin:12px 2px 6px}
 .slots{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
@@ -684,7 +688,7 @@ p.reader .vs{font-size:var(--rs);line-height:1.7}
 .sw-l{left:16px;border:2px solid var(--muted);color:var(--muted);transform:rotate(-8deg)}.sw-r{right:16px;border:2px solid #43C985;color:#2BB56F;transform:rotate(8deg)}
 .cd-t{height:4px;border-radius:9px;background:var(--card2);overflow:hidden;margin:14px 4px 6px}.cd-t i{display:block;height:100%;width:0;background:var(--grad);animation:cdfill 60s linear forwards}
 @keyframes cdfill{to{width:100%}}
-.sw-hint{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;font-weight:600;color:var(--muted);margin:0 4px}
+.sw-hint{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:600;color:var(--muted);margin:0 4px}
 .aic{display:flex;align-items:center;gap:13px;width:100%;text-align:left;padding:13px 16px;border-radius:24px;margin:0 0 12px;background:linear-gradient(135deg,color-mix(in srgb,#B9A6FF 26%,transparent),color-mix(in srgb,#7CC4FF 14%,transparent)),var(--card);border:1px solid var(--stroke)}
 .aic b{display:block;font-size:16.5px;font-weight:800}.aic small{display:block;font-size:12.5px;color:var(--muted);font-weight:600}.aic .be{font-size:28px}.aic>svg.i{margin-left:auto;opacity:.5}
 .aires{margin-top:14px;padding:14px 16px;border-radius:20px;background:color-mix(in srgb,#B9A6FF 12%,transparent);border:1px solid color-mix(in srgb,#B9A6FF 30%,transparent)}
@@ -749,7 +753,8 @@ p.reader .vs{font-size:var(--rs);line-height:1.7}
 .rl i{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--c1),var(--c2))}
 .rl span{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rl b{font-size:18px;font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;background-clip:text;color:transparent}
-.rl b small{font-size:11.5px;font-weight:700;color:var(--muted);-webkit-text-fill-color:var(--muted);margin-left:2px}
+.rl b small{font-size:12px;font-weight:700;color:var(--muted);-webkit-text-fill-color:var(--muted);margin-left:2px}
+@media (max-width:389px){.rings-svg{width:96px;height:96px}.rl{grid-template-columns:auto 1fr;row-gap:1px;padding:6px 4px}.rl b{grid-column:2;font-size:16px;line-height:1.1}}/* узкий экран: число под названием, чтобы «Благодарность» не обрезалась */
 /* home cards */
 .weekc,.confc{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:15px 16px;border-radius:26px;margin-bottom:12px;color:#FFF7EA;position:relative;overflow:hidden}
 .weekc{background:radial-gradient(100% 120% at 0% 0%,#8B7CFF,transparent 60%),radial-gradient(100% 120% at 100% 100%,#FF6A8A,transparent 60%),#1B1640}
@@ -775,7 +780,7 @@ p.reader .vs{font-size:var(--rs);line-height:1.7}
 .ch-stats>*{padding:10px 8px;border-radius:16px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.08);text-align:center;color:inherit}
 .ch-stats b{display:block;font-size:20px;font-weight:800;line-height:1.1}
 .ch-stats b svg.i{width:20px;height:20px}
-.ch-stats span{display:block;font-size:11.5px;opacity:.7;font-weight:600;margin-top:2px}
+.ch-stats span{display:block;font-size:12px;opacity:.7;font-weight:600;margin-top:2px}
 .cf-item{border-radius:22px;background:var(--card);border:1px solid var(--stroke);margin-bottom:8px;overflow:hidden}
 .cf-item.rel{display:flex;align-items:center;gap:12px;padding:12px 14px}
 .cf-head{display:flex;align-items:center;gap:12px;padding:12px 14px;width:100%;text-align:left}
@@ -901,12 +906,13 @@ p.reader .vs{font-size:var(--rs);line-height:1.7}
 
 
 @media (prefers-reduced-motion: reduce){
-  .aurora i,.cta .orb::before,.cta::before,.breath .core,.breath .rg,.eq i{animation:none}
+  .aurora i:nth-child(n),.cta .orb::before,.cta::before,.breath .core,.breath .rg,.eq i{animation:none}
   .breath .lbl::before{animation:none;content:"Дыши спокойно"}
   .sheet,.shade,.toast,.seg .knob{transition:none}
 }
 /* зона нажатия не меньше ~40px у мелких кнопок — без изменения вида */
-.textbtn,.pg-swap,.pg-more,.vs .cm,.vs .vn,.r-intro .x{position:relative}
+.textbtn,.pg-swap,.pg-more,.vs .cm,.vs .vn,.r-intro .x,.nav,.filters button,.rings-t,[data-a=fColor],[data-a=goal],[data-a=perDay]{position:relative}
+.nav::after,.filters button::after,.rings-t::after,[data-a=fColor]::after,[data-a=goal]::after,[data-a=perDay]::after{content:"";position:absolute;inset:-4px}
 .textbtn::after,.pg-swap::after,.pg-more::after,.vs .cm::after,.vs .vn::after,.r-intro .x::after{content:"";position:absolute;inset:-7px -6px}
 .pg-swap::after{inset:-4px}
 .vs .cm::after,.vs .vn::after{inset:-8px -5px}
@@ -917,8 +923,8 @@ p.reader .vs{font-size:var(--rs);line-height:1.7}
 <main class="wrap" id="main"></main>
 <div class="dock"><div class="dock-in"><nav class="tabs" id="tabs" aria-label="Разделы"></nav><button class="fab" id="fab" data-a="fab" aria-label="Добавить"></button></div></div>
 <div class="shade hidden" id="shade" data-a="closeSheet"></div>
-<div class="sheet hidden" id="sheet" role="dialog" aria-modal="true"><div class="sheet-in" id="sheetIn"></div></div>
-<div class="pm" id="pm" role="dialog" aria-modal="true" aria-label="Время молитвы"><div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div><div class="pm-in" id="pmIn"></div></div>
+<div class="sheet hidden" id="sheet" role="dialog" aria-modal="true" tabindex="-1"><div class="sheet-in" id="sheetIn"></div></div>
+<div class="pm" id="pm" role="dialog" aria-modal="true" aria-label="Время молитвы" tabindex="-1"><div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div><div class="pm-in" id="pmIn"></div></div>
 <div class="storyv" id="story" role="dialog" aria-modal="true" aria-label="Итоги недели"></div>
 <canvas id="burst" aria-hidden="true"></canvas>
 <div class="dlg" id="dlg"></div>
@@ -1087,7 +1093,7 @@ try{const r=localStorage.getItem(LSP);if(r)pending=new Set(JSON.parse(r))}catch(
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LSP,JSON.stringify([...pending]))}catch(e){}}
 function hasData(){return Object.keys(S.people||{}).length||Object.keys(S.marks||{}).length||Object.keys(S.prayers).length||Object.keys(S.entries).length||Object.keys(S.meta.days||{}).length}
 
-let col=null; const chains={},inflight={},busy={},bad={};const APPV="36";
+let col=null; const chains={},inflight={},busy={},bad={};const APPV="37";
 function current(id){if(id==="meta")return S.meta;return S.prayers[id]||S.entries[id]||S.marks[id]||S.people[id]||null}
 function write(id){
   pending.add(id);saveLocal();
@@ -1326,7 +1332,7 @@ function makeStars(total,extraGold){
   for(let i=0;i<Math.min(total,420);i++)st.push({x:.03+seeded(i*3+7)*.94,y:.05+Math.pow(seeded(i*5+11),1.25)*.62,r:.9+seeded(i*7+13)*1.2,a:.75+seeded(i*11+3)*.25,tw:seeded(i*13+5)*6.3,sp:.6+seeded(i*17+1)*1.2});
   (extraGold||[]).forEach(p=>{const hh=hash(p.id);st.push({x:.08+seeded(hh)*.84,y:.07+seeded(hh+1)*.45,r:2.2,gold:true,tw:seeded(hh+2)*6,sp:.7})});
   return st}
-const SKY={raf:0,stars:null,count:-1,ans:-1};
+const SKY={raf:0,stars:null,count:-1,ans:-1,last:0,vis:true,frame:null,io:null};
 function skyStars(){const tt=totalTimes(),an=answered().length;
   if(tt!==SKY.count||an!==SKY.ans){const prev=SKY.count;SKY.stars=makeStars(tt,answered());
     const now=performance.now()+450;/* после того как экран молитвы погас */
@@ -1340,7 +1346,7 @@ function ansMoment(p){momClose(true);const waited=daysBetween(p.createdAt,p.answ
   const meta=(waited>0?`Ответ пришёл через ${waited} ${plural(waited,"день","дня","дней")} молитвы`:"Ответ пришёл в тот же день")+(t?` · ${t} ${plural(t,"раз","раза","раз")} в молитве`:"");
   document.body.insertAdjacentHTML("beforeend",`<div id="moment" class="moment" role="dialog" aria-modal="true" aria-labelledby="moH"><canvas id="momC" aria-hidden="true"></canvas>
     <button class="pill icon mo-x" data-a="momClose" aria-label="Закрыть">${ic("x")}</button>
-    <div class="mo-in"><h2 class="mo-h" id="moH">Бог ответил</h2><p class="mo-t">«${esc(p.title)}»</p>
+    <div class="mo-in" tabindex="-1"><h2 class="mo-h" id="moH">Бог ответил</h2><p class="mo-t">«${esc(p.title)}»</p>
       ${p.answer?`<p class="mo-q">${esc(p.answer)}</p>`:""}<p class="mo-m">${meta}</p>
       <p class="mo-v">«Благословен Господь, ибо Он услышал голос молений моих»<span>Пс 27:6</span></p>
       <div class="mo-b"><button class="btn wide" data-a="momThanks" data-id="${p.id}">🙌 Поблагодарить Бога</button>
@@ -1352,15 +1358,20 @@ function ansMoment(p){momClose(true);const waited=daysBetween(p.createdAt,p.answ
   /* холм с крестом стоит точно над карточкой, а не просвечивает сквозь неё */
   const card=$("#moment .mo-in"),hillY=Math.max(.42,Math.min(.9,(card.offsetTop-10)/r.height));
   const frame=tm=>{if(!document.body.contains(cv))return;paintSky(ctx,r.width,r.height,tm,{stars,hillY,crossS:18});if(!RM&&!document.hidden)MOM.raf=requestAnimationFrame(frame)};
-  MOM.raf=requestAnimationFrame(frame);setTimeout(()=>{const b=$("#moment [data-a=momThanks]");if(b)b.focus({preventScroll:true})},1200)}
-function momClose(now){cancelAnimationFrame(MOM.raf);const m=$("#moment");if(!m)return;document.body.style.overflow="";if(now||RM){m.remove();return}m.classList.add("out");setTimeout(()=>m.remove(),260)}
+  MOM.raf=requestAnimationFrame(frame);modalIn($("#moment .mo-in"),"mom");setTimeout(()=>{const b=$("#moment [data-a=momThanks]");if(b)b.focus({preventScroll:true})},1200)}
+function momClose(now){cancelAnimationFrame(MOM.raf);const m=$("#moment");if(!m)return;document.body.style.overflow="";m.id="";m.inert=true;modalOut("mom");if(now||RM){m.remove();return}m.classList.add("out");setTimeout(()=>m.remove(),260)}
 function skyLoop(){
   cancelAnimationFrame(SKY.raf);const cv=$("#skyC");if(!cv)return;
   const dpr=Math.min(2,window.devicePixelRatio||1);const r=cv.getBoundingClientRect();cv.width=r.width*dpr;cv.height=r.height*dpr;const ctx=cv.getContext("2d");ctx.scale(dpr,dpr);
-  const frame=t=>{if(!document.body.contains(cv))return;paintSky(ctx,r.width,r.height,t,{stars:skyStars(),hillY:.62,crossS:13});
-    if(!RM&&!document.hidden&&!PM&&!CF&&!STY)SKY.raf=requestAnimationFrame(frame)};
-  SKY.raf=requestAnimationFrame(frame);
+  /* ~30 кадров в секунду; стоит, пока открыт лист или небо прокручено за экран */
+  const frame=t=>{SKY.raf=0;if(!document.body.contains(cv))return;
+    if(t-SKY.last<30){SKY.raf=requestAnimationFrame(frame);return}SKY.last=t;
+    paintSky(ctx,r.width,r.height,t,{stars:skyStars(),hillY:.62,crossS:13});
+    if(!RM&&!document.hidden&&!PM&&!CF&&!STY&&!ui.shOpen&&SKY.vis!==false)SKY.raf=requestAnimationFrame(frame)};
+  SKY.frame=frame;SKY.last=0;SKY.raf=requestAnimationFrame(frame);
+  if(window.IntersectionObserver){if(SKY.io)SKY.io.disconnect();SKY.vis=true;SKY.io=new IntersectionObserver(es=>{SKY.vis=es[es.length-1].isIntersecting;if(SKY.vis)skyResume()});SKY.io.observe(cv)}
 }
+function skyResume(){if(!SKY.frame||RM||ui.tab!=="home"||!$("#skyC"))return;cancelAnimationFrame(SKY.raf);SKY.raf=requestAnimationFrame(SKY.frame)}
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&ui.tab==="home")skyLoop()});
 window.addEventListener("resize",()=>{if(ui.tab==="home")skyLoop()});
 
@@ -1414,8 +1425,8 @@ function prayerRow(p,mode){
   const t=total(p),todayN=(p.log||{})[today()]||0;
   const sub=[p.wait&&p.status!=="answered"?"⏳ жду":"",p.who||p.cat,t?t+" "+plural(t,"раз","раза","раз"):"ещё без молитвы"].filter(Boolean).join(" · ");
   const right=mode==="answered"?`<span class="pillinfo g">Отвечено</span>`:
-    `<span class="tap ${todayN?"done":""}" data-a="quick" data-id="${p.id}" role="button" aria-label="Отметить молитву">${todayN?ic("check")+todayN:ic("plus")}</span>`;
-  return `<div class="row" data-a="openPrayer" data-id="${p.id}" role="button" tabindex="0" style="--c:${p.color}"><span class="ic">${p.icon}</span><span class="tx"><div class="tt">${esc(p.title)}</div><div class="sb">${esc(sub)}</div>${mode==="answered"?"":dots7(p)}</span>${right}</div>`;
+    `<span class="tap ${todayN?"done":""}" data-a="quick" data-id="${p.id}" role="button" tabindex="0" aria-label="Отметить молитву">${todayN?ic("check")+todayN:ic("plus")}</span>`;
+  return `<div class="row" data-a="openPrayer" data-id="${p.id}" role="button" tabindex="0" style="--c:${p.color}"><span class="ic" aria-hidden="true">${p.icon}</span><span class="tx"><div class="tt">${esc(p.title)}</div><div class="sb">${esc(sub)}</div>${mode==="answered"?"":dots7(p)}</span>${right}</div>`;
 }
 function ring(val,max,id){const r=44,C=2*Math.PI*r,p=max?Math.min(1,val/max):0;id=id||"rg";
   const cols=id==="rgo"?["#FFD27A","#FF6A8A"]:["#7BE8B0","#2FBF7A"];
@@ -1439,7 +1450,7 @@ function vHome(){
   const sg=suggestion(), isFav=favs().includes(v.r), lp=sg?lastPrayed(sg):"", h=new Date().getHours(), wd=new Date().getDay();
   const confDone=!!confDays()[today()], bs=streakOf(bDays()), slot=homeSlot(h,wd,confDone);/* если в «сейчас важно» уже зовут добавить нужду — пустой блок ниже не повторяет */
   return `<section class="sky" aria-label="Твоё небо молитв"><canvas id="skyC" aria-hidden="true"></canvas>
-    <div class="sky-top"><div><div class="sky-date">${cap(fLong.format(new Date()))}</div><div class="sky-greet">${greet()}</div>
+    <div class="sky-top"><div><div class="sky-date">${cap(fLong.format(new Date()))}</div><h1 class="sky-greet">${greet()}</h1>
     <div class="sky-cap">${tt?`<b>${tt}</b> ${plural(tt,"звезда","звезды","звёзд")} на твоём небе — по одной за каждую молитву`:"Каждая молитва зажжёт здесь звезду"}</div>
     <div class="sky-chips">${s?`<span>🔥 ${s} ${plural(s,"день","дня","дней")} в молитве</span>`:""}${bs?`<span>📖 ${bs} ${plural(bs,"день","дня","дней")} в Слове</span>`:""}${an?`<span>✨ ${an} ${plural(an,"ответ","ответа","ответов")}</span>`:""}${CH.live&&CH.live.global?`<span>🔥 сейчас молятся: ${CH.live.global}</span>`:""}</div></div>
     <button class="gl" data-a="settings" aria-label="Настройки">${ic("gear")}</button></div>
@@ -1469,7 +1480,7 @@ function homeSlot(h,wd,confDone){const m=new Date().getMonth(),d=new Date().getD
 
 function testimony(p){
   const waited=daysBetween(p.createdAt,p.answeredAt),t=total(p);
-  return `<button class="testi" data-a="openPrayer" data-id="${p.id}" style="--c:${p.color}"><div class="hd"><span class="ic">${p.icon}</span><span><b>${esc(p.title)}</b><span>${fDayY.format(new Date(p.answeredAt))}</span></span></div>
+  return `<button class="testi" data-a="openPrayer" data-id="${p.id}" style="--c:${p.color}"><div class="hd"><span class="ic" aria-hidden="true">${p.icon}</span><span><b>${esc(p.title)}</b><span>${fDayY.format(new Date(p.answeredAt))}</span></span></div>
   ${p.answer?`<q>${esc(p.answer)}</q>`:`<q>${p.ansType==="no"?"Бог закрыл эту дверь.":p.ansType==="let"?"Отдал это Богу.":"Бог ответил."}</q>`}
   <div class="ft"><span class="pillinfo ${p.ansType==="no"||p.ansType==="let"?"w":"g"}">${p.ansType==="no"?"Бог сказал «нет»":p.ansType==="let"?"Отпущено Богу":waited?`Ответ через ${waited} ${plural(waited,"день","дня","дней")}`:"Ответ в тот же день"}</span>${t?`<span class="pillinfo">${t} ${plural(t,"молитва","молитвы","молитв")}</span>`:""}</div></button>`;
 }
@@ -1620,7 +1631,7 @@ function vBibleProgress(){
     <div class="tile"><span class="ti c-violet">${ic("chart")}</span><b>${Math.round(l30/30*100)}%</b><span>${l30} ${plural(l30,"день","дня","дней")} из 30 с Библией</span></div>
     <div class="tile"><span class="ti c-gold">${ic("book")}</span><b>${tot}</b><span>${plural(tot,"глава","главы","глав")} · ${pct}% Библии</span></div>
   </div>
-  ${nx?`<button class="suggest" data-a="contRead" data-v="${nx.b}" data-c="${nx.c}" style="--c:#3CC8B4;margin-bottom:12px"><span class="ic">📖</span><span class="tx"><small>Продолжить чтение</small><b>${BOOKS[nx.b][0]}, глава ${nx.c}</b><span class="sb">${BIB?"открыть и читать":"нажми, чтобы отметить"}</span></span><span class="tap">${ic("right")}</span></button>`:""}
+  ${nx?`<button class="suggest" data-a="contRead" data-v="${nx.b}" data-c="${nx.c}" style="--c:#3CC8B4;margin-bottom:12px"><span class="ic" aria-hidden="true">📖</span><span class="tx"><small>Продолжить чтение</small><b>${BOOKS[nx.b][0]}, глава ${nx.c}</b><span class="sb">${BIB?"открыть и читать":"нажми, чтобы отметить"}</span></span><span class="tap">${ic("right")}</span></button>`:""}
   <button class="card planc" data-a="planSheet"><div><div class="lab">${ic("cal")}Мой план чтения</div><b>${pl.name?esc(pl.name):"Настроить план"}</b><span>${pl.perDay?pl.perDay+" "+plural(pl.perDay,"глава","главы","глав")+" в день · ":""}${pl.week} ${plural(pl.week,"день","дня","дней")} в неделю</span></div><span class="rb">${ic("pen")}</span></button>
   <div class="card"><h2>Прогресс по Библии</h2><div class="small">${tot} из 1189 глав · ${pct}%</div>
     <div class="bar"><span>Ветхий Завет</span><span class="tr"><i style="width:${ot/OTN*100}%;background:linear-gradient(90deg,#7BE8C8,#2FBF9A)"></i></span><span class="n">${Math.round(ot/OTN*100)}%</span></div>
@@ -1682,17 +1693,17 @@ function drawLearn(redraw){
 /* fasting */
 function fastSheet(){
   openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>Начать пост</h2><span style="width:40px"></span></div>
-  <div class="hero" style="--c:#C9A27A"><span class="ic">🌾</span><h3>Время поста</h3><p>Таймер пойдёт с этого момента. Когда закончишь — нажми «Завершить», и пост попадёт в дневник.</p></div>
+  <div class="hero" style="--c:#C9A27A"><span class="ic" aria-hidden="true">🌾</span><h3>Время поста</h3><p>Таймер пойдёт с этого момента. Когда закончишь — нажми «Завершить», и пост попадёт в дневник.</p></div>
   <label class="l" for="fastI">О чём пост? За что прошу?</label><textarea class="in" id="fastI" placeholder="Например: за исцеление мамы Макса, за мудрость в решении…"></textarea>
   <div class="small" style="margin:14px 4px 0">«Когда поститесь, не будьте унылы, как лицемеры… Отец твой, видящий тайное, воздаст тебе явно.» — Мф 6:16–18</div>
   <button class="btn wide mt" data-a="fastGo">${ic("play")}Начать пост</button>`,"fast");
 }
 function fastCard(){const f=S.meta.fast;if(!f||!f.start)return "";
-  return `<div class="suggest" style="--c:#C9A27A;margin-bottom:12px"><span class="ic">🌾</span><span class="tx"><small>Пост идёт</small><b id="fastT">${fmtDur(Date.now()-f.start)}</b><span class="sb">${esc(f.intent||"с "+fTime.format(new Date(f.start)))}</span></span><button class="btn sm" data-a="fastEnd">Завершить</button></div>`}
+  return `<div class="suggest" style="--c:#C9A27A;margin-bottom:12px"><span class="ic" aria-hidden="true">🌾</span><span class="tx"><small>Пост идёт</small><b id="fastT">${fmtDur(Date.now()-f.start)}</b><span class="sb">${esc(f.intent||"с "+fTime.format(new Date(f.start)))}</span></span><button class="btn sm" data-a="fastEnd">Завершить</button></div>`}
 function bibleHomeCard(){
   const bd=bDays(),pl=plan(),te=bToday(),rt=!!bd[today()],wk=weekCount(bd);
   const what=te.filter(e=>e.book!=null).map(e=>fmtRead(e)).join(" · ");
-  return `<div class="suggest" style="--c:#3CC8B4;margin-bottom:12px" data-a="tab" data-v="bible" role="button" tabindex="0"><span class="ic">📖</span><span class="tx"><small>Библия сегодня</small><b>${rt?(what||"Прочитано"):"Ещё не отмечено"}</b><span class="sb">На этой неделе ${wk} из ${pl.week} ${plural(pl.week,"дня","дней","дней")}${streakOf(bd)>1?" · 🔥 "+streakOf(bd):""}</span></span>
+  return `<div class="suggest" style="--c:#3CC8B4;margin-bottom:12px" data-a="tab" data-v="bible" role="button" tabindex="0"><span class="ic" aria-hidden="true">📖</span><span class="tx"><small>Библия сегодня</small><b>${rt?(what||"Прочитано"):"Ещё не отмечено"}</b><span class="sb">На этой неделе ${wk} из ${pl.week} ${plural(pl.week,"дня","дней","дней")}${streakOf(bd)>1?" · 🔥 "+streakOf(bd):""}</span></span>
   <span class="tap ${rt?"done":""}" data-a="${rt?"tab":"bibleLog"}" data-v="${rt?"bible":""}" role="button" aria-label="${rt?"Открыть Библию":"Отметить чтение"}">${rt?ic("check"):ic("plus")}</span></div>`}
 
 /* ---------- rings of the day ---------- */
@@ -1713,7 +1724,7 @@ function ringsSVG(R){
   return `<svg viewBox="0 0 120 120" aria-hidden="true"><defs>${d}</defs>${c}</svg>`}
 function ringsCard(){
   const R=dayRings(),all=R.every(r=>r.v>=r.g);
-  return `<section class="rings ${all?"closed":""}" aria-label="Кольца дня"><div class="rings-svg" data-a="tab" data-v="stats" role="button" aria-label="Мои итоги">${ringsSVG(R)}${all?`<span class="rings-star">✨</span>`:""}</div>
+  return `<section class="rings ${all?"closed":""}" aria-label="Кольца дня"><div class="rings-svg" data-a="tab" data-v="stats" aria-hidden="true">${ringsSVG(R)}${all?`<span class="rings-star">✨</span>`:""}</div>
   <div class="rings-l"><button class="rings-t" data-a="tab" data-v="stats">${all?"Все кольца замкнуты":"Кольца дня"} <span class="rings-more">Итоги ›</span></button>${R.map(r=>`<button class="rl" data-a="${r.a}" data-v="${r.k==="thanks"?"thanks":""}" style="--c1:${r.c1};--c2:${r.c2}"><i></i><span>${r.n}</span><b>${Math.min(r.v,99)}<small>/${r.g} ${r.u}</small></b></button>`).join("")}</div></section>`}
 function checkRings(){const R=dayRings();if(R.every(r=>r.v>=r.g)&&S.meta.ringsDay!==today()){S.meta.ringsDay=today();S.meta.ringsCount=(S.meta.ringsCount||0)+1;persist("meta");setTimeout(()=>{burst();toast("Все три кольца замкнуты! ✨")},500)}}
 
@@ -1820,12 +1831,12 @@ function drawPin(){const K=ui.kp;const html=`<div class="sh-top"><button class="
   if(ui.sheetKind==="pin")redrawSheet(html);else openSheet(html,"pin")}/* ---------- dialog (replaces confirm) ---------- */
 function ask(msg,ok,danger){return new Promise(res=>{const d=$("#dlg");
   d.innerHTML=`<div class="dlg-card" role="alertdialog" aria-modal="true"><p>${esc(msg)}</p><div class="row2"><button class="btn ghost" id="dlgNo">Отмена</button><button class="btn ${danger?"dangerf":""}" id="dlgOk">${esc(ok||"Да")}</button></div></div>`;
-  d.classList.add("show");const done=v=>{d.classList.remove("show");d.innerHTML="";res(v)};
+  d.classList.add("show");modalIn($("#dlgNo"),"dlg");const done=v=>{d.classList.remove("show");d.innerHTML="";modalOut("dlg");res(v)};
   $("#dlgNo").onclick=e=>{e.stopPropagation();done(false)};$("#dlgOk").onclick=e=>{e.stopPropagation();done(true)};d.onclick=e=>{if(e.target===d)done(false)}})}
 
 function choose(msg,opts){return new Promise(res=>{const d=$("#dlg");
   d.innerHTML=`<div class="dlg-card" role="alertdialog" aria-modal="true"><p>${esc(msg)}</p><div class="dlg-col">${opts.map(([k,l,c])=>`<button class="btn wide ${c||""}" data-k="${k}">${l}</button>`).join("")}<button class="btn ghost wide" data-k="">Закрыть</button></div></div>`;
-  d.classList.add("show");const done=v=>{d.classList.remove("show");d.innerHTML="";res(v)};
+  d.classList.add("show");modalIn(d.querySelector("[data-k]"),"dlg");const done=v=>{d.classList.remove("show");d.innerHTML="";modalOut("dlg");res(v)};
   d.querySelectorAll("[data-k]").forEach(b=>b.onclick=e=>{e.stopPropagation();done(b.dataset.k)});d.onclick=e=>{if(e.target===d)done("")}})}
 /* ---------- bible text storage ---------- */
 const IDB={open(){return new Promise((res,rej)=>{try{const r=indexedDB.open("pj-bible",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}})},
@@ -2445,7 +2456,7 @@ function vReader(){
   const readTodayCh=bToday().some(e=>e.book===b&&(e.chapters||[]).includes(c)),readEver=readSet().has(b+":"+c);
   const verses=vs.map((t,i)=>{const n=i+1,h=m&&m.hl[n],note=m&&m.notes[n];
     const tx=n===1&&R.layout==="flow"&&t?`<span class="dc">${esc(t.charAt(0))}</span>${esc(t.slice(1))}`:esc(t);
-    return `<span class="vs ${h?"hl":""} ${TTS.on&&TTS.i+1===n?"speak":""} ${sel.includes(n)?"sel":""} ${ui.flash===n?"flash":""}" id="v${n}" data-a="vtap" data-v="${n}" style="${h?`--h:${HL[h]}`:""}">${n===1&&R.layout==="flow"?"":`<sup>${n}</sup>`}${tx}${note?`<button class="vn" data-a="vnote" data-v="${n}" aria-label="Заметка к стиху ${n}">${ic("pen")}</button>`:""}${cmE[n]?`<button class="cm" data-a="cmt" data-v="${n}" aria-label="Комментарий к стиху ${n}">${[...new Set(cmE[n].map(x=>(CK[x.kind]||CK.fact)[0]))].join("")}</button>`:""}</span>`}).join(R.layout==="flow"?" ":"");
+    return `<span class="vs ${h?"hl":""} ${TTS.on&&TTS.i+1===n?"speak":""} ${sel.includes(n)?"sel":""} ${ui.flash===n?"flash":""}" id="v${n}" data-a="vtap" data-v="${n}" tabindex="0" style="${h?`--h:${HL[h]}`:""}">${n===1&&R.layout==="flow"?"":`<sup>${n}</sup>`}${tx}${note?`<button class="vn" data-a="vnote" data-v="${n}" aria-label="Заметка к стиху ${n}">${ic("pen")}</button>`:""}${cmE[n]?`<button class="cm" data-a="cmt" data-v="${n}" aria-label="Комментарий к стиху ${n}">${[...new Set(cmE[n].map(x=>(CK[x.kind]||CK.fact)[0]))].join("")}</button>`:""}</span>`}).join(R.layout==="flow"?" ":"");
   const soap=(m&&m.soap)||[];
   return `<div class="rbar"><button class="rpick" data-a="rPick">${esc(BOOKS[b][0])} ${c}${ic("chev")}</button>${READ_TTS?`<button class="rb ${TTS.on?"play":""}" data-a="rListen" aria-label="${TTS.on?"Остановить чтение":"Слушать главу"}">${TTS.on?"⏸":"🎧"}</button>`:""}<button class="rb" data-a="rSearch" aria-label="Поиск по Библии">${ic("search")}</button><button class="rb" data-a="rSettings" aria-label="Настройки текста"><b style="font-family:var(--serif);font-size:18px">Аа</b></button></div>
   <article class="reader t-${R.theme} f-${R.font} l-${R.layout}" style="--rs:${R.size}px">
@@ -2569,7 +2580,7 @@ function todaysList(){
 function todayCard(){
   const L=todaysList();if(!L.length)return "";const t=today(),done=L.filter(p=>(p.log||{})[t]).length;
   return `<section class="todayc"><div class="tc-h"><div><small>Сегодня в молитве</small><b>${done===L.length?"Все нужды дня ✓":done+" из "+L.length}</b></div><button class="btn sm" data-a="pmStart" data-v="cards">🤲 По карточкам</button></div>
-  <div class="tc-list">${L.map(p=>{const n=(p.log||{})[t]||0;return `<div class="tc-row" data-a="openPrayer" data-id="${p.id}" role="button" tabindex="0" style="--c:${p.color}"><span class="ic">${p.icon}</span><span class="tx"><b>${esc(p.title)}</b><span>${esc((ui.why||{})[p.id]||"по очереди")}${p.promise&&p.promise.r?" · "+esc(p.promise.r):""}</span></span><span class="tap ${n?"done":""}" data-a="quick" data-id="${p.id}" role="button" aria-label="Помолился">${n?ic("check"):ic("plus")}</span></div>`}).join("")}</div></section>`}
+  <div class="tc-list">${L.map(p=>{const n=(p.log||{})[t]||0;return `<div class="tc-row" data-a="openPrayer" data-id="${p.id}" role="button" tabindex="0" style="--c:${p.color}"><span class="ic" aria-hidden="true">${p.icon}</span><span class="tx"><b>${esc(p.title)}</b><span>${esc((ui.why||{})[p.id]||"по очереди")}${p.promise&&p.promise.r?" · "+esc(p.promise.r):""}</span></span><span class="tap ${n?"done":""}" data-a="quick" data-id="${p.id}" role="button" aria-label="Помолился">${n?ic("check"):ic("plus")}</span></div>`}).join("")}</div></section>`}
 function bdayCard(){const soon=peopleArr().map(p=>[p,bdayIn(p)]).filter(([,d])=>d!==null&&d<=3).sort((a,b)=>a[1]-b[1]);if(!soon.length)return "";const [p,d]=soon[0];
   return `<button class="bdc" data-a="openPerson" data-id="${p.id}"><span class="bd-e">🎂</span><span><small>${d===0?"Сегодня":d===1?"Завтра":"Через "+d+" "+plural(d,"день","дня","дней")}</small><b>День рождения · ${esc(p.name)}</b><span>Помолись и поблагодари Бога за этого человека</span></span>${ic("right")}</button>`}
 /* people views */
@@ -2679,7 +2690,7 @@ function bgDialog(cur,now){return new Promise(res=>{const d=$("#dlg");
     <div class="bg-h">Природа</div><div class="bg-g">${grp("n")}</div>
     <button class="btn ghost wide" data-k="" style="margin-top:14px">Закрыть</button>
     <div class="bg-cr">Записи — Wikimedia Commons, свободные лицензии.<br>Птицы — Robert EA Harvey, CC BY-SA 4.0 · Голос молитвы — ElevenLabs</div></div>`;
-  d.classList.add("show");const done=v=>{d.classList.remove("show");d.innerHTML="";res(v)};
+  d.classList.add("show");modalIn(d.querySelector("[data-k]"),"dlg");const done=v=>{d.classList.remove("show");d.innerHTML="";modalOut("dlg");res(v)};
   d.querySelectorAll("[data-k]").forEach(b=>b.onclick=e=>{e.stopPropagation();const k=b.dataset.k;if(k&&!bgFree(k)){done("");setTimeout(()=>plusSheet("music"),120);return}if(k&&now)now(k);done(k)});d.onclick=e=>{if(e.target===d)done("")}})}
 /* cards mode (Echo-style) */
 function drawCards(){
@@ -2688,7 +2699,7 @@ function drawCards(){
   $("#pmIn").innerHTML=`${pmTop()}
   <div class="steps">${L.map((_,k)=>`<i class="${k<=i?"on":""}"></i>`).join("")}</div>
   <div class="pm-step">Нужда ${i+1} из ${L.length}</div>
-  <div class="pcard sw" style="--c:${p.color}"><span class="ic">${p.icon}</span><h3>${esc(p.title)}</h3>${p.who?`<div class="pc-who">${esc(p.who)}</div>`:""}${p.note?`<p class="pc-note">${esc(p.note)}</p>`:""}
+  <div class="pcard sw" style="--c:${p.color}"><span class="ic" aria-hidden="true">${p.icon}</span><h3>${esc(p.title)}</h3>${p.who?`<div class="pc-who">${esc(p.who)}</div>`:""}${p.note?`<p class="pc-note">${esc(p.note)}</p>`:""}
   <div class="pc-prom"><small>Молись Словом</small><p>«${esc(cv.t)}»</p><span>${esc(cv.r||"")}</span></div>
   <div class="pg-how"><small>Как молиться</small><p>${esc(cg.q)}</p>${p.wait?`<p class="pg-wait">⏳ Ты ждёшь ответа на эту молитву. Бог не забыл — продолжай доверять.</p>`:""}<details class="pg-pray"><summary>🙏 Можно сказать так</summary><p>${esc(cg.p)}</p></details></div>
   ${(ui.why||{})[p.id]&&(ui.why||{})[p.id]!=="по очереди"?`<div class="small" style="margin-top:12px">${esc(ui.why[p.id])}</div>`:""}
@@ -2792,7 +2803,7 @@ function srsSheet(){const q=srsDue();if(!q.length){closeSheet();toast("Все с
 function capLocked(e){return e.type==="capsule"&&e.openAt>today()}
 function capsuleForm(){ui.cap={m:6};
   openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>Капсула времени</h2><button class="pill pri" data-a="capSave">Запечатать</button></div>
-  <div class="hero" style="--c:#8B7CFF"><span class="ic">📬</span><h3>Письмо в будущее</h3><p>Напиши себе, Богу или о том, во что веришь сейчас. Откроется только в выбранный день.</p></div>
+  <div class="hero" style="--c:#8B7CFF"><span class="ic" aria-hidden="true">📬</span><h3>Письмо в будущее</h3><p>Напиши себе, Богу или о том, во что веришь сейчас. Откроется только в выбранный день.</p></div>
   <textarea class="in" id="capT" style="min-height:180px" placeholder="Дорогой я через полгода… Сейчас я молюсь о…"></textarea>
   <label class="l">Открыть через</label><div class="pick" id="capP">${[[1,"1 месяц"],[3,"3 месяца"],[6,"полгода"],[12,"1 год"]].map(([m,l])=>`<button class="${m===6?"on":""}" data-a="capM" data-v="${m}">${l}</button>`).join("")}</div>`,"cap");setTimeout(()=>$("#capT").focus(),350)}
 function capsuleHome(){const ready=Object.values(S.entries).filter(e=>e.type==="capsule"&&!capLocked(e)&&!e.opened);if(!ready.length)return "";const e=ready[0];
@@ -2849,9 +2860,19 @@ function render(){
 }
 
 /* ---------- sheets ---------- */
-function openSheet(html,kind){ui.sheetKind=kind||"";$("#sheetIn").innerHTML=`<div class="grab"></div>`+html;const sh=$("#sheet"),sd=$("#shade");sh.scrollTop=0;sh.classList.remove("hidden");sd.classList.remove("hidden");requestAnimationFrame(()=>requestAnimationFrame(()=>{sh.classList.add("show");sd.classList.add("show")}))}
-function closeSheet(){const sh=$("#sheet"),sd=$("#shade");sh.classList.remove("show");sd.classList.remove("show");ui.sheetKind="";ui.detail=null;setTimeout(()=>{if(!sh.classList.contains("show")){sh.classList.add("hidden");sd.classList.add("hidden")}},340)}
-function redrawSheet(html){const y=$("#sheet").scrollTop;$("#sheetIn").innerHTML=`<div class="grab"></div>`+html;$("#sheet").scrollTop=y}
+/* модальные слои (лист, молитва, «Бог ответил», окно вопроса): всё под верхним слоем недоступно для фокуса и диктора,
+   фокус переходит внутрь, а при закрытии возвращается туда, откуда открыли */
+const FOC={};
+function modalSync(){const top=$("#dlg").classList.contains("show")?$("#dlg"):$("#moment")||($("#pm").matches(".show:not(.out)")?$("#pm"):ui.shOpen?$("#sheet"):null);
+  [$("#main"),$(".dock"),$("#sheet"),$("#pm")].forEach(el=>{if(el)el.inert=!!top&&el!==top})}
+function modalIn(el,key){FOC[key]=document.activeElement;modalSync();if(el&&!el.contains(document.activeElement))try{el.focus({preventScroll:true})}catch(e){}}
+function modalOut(key){const el=FOC[key];FOC[key]=null;modalSync();if(el&&el!==document.body&&el.isConnected&&!el.closest("[inert]"))try{el.focus({preventScroll:true})}catch(e){}}
+function sheetLabel(){const sh=$("#sheet"),h=$("#sheetIn").querySelector("h1,h2,h3");if(h){h.id=h.id||"shH";sh.setAttribute("aria-labelledby",h.id)}else sh.removeAttribute("aria-labelledby")}
+function openSheet(html,kind){ui.sheetKind=kind||"";$("#sheetIn").innerHTML=`<div class="grab"></div>`+html;const sh=$("#sheet"),sd=$("#shade");sh.scrollTop=0;sh.classList.remove("hidden");sd.classList.remove("hidden");sheetLabel();
+  if(!ui.shOpen){ui.shOpen=true;FOC.sheet=document.activeElement}modalSync();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{sh.classList.add("show");sd.classList.add("show");if(!sh.contains(document.activeElement))try{sh.focus({preventScroll:true})}catch(e){}}))}
+function closeSheet(){const sh=$("#sheet"),sd=$("#shade");sh.classList.remove("show");sd.classList.remove("show");ui.sheetKind="";ui.detail=null;if(ui.shOpen){ui.shOpen=false;modalOut("sheet");skyResume()}setTimeout(()=>{if(!sh.classList.contains("show")){sh.classList.add("hidden");sd.classList.add("hidden")}},340)}
+function redrawSheet(html){const y=$("#sheet").scrollTop;$("#sheetIn").innerHTML=`<div class="grab"></div>`+html;$("#sheet").scrollTop=y;sheetLabel()}
 
 function prayerForm(p){
   ui.form=p?{id:p.id,due:p.due||"",title:p.title,who:p.who||"",note:p.note||"",cat:p.cat,icon:p.icon,color:p.color,sched:p.sched||"rot",wd:(p.wd||[]).slice(),personId:p.personId||"",pt:(p.promise&&p.promise.t)||"",pr:(p.promise&&p.promise.r)||""}:{id:null,title:"",who:"",note:"",cat:"Другое",icon:"🙏",color:COLORS[Object.keys(S.prayers).length%COLORS.length],sched:"rot",wd:[],personId:ui.prefPerson||"",pt:"",pr:""};ui.prefPerson="";
@@ -2898,7 +2919,7 @@ function sheetDetail(){
   const notes=Object.values(S.entries).filter(e=>(e.prayerIds||[]).includes(p.id)&&(e.text||e.thanks)).sort((a,b)=>b.createdAt-a.createdAt).slice(0,6);
   const since=daysBetween(p.createdAt,p.answeredAt||Date.now());
   const html=`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Закрыть">${ic("x")}</button><span></span><button class="pill" data-a="editPrayer" data-id="${p.id}">${ic("pen")}Изменить</button></div>
-  <div class="hero" style="--c:${p.color}"><span class="ic">${p.icon}</span><h3>${esc(p.title)}</h3><p>${esc([p.who,p.cat].filter(Boolean).join(" · "))} · с ${fDay.format(new Date(p.createdAt))}</p></div>
+  <div class="hero" style="--c:${p.color}"><span class="ic" aria-hidden="true">${p.icon}</span><h3>${esc(p.title)}</h3><p>${esc([p.who,p.cat].filter(Boolean).join(" · "))} · с ${fDay.format(new Date(p.createdAt))}</p></div>
   ${p.due&&p.status!=="answered"?`<p class="small" style="text-align:center;margin:-6px 0 12px">📅 ${esc(dueLabel(p))}${Math.abs(ddiff(today(),p.due))>1?" · "+fDay.format(parseDk(p.due)):""}</p>`:""}
   ${p.note?`<p class="note">${esc(p.note)}</p>`:""}
   ${p.promise&&p.promise.t?`<div class="prom"><small>Обетование · молись Словом</small><p>«${esc(p.promise.t)}»</p><span>${esc(p.promise.r||"")}</span></div>`:p.status!=="answered"?(()=>{const v=autoPromise(p);return `<div class="prom"><small>Слово для молитвы · тема «${esc(p.cat||"Другое")}»</small><p>«${esc(v.t)}»</p><span>${esc(v.r)}</span></div>`})():""}
@@ -2914,7 +2935,7 @@ function sheetDetail(){
 function answerForm(id){
   const p=S.prayers[id];
   openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>Ответ на молитву</h2><button class="pill pri" data-a="saveAnswer" data-id="${id}">Готово</button></div>
-  <div class="hero" style="--c:${p.color}"><span class="ic">${p.icon}</span><h3>${esc(p.title)}</h3></div>
+  <div class="hero" style="--c:${p.color}"><span class="ic" aria-hidden="true">${p.icon}</span><h3>${esc(p.title)}</h3></div>
   <div class="ansp" id="ansP">${Object.entries(ANS).map(([k,a])=>`<button class="${k==="yes"?"on":""}" data-a="ansType" data-v="${k}">${a[0]} ${a[1]}</button>`).join("")}</div>
   <label class="l" for="aText" id="aLab">Как Господь ответил?</label><textarea class="in" id="aText" style="min-height:150px" placeholder="Опиши, что произошло. Это свидетельство ты будешь перечитывать."></textarea>`,"answer");ui.ans="yes";
   setTimeout(()=>$("#aText").focus(),350);
@@ -3111,7 +3132,7 @@ function drawAskFlow(keep){const F=PM.af,st=PM.steps[PM.step];let p=S.prayers[F.
   $("#pmIn").innerHTML=`${pmTop()}
   <div class="steps">${PM.steps.map((_,i)=>`<i class="${i<=PM.step?"on":""}"></i>`).join("")}</div>
   <div class="pm-step">${esc(st.t)} · ${F.i+1} из ${F.ids.length}</div>
-  <div class="pcard ${keep?"":"pg-in"}" style="--c:${p.color}"><span class="ic">${p.icon}</span><h3>${esc(p.title)}</h3>${p.who?`<div class="pc-who">${esc(p.who)}</div>`:""}${p.note?`<p class="pc-note">${esc(p.note)}</p>`:""}
+  <div class="pcard ${keep?"":"pg-in"}" style="--c:${p.color}"><span class="ic" aria-hidden="true">${p.icon}</span><h3>${esc(p.title)}</h3>${p.who?`<div class="pc-who">${esc(p.who)}</div>`:""}${p.note?`<p class="pc-note">${esc(p.note)}</p>`:""}
   <div class="pc-prom"><small>Молись Словом</small><p>«${esc(v.t)}»</p><span>${esc(v.r||"")}</span></div>
   <div class="pg-how"><small>Как молиться</small><p>${esc(cg.q)}</p>${p.wait?`<p class="pg-wait">⏳ Ты ждёшь ответа на эту молитву. Бог не забыл — продолжай доверять.</p>`:""}<details class="pg-pray"><summary>🙏 Можно сказать так</summary><p>${esc(cg.p)}</p></details></div></div>
   <button class="pg-more" style="margin:14px auto 0" data-a="afStop">Вернуться к списку</button>
@@ -3131,8 +3152,8 @@ function startPM(mode){
   ping("pmStart");pmShow();document.body.style.overflow="hidden";if(bgPref()!=="off")bgStart(bgPref());drawPM();if(tgOn())call("live/start",{minutes:30}).catch(()=>{});tick=setInterval(()=>{const el=$("#pmTimer");if(el)el.textContent=elapsed()},1000)}
 function elapsed(){const s=Math.floor((Date.now()-PM.start)/1000);return pad(Math.floor(s/60))+":"+pad(s%60)}
 /* экран молитвы и покаяния: мягко появляется и исчезает (без анимации при «Уменьшить движение») */
-function pmShow(){const el=$("#pm");clearTimeout(pmShow.t);el.classList.remove("out");el.classList.add("show")}
-function pmHide(){const el=$("#pm");clearTimeout(pmShow.t);if(RM||!el.classList.contains("show")){el.classList.remove("show","out");return}el.classList.add("out");pmShow.t=setTimeout(()=>el.classList.remove("show","out"),230)}
+function pmShow(){const el=$("#pm");clearTimeout(pmShow.t);const was=el.matches(".show:not(.out)");el.classList.remove("out");el.classList.add("show");if(!was)modalIn(el,"pm")}
+function pmHide(){const el=$("#pm");clearTimeout(pmShow.t);const was=el.classList.contains("show");if(RM||!was){el.classList.remove("show","out")}else{el.classList.add("out");pmShow.t=setTimeout(()=>el.classList.remove("show","out"),230)}if(was)modalOut("pm")}
 function closePM(){clearInterval(tick);if(PM){clearTimeout(PM.rvT);if(!PM.done)ping(PM.mode==="full"&&PM.step<6?"pmQuit"+(PM.step+1):"pmQuit")}pgHush();bgStop();if(PM&&tgOn())call("live/stop").catch(()=>{});PM=null;pmHide();document.body.style.overflow="";render();checkBadges()}
 function musicBtn(){const k=bgNow(),b=BGS.find(x=>x[0]===k);return `<button class="music ${k!=="off"?"on":""}" data-a="pmMusic" aria-label="Фон">${k!=="off"?`<span class="eq"><i></i><i></i><i></i></span>${b[2]}`:ic("music")+"Фон"}</button>`}
 function drawPM(keep){
@@ -3146,7 +3167,7 @@ function drawPM(keep){
   if(st.input)mid=`<textarea class="in" id="pmInput" placeholder="${st.ph}" style="min-height:150px">${esc(PM[st.input])}</textarea>`;
   if(st.list){const tl=new Set(todaysList().map(p=>p.id)),a=active().sort((x,y)=>tl.has(y.id)-tl.has(x.id)),fl=afList().length;
     mid=(PM.afN?`<div class="pg-done">✓ Отдано Богу: ${PM.afN} ${plural(PM.afN,"нужда","нужды","нужд")}</div>`:fl?`<button class="btn wide pg-flow" data-a="pmFlow">🙏 ${PM.checked.size?"Молиться за отмеченные":"Молиться по очереди"} · ${fl}</button>`:"")+
-    `<div class="checks">${a.map(p=>`<button class="check ${PM.checked.has(p.id)?"on":""}" data-a="pmCheck" data-id="${p.id}" style="--c:${p.color}"><span class="ic">${p.icon}</span><span class="tx"><b>${esc(p.title)}</b>${p.who||p.note?`<span>${esc((p.who||p.note).slice(0,80))}</span>`:""}</span><span class="bx">${ic("check")}</span></button>`).join("")}</div>
+    `<div class="checks">${a.map(p=>`<button class="check ${PM.checked.has(p.id)?"on":""}" data-a="pmCheck" data-id="${p.id}" style="--c:${p.color}"><span class="ic" aria-hidden="true">${p.icon}</span><span class="tx"><b>${esc(p.title)}</b>${p.who||p.note?`<span>${esc((p.who||p.note).slice(0,80))}</span>`:""}</span><span class="bx">${ic("check")}</span></button>`).join("")}</div>
     <div class="addline"><input class="in" id="pmNew" maxlength="80" placeholder="Новая нужда…"><button class="btn ghost" data-a="pmAdd" aria-label="Добавить нужду">${ic("plus")}</button></div>`}
   let vt="",vr="",lord=false;
   if(st.lord){vt=st.lord;vr="Мф 6:9–13";lord=true}
@@ -3672,8 +3693,8 @@ $("#importFile").addEventListener("change",async e=>{const f=e.target.files[0];e
     render();toast("Копия загружена")}catch(err){toast("Это не файл копии дневника")}});
 
 document.addEventListener("click",e=>{const el=e.target.closest("[data-a]");if(!el)return;const a=act[el.dataset.a];if(!a)return;e.stopPropagation();e.preventDefault();a(el.dataset,el)});
-document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches("[role=button][data-a]")){e.preventDefault();e.target.click()}
-  if(e.key==="Escape"){if(TR){tourEnd();return}if(STY)closeStory();else if(CF)act.cfClose();else if(PM)act.pmClose();else if(!$("#sheet").classList.contains("hidden"))closeSheet()}});
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches("[role=button][data-a],.vs[data-a]")){e.preventDefault();e.target.click()}
+  if(e.key==="Escape"){const d=$("#dlg");if(d.classList.contains("show")){d.click();return}if($("#moment")){momClose();return}if(TR){tourEnd();return}if(STY)closeStory();else if(CF)act.cfClose();else if(PM)act.pmClose();else if(!$("#sheet").classList.contains("hidden"))closeSheet()}});
 
 /* увеличенный системный шрифт: сравниваем реальную ширину текста с ожидаемой */
 try{const sp=document.createElement("span");sp.style.cssText="position:absolute;visibility:hidden;font:700 16px Onest,Arial,sans-serif;white-space:nowrap";sp.textContent="Молитвы Дневник";document.body.appendChild(sp);
@@ -3681,7 +3702,7 @@ try{const sp=document.createElement("span");sp.style.cssText="position:absolute;
 render();
 connect();
 setTimeout(guideLoad,600);
-loadBible();
+(window.requestIdleCallback||setTimeout)(loadBible,{timeout:2000});
 if(LOGIN0&&TG)setTimeout(()=>approveSheet(LOGIN0),600);
 try{const pq=new URLSearchParams(location.search).get("paid");if(pq||(TG&&TG.initDataUnsafe&&TG.initDataUnsafe.start_param==="paid")){if(pq)history.replaceState(null,"",location.pathname+location.hash);setTimeout(()=>{toast("Проверяю оплату…");plusRefresh();setTimeout(plusRefresh,4000);setTimeout(()=>{if(isPlus())toast("✨ Плюс включён. Спасибо за поддержку!")},4500)},1200)}}catch(e){}
 if(JOIN0&&tgOn()){try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}setTimeout(()=>joinPrompt(JOIN0),400)}

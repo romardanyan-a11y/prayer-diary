@@ -486,6 +486,7 @@ input[type=time].in{width:auto;padding:9px 12px;font-weight:700}
 .todayc{border-radius:28px;padding:16px;margin-bottom:12px;background:radial-gradient(120% 100% at 100% 0%,color-mix(in srgb,#FF6A8A 16%,transparent),transparent 60%),var(--card);border:1px solid var(--stroke);box-shadow:var(--shadow)}
 .tc-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 12px}.tc-h .btn.sm{white-space:nowrap;flex:none}
 .tog-start{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:4px 2px 16px}.tog-start span{font-size:13px;font-weight:700;color:var(--muted);margin-right:2px}
+.slot-x{position:relative}.slot-close{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--muted);background:var(--card2)}.slot-close svg.i{width:16px;height:16px}
 .jsum{width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px;margin:0 0 10px;border-radius:18px;background:var(--card);border:1px solid var(--stroke);text-align:left}.jsum b{flex:1;font-size:15px;font-weight:700}.jsum i{font-style:normal;color:var(--muted)}
 .tc-h small{display:block;font-size:12.5px;font-weight:700;color:var(--muted)}
 .tc-h b{display:block;font-size:20px;font-weight:800;letter-spacing:-.02em}
@@ -1068,7 +1069,7 @@ try{const r=localStorage.getItem(LSP);if(r)pending=new Set(JSON.parse(r))}catch(
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LSP,JSON.stringify([...pending]))}catch(e){}}
 function hasData(){return Object.keys(S.people||{}).length||Object.keys(S.marks||{}).length||Object.keys(S.prayers).length||Object.keys(S.entries).length||Object.keys(S.meta.days||{}).length}
 
-let col=null; const chains={},inflight={},busy={},bad={};const APPV="27";
+let col=null; const chains={},inflight={},busy={},bad={};const APPV="28";
 function current(id){if(id==="meta")return S.meta;return S.prayers[id]||S.entries[id]||S.marks[id]||S.people[id]||null}
 function write(id){
   pending.add(id);saveLocal();
@@ -1407,8 +1408,9 @@ function vHome(){
 /* «Сейчас важно» — на главной одна карточка за раз, самая срочная; остальные ждут своей очереди
    (одно решение под одну проблему: раньше их могло быть пять-шесть подряд) */
 function homeSlot(h,wd,confDone){const m=new Date().getMonth(),d=new Date().getDate();
-  const L=[()=>h>=17&&!confDone?`<button class="confc" data-a="confStart"><span class="cf-orb">🤍</span><span><small>Вечерний разбор</small><b>Посмотри на день с Богом</b><span>Покайся — и засыпай прощённым</span></span>${ic("right")}</button>`:"",
-    answerCard,firstNeedCard,bdayCard,fastCard,dueCard,forMeCard,
+  const L=[answerCard,firstNeedCard,bdayCard,fastCard,dueCard,
+    ()=>h>=17&&!confDone&&S.meta.confSkip!==today()?`<div class="slot-x"><button class="confc" data-a="confStart"><span class="cf-orb">🤍</span><span><small>Вечерний разбор</small><b>Посмотри на день с Богом</b><span>Покайся — и засыпай прощённым</span></span>${ic("right")}</button><button class="slot-close" data-a="confSkip" aria-label="Не сегодня">${ic("x")}</button></div>`:"",
+    forMeCard,
     ()=>(m===11&&d>=15)||(m===0&&d<=15)?`<button class="weekc" data-a="yearOpen" style="background:radial-gradient(100% 120% at 0% 0%,#FFB35C,transparent 60%),radial-gradient(100% 120% at 100% 100%,#6B5CF0,transparent 60%),#2A1030"><span class="wk-orb">🎆</span><span><small>Итоги года</small><b>Твой год с Богом</b></span>${ic("right")}</button>`:"",
     ()=>wd===0||wd===1?`<button class="weekc" data-a="storyOpen"><span class="wk-orb">✨</span><span><small>${wd===0?"Неделя подходит к концу":"Новая неделя"}</small><b>Твоя неделя с Богом</b></span>${ic("right")}</button>`:"",
     loginCard,srsCard,capsuleHome,churchHome];
@@ -1824,7 +1826,7 @@ try{const c=JSON.parse(localStorage.getItem("pj-ch")||"null");if(c&&c.me){CH.me=
 async function pcall(path,body){let r;try{r=await fetch(API+"/api/"+path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body||{})})}catch(e){throw new Error("Нет связи с сервером — проверь интернет")}
   const o=await r.json().catch(()=>({error:"Нет связи с сервером"}));if(!r.ok||o.error){const er=new Error(o.error||"Ошибка");er.status=r.status;throw er}return o}
 async function call(path,body){if(!TG&&!SES)throw new Error("Открой дневник через Telegram");
-  const ac=new AbortController(),to=setTimeout(()=>ac.abort(),12000);let r;
+  const ac=new AbortController(),to=setTimeout(()=>ac.abort(),/^ai\//.test(path)?60000:12000);let r;/* ИИ может думать до минуты */
   try{r=await fetch(API+"/api/"+path,{method:"POST",signal:ac.signal,headers:Object.assign({"content-type":"application/json"},TG?{"x-init-data":TG.initData}:{"x-session":SES}),body:JSON.stringify(Object.assign({tz:new Date().getTimezoneOffset()},body||{}))})}
   catch(e){throw new Error("Нет связи с сервером — проверь интернет")}finally{clearTimeout(to)}
   const o=await r.json().catch(()=>({error:"Нет связи с сервером"}));if(!r.ok||o.error){const er=new Error(o.error||"Ошибка");er.status=r.status;throw er}return o}
@@ -2309,7 +2311,7 @@ const TOUR=[
   {tab:"prayers",sel:'#tabs [data-v="prayers"]',t:"Мои молитвы",x:"Все твои нужды здесь. Когда Бог ответит — открой молитву и нажми «Бог ответил». Так соберутся твои свидетельства."},
   {tab:"bible",sel:".cm, .r-intro, .rbar",t:"Библия с комментариями",x:"Значки у стихов — короткие интересные комментарии. Нажми на любой стих, чтобы выделить его, написать заметку или сделать картинку. В конце главы — вопросы и викторина."},
   {tab:"church",sel:'#tabs [data-v="church"]',t:"Вместе с другими",x:"Молитвенная стена — общая для всех христиан и своя для твоей церкви. Создай церковь или вступи по приглашению. «Читаем вместе» — общие планы чтения Библии."},
-  {tab:"journal",sel:".expbtn",t:"Дневник и опыты",x:"Мысли, благодарности, проповеди и опыты — как Бог действовал в твоей жизни. Всё личное видишь только ты."},
+  {tab:"journal",sel:"#fab",t:"Дневник и опыты",x:"Мысли, благодарности, проповеди и опыты — как Бог действовал в твоей жизни. Всё личное видишь только ты."},
   {t:"Дневник Плюс ✨",x:"Всё главное бесплатно навсегда: молитва, Библия, дневник, церковь и напоминания.<br><br>Плюс — по желанию: живой голос, который ведёт молитву, вся музыка и звуки природы, больше вопросов ИИ-помощнику, книга ответов на молитвы. Первые 7 дней — бесплатно, без карты. Оплата — картой."},
   {tab:"home",sel:'[data-a="settings"]',t:"Настройки",x:"Оформление, напоминания, код для покаяния и «Дневник Плюс». Здесь же можно снова пройти это знакомство."}];
 let TR=null;
@@ -2404,7 +2406,7 @@ function vReader(){
   </article>
   ${tgOn()&&(!CH.ai||CH.ai.ready)&&BIB?`<button class="aic" data-a="aiChapter"><span class="be">✨</span><span><b>Спросить о главе</b><small>Непонятное место, контекст, как применить — ответит ИИ</small></span>${ic("right")}</button>`:""}
   ${BIB?`<button class="quizc" data-a="rPray"><span class="be">🙏</span><span><b>Помолиться этой главой</b><small>Медленно прочитать отрывок и ответить Богу — Лекцио</small></span>${ic("right")}</button>`:""}
-  ${cm&&cm.quiz&&cm.quiz.length?`<button class="quizc" data-a="quizGo"><span class="be">🧩</span><span><b>Проверь себя</b><small>${(S.meta.quiz||{})[b+"_"+c]!=null?"Твой результат: "+S.meta.quiz[b+"_"+c]+" из "+cm.quiz.length+" · пройти снова":cm.quiz.length+" вопроса по главе"}</small></span>${ic("right")}</button>`:""}
+  ${cm&&cm.quiz&&cm.quiz.length?`<button class="quizc" data-a="quizGo"><span class="be">🧩</span><span><b>Проверь себя</b><small>${(S.meta.quiz||{})[b+"_"+c]!=null?"Твой результат: "+S.meta.quiz[b+"_"+c]+" из "+cm.quiz.length+" · пройти снова":cm.quiz.length+" "+plural(cm.quiz.length,"вопрос","вопроса","вопросов")+" по главе"}</small></span>${ic("right")}</button>`:""}
   <section class="card soap"><div class="lab">${ic("spark")}Размышление о главе</div><h2 style="margin-top:6px">${esc(BOOKS[b][1])} ${c}: что Бог говорит мне?</h2>
     ${soap.map((s_,i)=>`<div class="soap-i"><div class="small">${fDayY.format(new Date(s_.ts))}</div>${[["s","Зацепило"],["o","Смысл"],["a","Применю"],["p","Молитва"]].filter(([k])=>s_[k]).map(([k,l])=>`<p><b>${l}:</b> ${esc(s_[k])}</p>`).join("")}<button class="textbtn" style="color:var(--muted)" data-a="soapDel" data-v="${i}">Удалить</button></div>`).join("")}
     ${cm&&cm.questions&&cm.questions.length?`<div class="small" style="margin-top:10px;font-weight:700">Вопросы для размышления</div><ol class="qs">${cm.questions.map(q=>`<li>${esc(q)}</li>`).join("")}</ol>`:""}
@@ -3534,6 +3536,7 @@ const act={
   reopen:d=>{const p=S.prayers[d.id];p.status="active";persist(p.id);dueSync(p);render();sheetDetail()},
   dueStill:d=>{const p=S.prayers[d.id];if(!p)return;p.dueAsked=p.due;persist(p.id);render();toast("Продолжаем молиться 🤍")},
   newEntry:d=>entryForm(d.v),
+  confSkip:()=>{S.meta.confSkip=today();persist("meta");render()},
   jDay:d=>{ui.jDays=Object.assign({},ui.jDays,{[d.v]:!(ui.jDays||{})[d.v]});render()},
   jf:d=>{ui.jf=d.v;render()},
   eType:d=>{ui.form.type=d.v;markPick($("#eTypes"),d.v);const x=d.v==="exp";$("#eSermon").classList.toggle("hidden",d.v!=="sermon"&&!x);$("#eTitleL").textContent=x?"Коротко: что произошло":"Тема и проповедник";$("#eTitle").placeholder=x?"Например: «Бог помог найти работу»":"Например: «Вера и дела», пастор Андрей"},

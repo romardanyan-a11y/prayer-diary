@@ -1069,7 +1069,7 @@ try{const r=localStorage.getItem(LSP);if(r)pending=new Set(JSON.parse(r))}catch(
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LSP,JSON.stringify([...pending]))}catch(e){}}
 function hasData(){return Object.keys(S.people||{}).length||Object.keys(S.marks||{}).length||Object.keys(S.prayers).length||Object.keys(S.entries).length||Object.keys(S.meta.days||{}).length}
 
-let col=null; const chains={},inflight={},busy={},bad={};const APPV="28";
+let col=null; const chains={},inflight={},busy={},bad={};const APPV="30";
 function current(id){if(id==="meta")return S.meta;return S.prayers[id]||S.entries[id]||S.marks[id]||S.people[id]||null}
 function write(id){
   pending.add(id);saveLocal();
@@ -1110,6 +1110,7 @@ const CS=(()=>{if(!TG||!TG.CloudStorage||!TG.isVersionAtLeast||!TG.isVersionAtLe
   const N=4000,chunk=id=>/^(.+)--(\d+)$/.exec(id);
   return{
     async keys(){return await cb("getKeys")||[]},
+    async clear(){const ks=await this.keys();for(let i=0;i<ks.length;i+=50)await cb("removeItems",ks.slice(i,i+50))},
     async get(k){return await cb("getItem",k)},async put(k,v){await cb("setItem",k,v)},
     async getAll(){const ks=await this.keys(),vals={};for(let i=0;i<ks.length;i+=50)Object.assign(vals,await cb("getItems",ks.slice(i,i+50))||{});
       const docs=[];Object.keys(vals).forEach(k=>{if(chunk(k))return;let v=vals[k]||"";const m=/^~(\d+)\|/.exec(v);if(m){v=v.slice(m[0].length);for(let j=1;j<+m[1];j++)v+=vals[k+"--"+j]||""}
@@ -1160,22 +1161,29 @@ function vMark(id){if(!VT.key)return;VT.dirty.add(id);clearTimeout(VT.t);VT.t=se
 function vScanAll(){const st=vSt(),pu=st.pushed||{};allIds().forEach(id=>{const o=current(id),v=o?(o._v||1):(TOMB[id]||0);if(v&&(pu[id]||0)<v)VT.dirty.add(id)})}
 async function vFlush(){if(!VT.key||VT.busy)return;VT.busy=true;VT.t=null;const ids=[...VT.dirty];VT.dirty.clear();const st=vSt();st.pushed=st.pushed||{};
   try{for(let i=0;i<ids.length;i+=40){const items=[];
-      for(const id of ids.slice(i,i+40)){const o=current(id),v=o?(o._v||1):(TOMB[id]||0);if(!v||(st.pushed[id]||0)>=v)continue;items.push({id,v,data:o?await seal(VT.key,id,TE.encode(JSON.stringify(o))):null})}
-      if(items.length){await call("vault/push",{items});items.forEach(x=>{st.pushed[x.id]=x.v});vSave(st)}}
+      for(const id of ids.slice(i,i+40)){const o=current(id),v=o?(o._v||1):(TOMB[id]||0);if(!v||(st.pushed[id]||0)>=v||(st.rej&&st.rej[id]===v))continue;items.push({id,v,data:o?await seal(VT.key,id,TE.encode(JSON.stringify(o))):null})}
+      if(items.length){const r=await call("vault/push",{items}),rej=new Set((r&&r.rejected)||[]);st.rej=st.rej||{};items.forEach(x=>{if(rej.has(x.id))st.rej[x.id]=x.v;else{st.pushed[x.id]=x.v;delete st.rej[x.id]}});vSave(st);if(rej.size)ui.lastErr=rej.size+" "+plural(rej.size,"запись слишком большая","записи слишком большие","записей слишком большие")+" для облака — сократи текст"}}
     if(VT.mode==="pwa")setSync("ok")}
   catch(e){ids.forEach(id=>VT.dirty.add(id));if(VT.mode==="pwa")setSync("err");if(e&&e.status===401)vSignedOut();else{clearTimeout(VT.t);VT.t=setTimeout(vFlush,30000)}}
   finally{VT.busy=false;if(VT.dirty.size&&!VT.t)VT.t=setTimeout(vFlush,1500)}}
 function vApply(id,o,v){o._v=v;o.id=id;const cols=[S.prayers,S.entries,S.marks,S.people];
-  if(id==="meta"){const days=Object.assign({},o.days||{});let extra=false;Object.entries(S.meta.days||{}).forEach(([k,c])=>{if((days[k]||0)<c){days[k]=c;extra=true}});
-    S.meta=Object.assign({id:"meta",kind:"meta"},o,{days});if(extra){S.meta._v=Date.now();vMark("meta")}}
+  if(id==="meta"){const L=S.meta||{},m=Object.assign({id:"meta",kind:"meta"},o);let extra=false;
+    /* поля, которые только растут (дни и часы молитвы, тесты, вехи, кольца): берём объединение, чтобы правка с другого устройства их не стёрла */
+    const maxMap=k=>{const r=Object.assign({},o[k]||{});Object.entries(L[k]||{}).forEach(([d,c])=>{if((r[d]||0)<c){r[d]=c;extra=true}});m[k]=r};
+    const unionMap=k=>{const r=Object.assign({},o[k]||{});Object.entries(L[k]||{}).forEach(([d,c])=>{if(c&&typeof c==="object"){const x=Object.assign({},r[d]||{});Object.keys(c).forEach(h=>{if(!x[h]){x[h]=c[h];extra=true}});r[d]=x}else if(!(d in r)){r[d]=c;extra=true}});m[k]=r};
+    maxMap("days");maxMap("quiz");unionMap("hours");unionMap("world");
+    if(Array.isArray(L.badges)){const b=new Set(Array.isArray(o.badges)?o.badges:[]);L.badges.forEach(x=>{if(!b.has(x)){b.add(x);extra=true}});m.badges=[...b]}
+    if((L.ringsCount||0)>(o.ringsCount||0)){m.ringsCount=L.ringsCount;extra=true}
+    S.meta=m;if(extra){S.meta._v=Date.now();vMark("meta")}}
   else{cols.forEach(c=>{delete c[id]});const c=o.kind==="prayer"?S.prayers:o.kind==="mark"?S.marks:o.kind==="person"?S.people:o.kind==="entry"?S.entries:null;if(!c)return;c[id]=o}
   if(TOMB[id]){delete TOMB[id];saveTomb()}if(col)write(id)}
 function vApplyDel(id,v){[S.prayers,S.entries,S.marks,S.people].forEach(c=>{delete c[id]});TOMB[id]=v;saveTomb();if(col)write(id)}
 async function vPull(){if(!VT.key||VT.pulling)return 0;VT.pulling=true;let n=0;const st=vSt();st.pushed=st.pushed||{};
+  if(st.failed&&Object.keys(st.failed).length&&Date.now()-(st.failAt||0)>864e5){st.cur=0;st.failed={};st.failAt=Date.now();vSave(st)}
   try{for(let g=0;g<300;g++){const r=await call("vault/pull",{since:st.cur||0});
       for(const x of r.items){const lo=current(x.id),lv=lo?(lo._v||0):(TOMB[x.id]||0);if(x.v<=lv){st.pushed[x.id]=Math.max(st.pushed[x.id]||0,x.v);continue}
         if(x.data==null){st.pushed[x.id]=Math.max(st.pushed[x.id]||0,x.v);vApplyDel(x.id,x.v)}
-        else{let o;try{o=JSON.parse(TD.decode(await unseal(VT.key,x.id,x.data)))}catch(e){if(lo){lo._v=Math.max(lo._v||1,x.v)+1;delete st.pushed[x.id];VT.dirty.add(x.id)}continue}st.pushed[x.id]=Math.max(st.pushed[x.id]||0,x.v);vApply(x.id,o,x.v)}n++}
+        else{let o;try{o=JSON.parse(TD.decode(await unseal(VT.key,x.id,x.data)))}catch(e){if(lo){lo._v=Math.max(lo._v||1,x.v)+1;delete st.pushed[x.id];VT.dirty.add(x.id)}else{st.failed=st.failed||{};st.failed[x.id]=x.v;st.failAt=st.failAt||Date.now()}continue}st.pushed[x.id]=Math.max(st.pushed[x.id]||0,x.v);vApply(x.id,o,x.v)}n++}
       st.cur=r.cursor;vSave(st);if(!r.more)break}}
   finally{VT.pulling=false}
   if(VT.dirty.size){saveLocal();clearTimeout(VT.t);VT.t=setTimeout(vFlush,500)}
@@ -2212,6 +2220,8 @@ function donateSheet(){const tg=!!TG,st=tg&&ui.donStars,list=st?[50,150,300,700]
     ${!tg&&!SES?`<button class="btn wide" data-a="loginOpen">Войти через Telegram</button>`:`<div class="pl-don-g">${list.map(a=>`<button data-a="donatePay" data-v="${a}">${a.toLocaleString("ru-RU")}${unit}</button>`).join("")}</div>
     <p class="small pl-note">От ${month}${unit} — в благодарность месяц Плюса.</p>${tg?`<button class="textbtn pl-don" data-a="donStars">${st?"Оплатить картой":"или звёздами Telegram"}</button>`:""}`}${legalLinks()}`;
   if(ui.sheetKind==="donate")redrawSheet(html);else openSheet(html,"donate")}
+/* новый день наступил, пока приложение открыто — обновить «сегодня» (не посреди молитвы) */
+ui.dayK=today();setInterval(()=>{if(ui.dayK!==today()){ui.dayK=today();if(!PM&&!TR&&$("#sheet").classList.contains("hidden"))render()}},60000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&ui.payPending&&Date.now()-ui.payPending<30*60e3){plusRefresh();setTimeout(plusRefresh,4000)}});
 async function plusRefresh(){try{const me=await call("me");CH.me=Object.assign(CH.me||{},me);try{localStorage.setItem("pj-plus",String(me.plusUntil||0))}catch(e){}render();if(ui.sheetKind==="plus")plusSheet()}catch(e){}}
 async function payStart(kind,amount,via){try{
@@ -2492,7 +2502,7 @@ function autoPromise(p){const L=PROMISES[p.cat]||PROMISES["Другое"];return
 function dueLabel(p){if(!p.due)return "";const d=ddiff(today(),p.due);return d===0?"сегодня":d===1?"завтра":d===-1?"вчера":d>1?"через "+d+" "+plural(d,"день","дня","дней"):fDay.format(parseDk(p.due))}
 function dueSync(p){if(!p||!tgOn())return;const want=p.due&&p.status!=="answered"&&S.prayers[p.id]?p.due+"|"+p.title:"";if((p.dueSynced||"")===want)return;
   (want?call("due/set",{key:p.id,day:p.due,title:p.title}):call("due/del",{key:p.id})).then(()=>{if(S.prayers[p.id]){S.prayers[p.id].dueSynced=want;persist(p.id)}}).catch(()=>{})}
-function dueCard(){const t=today(),L=active().filter(p=>p.due&&p.due<t&&ddiff(p.due,t)<=7&&p.dueAsked!==p.due);if(!L.length)return "";const p=L[0];
+function dueCard(){const t=today(),L=active().filter(p=>p.due&&p.due<t&&ddiff(p.due,t)>=2&&ddiff(p.due,t)<=7&&p.dueAsked!==p.due);/* «вчера» — уже в «Сегодня в молитве» */if(!L.length)return "";const p=L[0];
   return `<section class="duec"><div class="lab">🕊 Как прошло?</div><p><b>${esc(p.title)}</b> — это было ${ddiff(p.due,t)===1?"вчера":fDay.format(parseDk(p.due))}.</p>
   <div class="row2"><button class="btn sm green" data-a="answerForm" data-id="${p.id}">🙌 Бог ответил</button><button class="btn sm ghost" data-a="dueStill" data-id="${p.id}">Ещё молюсь</button></div></section>`}
 /* today's list (PrayerMate-style rotation) */
@@ -2941,6 +2951,7 @@ function settingsSheet(redraw){hsCheck();
   ${storeRows()}
   <p class="small" style="margin:2px 6px 12px">Версия ${APPV}${col?" · ожидают сохранения: "+pending.size:""}${ui.lastErr?" · ошибка: "+esc(ui.lastErr):""}${pending.size&&col?` · <button class="textbtn" data-a="syncNow" style="padding:0">Сохранить сейчас</button>`:""}</p>
   <div class="row2"><button class="btn ghost ${dl?"":"hidden"}" data-a="export">${ic("down")}Скачать копию</button><button class="btn ghost" data-a="import">${ic("up")}Загрузить</button></div>
+  ${tgOn()?`<button class="set" style="width:100%;text-align:left" data-a="accDelete"><div><b style="color:var(--danger)">Удалить аккаунт</b><span>Все записи, публикации и данные о тебе — с сервера, из облака Telegram и с этого устройства</span></div>${ic("right")}</button>`:""}
   <label class="l">Приложение</label>
   ${hsRow()}
   <button class="set" style="width:100%;text-align:left" data-a="welcomeOpen"><div><b>Как пользоваться дневником</b><span>Короткое знакомство с разделами</span></div>${ic("right")}</button>
@@ -3017,6 +3028,8 @@ async function voUrl(name){if(VO.cache[name])return VO.cache[name];const r=await
 async function voPlay(name){const a=voEl(),tok=++VO.tok;VO.busy=true;
   try{const url=await voUrl(name);if(tok!==VO.tok)return;a.src=url;duck(true);const p=a.play();if(p&&p.catch)p.catch(()=>duck(false))}catch(e){duck(false)}finally{if(tok===VO.tok)VO.busy=false}}
 function voPrefetch(key,i){for(let n=1;n<5;n++){const nm=vName(key,i,"q"+n);if(!nm)break;voUrl(nm).catch(()=>{})}}
+/* запись для шага: текст шага; на шаге «Читай» в Лекцио — сам отрывок (если он из готовых) */
+const stepClip=(st,g)=>g?vName(st.k,PM.gi[PM.step],"m"):st.k==="l1"&&PM.li>=0&&PM.passage===GUIDE.lectio[PM.li]?vName("lectio",PM.li,"m"):null;
 function pgSpeak(clip,texts,key,i){pgHush();if(!VOICE_ON||!clip||!isPlus())return;voPlay(clip);if(key)voPrefetch(key,i)}
 /* карточка нужды: записанный стих-обещание, затем подсказка «как молиться»; название нужды не читаем — его пишет сам человек */
 const vClip=n=>VOICED.has(n)?n:null;
@@ -3060,7 +3073,7 @@ function startPM(mode){
   PM={mode,steps:MODES[mode].steps,step:0,start:Date.now(),checked:new Set(),thanks:"",text:"",word:"",passage:null,done:false,list:mode==="cards"?(todaysList().length?todaysList():active()):[],ci:0};
   if(mode==="cards"&&!PM.list.length){PM=null;toast("Сначала добавь нужды");return}
   PM.vv=PM.steps.map(st=>st.v&&!st.lord?freshVerse(st.k,st.v):null);PM.endV=freshVerse("done",VERSES[5]);
-  PM.gi=PM.steps.map(st=>(st.v||st.g)&&!st.lord&&GUIDE[st.k]?pickGuide(st.k):-1);if(MODES[mode].sit)ping("pmSit");{const ge=pickGuide("done");PM.endGi=ge;PM.endG=ge>=0?GUIDE.done[ge]:null}if(VOICE_ON&&S.meta.pmVoice)voUnlock();PM.voice=VOICE_ON&&isPlus()&&!!S.meta.pmVoice;PM.rv=0;PM.rvStep=0;if(mode==="lectio"){const li=pickGuide("lectio");if(li>=0)PM.passage=GUIDE.lectio[li]}
+  PM.gi=PM.steps.map(st=>(st.v||st.g)&&!st.lord&&GUIDE[st.k]?pickGuide(st.k):-1);if(MODES[mode].sit)ping("pmSit");{const ge=pickGuide("done");PM.endGi=ge;PM.endG=ge>=0?GUIDE.done[ge]:null}if(VOICE_ON&&S.meta.pmVoice)voUnlock();PM.voice=VOICE_ON&&isPlus()&&!!S.meta.pmVoice;PM.rv=0;PM.rvStep=0;if(mode==="lectio"){const li=pickGuide("lectio");if(li>=0){PM.passage=GUIDE.lectio[li];PM.li=li}}
   ping("pmStart");pmShow();document.body.style.overflow="hidden";if(bgPref()!=="off")bgStart(bgPref());drawPM();if(tgOn())call("live/start",{minutes:30}).catch(()=>{});tick=setInterval(()=>{const el=$("#pmTimer");if(el)el.textContent=elapsed()},1000)}
 function elapsed(){const s=Math.floor((Date.now()-PM.start)/1000);return pad(Math.floor(s/60))+":"+pad(s%60)}
 /* экран молитвы и покаяния: мягко появляется и исчезает (без анимации при «Уменьшить движение») */
@@ -3100,7 +3113,7 @@ function drawPM(keep){
   const inp=$("#pmInput");if(inp)inp.addEventListener("input",()=>PM[st.input]=inp.value);
   const nw=$("#pmNew");if(nw)nw.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();act.pmAdd()}});
   const dt=$("#pmIn .pg-pray");if(dt)dt.addEventListener("toggle",()=>{PM.pOpen=dt.open;if(dt.open){PM.pp=PM.pp||{};if(!PM.pp[PM.step]){PM.pp[PM.step]=1;ping("pmPray")}}});
-  if(!keep){$("#pm").scrollTop=0;pgArm();if(PM.voice)pgSpeak(g?vName(st.k,PM.gi[PM.step],"m"):null,[vt,say,q&&q[0]],st.k,PM.gi[PM.step])}
+  if(!keep){$("#pm").scrollTop=0;pgArm();if(PM.voice)pgSpeak(stepClip(st,g),[vt,say,q&&q[0]],st.k,PM.gi[PM.step])}
 }
 const remN=()=>S.meta.remN!=null?S.meta.remN:(S.meta.remAsk==="no"?1:0);
 function remDue(){if(!tgOn()||!CH.me||CH.me.remind||S.meta.remAsk==="yes"||remN()>=2)return false;return Date.now()-(S.meta.remT||0)>=3*864e5}
@@ -3126,8 +3139,7 @@ function drawPMDone(){
   <div class="done-stats"><div><b>${PM.minutes}</b><span>мин с Богом</span></div><div><b>${PM.checked.size}</b><span>${plural(PM.checked.size,"нужда","нужды","нужд")}</span></div><div><b>${streak()}</b><span>${plural(streak(),"день","дня","дней")} подряд</span></div></div>
   <p class="pv" style="text-align:center">${esc(v.t)}</p><div style="text-align:center"><span class="pvr">${esc(v.r)}</span></div>
   ${g?`<p class="pr pg-say" style="text-align:center">${esc(g.s)}</p>`:""}
-  <p class="pr" style="text-align:center">На твоём небе зажглась новая звезда. Всё записано в дневник.</p>${remOffer()}
-  ${plusTease()}
+  <p class="pr" style="text-align:center">На твоём небе зажглась новая звезда. Всё записано в дневник.</p>${(()=>{const ro=remOffer();return ro||plusTease()})()/* за раз — одно предложение */}
   <div style="text-align:center;margin:0 0 6px"><button class="textbtn" data-a="inviteFriend">💌 Позвать друга молиться вместе</button></div>
   <div class="pm-foot"><button class="btn" data-a="pmClose">Готово</button></div>`;
   $("#pm").scrollTop=0;
@@ -3169,7 +3181,7 @@ const act={
   srsAns:d=>{const r=ui.srsR,sr=Object.assign({},S.meta.srs||{}),cur=sr[r]||{lvl:0};const lvl=d.v==="1"?Math.min(SRS_I.length-1,(cur.lvl||0)+(sr[r]?1:0)):0;const x=new Date();x.setDate(x.getDate()+SRS_I[lvl]);sr[r]={lvl,due:dk(x)};S.meta.srs=sr;persist("meta");buzz();ui.srsShow=false;srsSheet()},
   capNew:()=>capsuleForm(),
   capM:d=>{ui.cap.m=+d.v;markPick($("#capP"),d.v)},
-  capSave:()=>{const t=$("#capT").value.trim();if(!t){$("#capT").focus();return}const x=new Date();x.setMonth(x.getMonth()+ui.cap.m);const id=rid("e_");
+  capSave:()=>{const t=$("#capT").value.trim();if(!t){$("#capT").focus();return}const x=new Date(),dd=x.getDate();x.setDate(1);x.setMonth(x.getMonth()+ui.cap.m);x.setDate(Math.min(dd,new Date(x.getFullYear(),x.getMonth()+1,0).getDate()));/* 31 авг + 6 мес = 28/29 фев, а не 3 мар */const id=rid("e_");
     S.entries[id]={kind:"entry",id,type:"capsule",text:t,openAt:dk(x),prayerIds:[],createdAt:Date.now()};persist(id);closeSheet();render();burst();toast("Запечатано до "+fDayY.format(x)+" 📬")},
   capLockedTap:d=>{const e=S.entries[d.id];if(e)toast("🔒 Откроется "+fDayY.format(parseDk(e.openAt)))},
   capOpen:d=>{entryView(d.id);render()},
@@ -3536,6 +3548,13 @@ const act={
   reopen:d=>{const p=S.prayers[d.id];p.status="active";persist(p.id);dueSync(p);render();sheetDetail()},
   dueStill:d=>{const p=S.prayers[d.id];if(!p)return;p.dueAsked=p.due;persist(p.id);render();toast("Продолжаем молиться 🤍")},
   newEntry:d=>entryForm(d.v),
+  accDelete:async()=>{
+    if(!await ask("Удалить аккаунт? Записи дневника, нужды, публикации на стене и всё, что связано с тобой, будут удалены безвозвратно. Сведения об оплатах сохранятся — этого требует закон. Скачай копию, если она нужна.","Удалить навсегда"))return;
+    try{await call("account/delete",{confirm:"УДАЛИТЬ"})}catch(e){toast(e.message);return}
+    try{if(CS)await CS.clear()}catch(e){}
+    try{await IDB.set("vault-dk",null)}catch(e){}
+    try{Object.keys(localStorage).filter(k=>/^pj-/.test(k)).forEach(k=>localStorage.removeItem(k))}catch(e){}
+    closeSheet();toast("Аккаунт удалён. Мир тебе 🕊");setTimeout(()=>location.reload(),1600)},
   confSkip:()=>{S.meta.confSkip=today();persist("meta");render()},
   jDay:d=>{ui.jDays=Object.assign({},ui.jDays,{[d.v]:!(ui.jDays||{})[d.v]});render()},
   jf:d=>{ui.jf=d.v;render()},
@@ -3547,7 +3566,8 @@ const act={
   delEntry:async d=>{const e0=S.entries[d.id];if(!await ask(e0&&e0.type==="session"?"Удалить эту молитву? Отметки за неё тоже снимутся.":"Удалить запись?","Удалить",true))return;
     if(e0&&e0.type==="session"){const k=dk(new Date(e0.createdAt));bump(S.meta.days,k,-1);persist("meta");(e0.prayerIds||[]).forEach(id=>{const p=S.prayers[id];if(p&&p.log){bump(p.log,k,-1);persist(id)}})}
     delete S.entries[d.id];persist(d.id);closeSheet();render()},
-  pmClose:async()=>{if(PM&&!PM.done&&(Date.now()-PM.start>20000)&&!await ask("Выйти без сохранения?","Выйти"))return;closePM()},
+  pmClose:async()=>{if(PM&&!PM.done&&PM.checked&&PM.checked.size){const n=PM.checked.size;act.pmFinish();closePM();toast("Сохранено: помолился за "+n+" "+plural(n,"нужду","нужды","нужд")+" 🙏");return}
+    if(PM&&!PM.done&&(Date.now()-PM.start>20000)&&!await ask("Выйти без сохранения?","Выйти"))return;closePM()},
   sitSheet:()=>sitSheet(),
   modeMore:()=>{ui.modeMore=!ui.modeMore;modeSheet()},
   bgChoose:async()=>{const r=await bgDialog(bgPref());if(!r)return;S.meta.bg=r;persist("meta");if(ui.sheetKind==="mode")modeSheet();else if(ui.sheetKind==="settings")settingsSheet(true)},
@@ -3562,10 +3582,10 @@ const act={
     if(PM.endGi>=0&&!vName("done",PM.endGi,"m")){const n=pickGuide("done");if(n>=0&&vName("done",n,"m")){PM.endGi=n;PM.endG=GUIDE.done[n]}}
     drawPM(true);ping("pmVoice");toast("Буду читать стих и подсказки вслух");const g=gAt(PM.step),st=PM.steps[PM.step];
     if(PM.af){const p=S.prayers[PM.af.ids[PM.af.i]];if(p)pgNeed(null,catGuide(p));return}
-    if(PM.mode==="cards"||PM.done)return;pgSpeak(g?vName(st.k,PM.gi[PM.step],"m"):null,g?[g.t,g.s,pgQ(g)[0]]:[st.lord||(st.v&&st.v.t),st.p],st.k,PM.gi[PM.step])},
+    if(PM.mode==="cards"||PM.done)return;pgSpeak(stepClip(st,g),g?[g.t,g.s,pgQ(g)[0]]:[st.lord||(st.v&&st.v.t),st.p],st.k,PM.gi[PM.step])},
   pmFlow:()=>{const ids=afList();if(!ids.length)return;ping("pmFlow");PM.af={ids,i:0,n:0};clearTimeout(PM.rvT);drawPM()},
   afDone:()=>{const F=PM.af;if(!F)return;PM.checked.add(F.ids[F.i]);F.n++;buzz();F.i++;if(F.i>=F.ids.length)afEnd();else drawPM()},
-  afSkip:()=>{const F=PM.af;if(!F)return;PM.checked.delete(F.ids[F.i]);F.i++;if(F.i>=F.ids.length)afEnd();else drawPM()},
+  afSkip:()=>{const F=PM.af;if(!F)return;F.i++;if(F.i>=F.ids.length)afEnd();else drawPM()},
   afStop:()=>{if(PM.af)afEnd()},
   pmPrev:()=>{PM.step--;drawPM()},
   pmCheck:d=>{if(PM.checked.has(d.id))PM.checked.delete(d.id);else PM.checked.add(d.id);buzz();drawPM(true)},

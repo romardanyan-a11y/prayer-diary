@@ -500,6 +500,10 @@ input[type=time].in{width:auto;padding:9px 12px;font-weight:700}
 .mo-b{display:grid;gap:10px}.mo-b .textbtn{color:rgba(235,235,245,.8);padding:10px}
 @keyframes moIn{from{opacity:0}to{opacity:1}}@keyframes moOut{to{opacity:0}}@keyframes moRise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){.moment,.moment.out,.mo-in{animation:none}}
+.fcat{width:100%;display:flex;align-items:center;gap:10px;margin:14px 0 0;padding:12px 14px;border-radius:16px;background:var(--card);border:1px solid var(--stroke);text-align:left;min-height:48px}.fcat span{font-size:14px;color:var(--muted);font-weight:600}.fcat b{flex:1;font-size:16px}.fcat i{font-style:normal;font-size:13.5px;color:var(--gold);font-weight:700}
+#fCatBox .pick{margin-top:10px}.l .opt{font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0}
+.fmore{margin:16px 0 4px;border-top:1px solid var(--stroke);padding-top:6px}.fmore>summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:10px;padding:12px 2px;min-height:44px;font-weight:700;font-size:16px}.fmore>summary::-webkit-details-marker{display:none}
+.fmore>summary::after{content:"▾";margin-left:auto;color:var(--muted)}.fmore[open]>summary::after{content:"▴"}.fmore>summary span{font-weight:500;font-size:13.5px;color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .jsum{width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px;margin:0 0 10px;border-radius:18px;background:var(--card);border:1px solid var(--stroke);text-align:left}.jsum b{flex:1;font-size:15px;font-weight:700}.jsum i{font-style:normal;color:var(--muted)}
 .tc-h small{display:block;font-size:12.5px;font-weight:700;color:var(--muted)}
 .tc-h b{display:block;font-size:20px;font-weight:800;letter-spacing:-.02em}
@@ -1082,7 +1086,7 @@ try{const r=localStorage.getItem(LSP);if(r)pending=new Set(JSON.parse(r))}catch(
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LSP,JSON.stringify([...pending]))}catch(e){}}
 function hasData(){return Object.keys(S.people||{}).length||Object.keys(S.marks||{}).length||Object.keys(S.prayers).length||Object.keys(S.entries).length||Object.keys(S.meta.days||{}).length}
 
-let col=null; const chains={},inflight={},busy={},bad={};const APPV="31";
+let col=null; const chains={},inflight={},busy={},bad={};const APPV="33";
 function current(id){if(id==="meta")return S.meta;return S.prayers[id]||S.entries[id]||S.marks[id]||S.people[id]||null}
 function write(id){
   pending.add(id);saveLocal();
@@ -1432,7 +1436,7 @@ function suggestion(){
 function vHome(){
   const v=dayVerse(), a=active(), s=streak(), an=answered().length, tt=totalTimes();
   const sg=suggestion(), isFav=favs().includes(v.r), lp=sg?lastPrayed(sg):"", h=new Date().getHours(), wd=new Date().getDay();
-  const confDone=!!confDays()[today()], bs=streakOf(bDays());
+  const confDone=!!confDays()[today()], bs=streakOf(bDays()), slot=homeSlot(h,wd,confDone);/* если в «сейчас важно» уже зовут добавить нужду — пустой блок ниже не повторяет */
   return `<section class="sky" aria-label="Твоё небо молитв"><canvas id="skyC" aria-hidden="true"></canvas>
     <div class="sky-top"><div><div class="sky-date">${cap(fLong.format(new Date()))}</div><div class="sky-greet">${greet()}</div>
     <div class="sky-cap">${tt?`<b>${tt}</b> ${plural(tt,"звезда","звезды","звёзд")} на твоём небе — по одной за каждую молитву`:"Каждая молитва зажжёт здесь звезду"}</div>
@@ -1442,14 +1446,14 @@ function vHome(){
   ${ringsCard()}
   <button class="cta" data-a="startPrayer"><span class="orb">${ic("flame")}</span><span><b>Начать молитву</b><small>Молитва, покаяние или пост</small></span><span class="go">${ic("play")}</span></button>
   ${todayCard()}${hoursOn()?hoursCard():""}
-  ${homeSlot(h,wd,confDone)}
+  ${slot}
   <section class="verse" aria-label="Стих дня"><div class="lab">${ic("sun")}Слово на сегодня</div>
     <p class="vt" data-a="verseMore" data-v="${esc(v.r)}" role="button" tabindex="0">${esc(v.t)}</p>
     <div class="v-foot"><span class="v-ref">${esc(v.r)}</span>
       <button class="rb ${isFav?"fav":""}" data-a="favVerse" data-v="${esc(v.r)}" aria-label="${isFav?"Убрать из избранного":"В избранное"}">${ic("heart")}</button>
       <button class="rb" data-a="shareVerse" data-v="${esc(v.r)}" aria-label="Сделать картинку">${ic("share")}</button>
       <button class="rb" data-a="verseMore" data-v="${esc(v.r)}" aria-label="Ещё">⋯</button></div></section>
-  ${a.length?"":`<div class="empty"><div class="ei">${ic("heart")}</div><b>Здесь будут твои нужды</b>За кого или за что ты хочешь молиться? Запиши — и отмечай каждый раз, когда молишься.<div class="mt"><button class="btn" data-a="newPrayer">${ic("plus")}Добавить нужду</button></div></div>`}`;
+  ${a.length||slot.includes('data-a="fnHide"')?"":`<div class="empty"><div class="ei">${ic("heart")}</div><b>Здесь будут твои нужды</b>За кого или за что ты хочешь молиться? Запиши — и отмечай каждый раз, когда молишься.<div class="mt"><button class="btn" data-a="newPrayer">${ic("plus")}Добавить нужду</button></div></div>`}`;
 }
 /* «Сейчас важно» — на главной одна карточка за раз, самая срочная; остальные ждут своей очереди
    (одно решение под одну проблему: раньше их могло быть пять-шесть подряд) */
@@ -2849,30 +2853,42 @@ function closeSheet(){const sh=$("#sheet"),sd=$("#shade");sh.classList.remove("s
 function redrawSheet(html){const y=$("#sheet").scrollTop;$("#sheetIn").innerHTML=`<div class="grab"></div>`+html;$("#sheet").scrollTop=y}
 
 function prayerForm(p){
-  ui.form=p?{id:p.id,due:p.due||"",title:p.title,who:p.who||"",note:p.note||"",cat:p.cat,icon:p.icon,color:p.color,sched:p.sched||"rot",wd:(p.wd||[]).slice(),personId:p.personId||"",pt:(p.promise&&p.promise.t)||"",pr:(p.promise&&p.promise.r)||""}:{id:null,title:"",who:"",note:"",cat:"Семья",icon:"🙏",color:COLORS[Object.keys(S.prayers).length%COLORS.length],sched:"rot",wd:[],personId:ui.prefPerson||"",pt:"",pr:""};ui.prefPerson="";
+  ui.form=p?{id:p.id,due:p.due||"",title:p.title,who:p.who||"",note:p.note||"",cat:p.cat,icon:p.icon,color:p.color,sched:p.sched||"rot",wd:(p.wd||[]).slice(),personId:p.personId||"",pt:(p.promise&&p.promise.t)||"",pr:(p.promise&&p.promise.r)||""}:{id:null,title:"",who:"",note:"",cat:"Другое",icon:"🙏",color:COLORS[Object.keys(S.prayers).length%COLORS.length],sched:"rot",wd:[],personId:ui.prefPerson||"",pt:"",pr:""};ui.prefPerson="";
   const f=ui.form;
   openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>${f.id?"Изменить нужду":"Новая нужда"}</h2><button class="pill pri" data-a="savePrayer" id="spBtn" ${f.title.trim()?"":"disabled"}>Готово</button></div>
   <div class="hero"><span class="ic" id="fIc" style="--c:${f.color}">${f.icon}</span></div>
-  <label class="l" for="fTitle">О чём молюсь</label><input class="in" id="fTitle" maxlength="80" placeholder="Например: исцеление для мамы Макса" value="${esc(f.title)}">
-  <label class="l" for="fWho">За кого</label><input class="in" id="fWho" maxlength="60" placeholder="Имя или группа людей — необязательно" value="${esc(f.who)}">
-  <label class="l" for="fNote">Подробности</label><textarea class="in" id="fNote" placeholder="Что именно просишь, какое обетование держишь — необязательно">${esc(f.note)}</textarea>
-  <label class="l">Тема</label><div class="pick" id="fCats">${CATS.map(c=>`<button class="${c===f.cat?"on":""}" data-a="fCat" data-v="${c}">${c}</button>`).join("")}</div>
+  <label class="l" for="fTitle">О чём молюсь</label><input class="in" id="fTitle" maxlength="80" placeholder="Например: здоровье мамы" value="${esc(f.title)}">
+  <label class="l" for="fWho">За кого <span class="opt">— необязательно</span></label><input class="in" id="fWho" maxlength="60" placeholder="Имя или группа людей" value="${esc(f.who)}">
+  ${peopleArr().length?`<div class="pick" id="fWhoPick" style="margin-top:8px">${peopleArr().slice(0,8).map(x=>`<button class="${f.personId===x.id?"on":""}" data-a="fWhoPick" data-v="${x.id}">${x.ava||""} ${esc(x.name)}</button>`).join("")}</div>`:""}
+  <button class="fcat" data-a="fCatOpen" aria-expanded="false"><span>Тема</span><b id="fCatL">${esc(f.cat)}</b><i>сменить</i></button>
+  <div id="fCatBox" class="hidden"><div class="pick" id="fCats">${CATS.map(c=>`<button class="${c===f.cat?"on":""}" data-a="fCat" data-v="${c}">${c}</button>`).join("")}</div></div>
+  <details class="fmore" ${f.id&&moreSum(f)?"open":""}><summary>Ещё<span>${moreSum(f)||"подробности, как часто, дата, обетование"}</span></summary>
+  <label class="l" for="fNote">Подробности</label><textarea class="in" id="fNote" placeholder="Что именно просишь">${esc(f.note)}</textarea>
+  <label class="l">Как часто молиться</label><div class="pick" id="fSch">${[["rot","По очереди"],["daily","Каждый день"],["week","По дням недели"]].map(([k,l])=>`<button class="${f.sched===k?"on":""}" data-a="fSch" data-v="${k}">${l}</button>`).join("")}</div>
+  <div id="fWdBox" class="${f.sched==="week"?"":"hidden"}" style="margin-top:8px"><div class="pick wdp" id="fWd">${WD.map((w,i)=>`<button class="${f.wd.includes(i)?"on":""}" data-a="fWd" data-v="${i}">${w}</button>`).join("")}</div></div>
+  <p class="small" style="margin:8px 4px 0">«По очереди» — приложение само будет ставить нужду в «Сегодня в молитве», чтобы ни одна не забылась.</p>
+  <label class="l" for="fDue">Когда это важно</label><input type="date" class="in" id="fDue" value="${esc(f.due||"")}">
+  <p class="small" style="margin:6px 4px 0">Например, операция или экзамен: в этот день нужда будет первой${tgOn()?", бот утром напомнит, а после спросит, как прошло":""}.</p>
+  <label class="l" for="fPt">Обетование — стих, которым молишься</label><textarea class="in" id="fPt" style="min-height:80px" placeholder="Например: «Не бойся, ибо Я с тобою…»">${esc(f.pt)}</textarea><input class="in" id="fPr" style="margin-top:8px" maxlength="40" placeholder="Ссылка, например Ис 41:10" value="${esc(f.pr)}">${promiseChips()}
+  <label class="l">Человек из твоего списка</label><div class="pick" id="fPer"><button class="${!f.personId?"on":""}" data-a="fPer" data-v="">Не выбран</button>${peopleArr().map(x=>`<button class="${f.personId===x.id?"on":""}" data-a="fPer" data-v="${x.id}">${x.ava||""} ${esc(x.name)}${x.tg||x.tgId?" 📨":""}</button>`).join("")}<button class="${f.personId==="new"?"on":""}" data-a="fPer" data-v="new">＋ Добавить человека</button></div><div id="fPerBox"></div>
   <label class="l">Значок</label><div class="icons" id="fIcons">${ICONS.map(i=>`<button class="${i===f.icon?"on":""}" data-a="fIcon" data-v="${i}" aria-label="Значок ${i}">${i}</button>`).join("")}</div>
   <label class="l">Цвет</label><div class="colors" id="fColors">${COLORS.map(c=>`<button style="--c:${c}" class="${c===f.color?"on":""}" data-a="fColor" data-v="${c}" aria-label="Цвет"></button>`).join("")}</div>
-  <label class="l">Человек</label><div class="pick" id="fPer"><button class="${!f.personId?"on":""}" data-a="fPer" data-v="">Никто</button>${peopleArr().map(x=>`<button class="${f.personId===x.id?"on":""}" data-a="fPer" data-v="${x.id}">${x.ava||""} ${esc(x.name)}${x.tg||x.tgId?" 📨":""}</button>`).join("")}<button class="${f.personId==="new"?"on":""}" data-a="fPer" data-v="new">＋ Новый</button></div><div id="fPerBox"></div>
-  <label class="l">Как часто молиться</label><div class="pick" id="fSch">${[["rot","По кругу"],["daily","Каждый день"],["week","По дням недели"]].map(([k,l])=>`<button class="${f.sched===k?"on":""}" data-a="fSch" data-v="${k}">${l}</button>`).join("")}</div>
-  <div id="fWdBox" class="${f.sched==="week"?"":"hidden"}" style="margin-top:8px"><div class="pick wdp" id="fWd">${WD.map((w,i)=>`<button class="${f.wd.includes(i)?"on":""}" data-a="fWd" data-v="${i}">${w}</button>`).join("")}</div></div>
-  <p class="small" style="margin:8px 4px 0">«По кругу» — приложение само подставит нужду в «Сегодня в молитве», чтобы ты молился обо всех по очереди.</p>
-  <label class="l" for="fDue">📅 Когда это важно (необязательно)</label><input type="date" class="in" id="fDue" value="${esc(f.due||"")}">
-  <p class="small" style="margin:6px 4px 0">Например, операция или экзамен. В этот день нужда будет первой${tgOn()?", бот утром напомнит, а после — спросит, как прошло":""}.</p>
-  <label class="l" for="fPt">Обетование — стих, которым молишься</label><textarea class="in" id="fPt" style="min-height:80px" placeholder="Например: «Не бойся, ибо Я с тобою…»">${esc(f.pt)}</textarea><input class="in" id="fPr" style="margin-top:8px" maxlength="40" placeholder="Ссылка, например Ис 41:10" value="${esc(f.pr)}">${promiseChips()}
+  </details>
   ${f.id?`<button class="btn danger wide mt" data-a="delPrayer" data-id="${f.id}">Удалить нужду</button>`:""}`,"form");
   $("#fPt").addEventListener("input",e=>f.pt=e.target.value);$("#fPr").addEventListener("input",e=>f.pr=e.target.value);
-  const ti=$("#fTitle");ti.addEventListener("input",()=>{f.title=ti.value;$("#spBtn").disabled=!ti.value.trim()});
-  $("#fWho").addEventListener("input",e=>f.who=e.target.value);$("#fNote").addEventListener("input",e=>f.note=e.target.value);$("#fDue").addEventListener("change",e=>f.due=e.target.value);
+  const ti=$("#fTitle");ti.addEventListener("input",()=>{f.title=ti.value;$("#spBtn").disabled=!ti.value.trim();fAutoCat()});
+  $("#fWho").addEventListener("input",e=>{f.who=e.target.value;fAutoCat()});$("#fNote").addEventListener("input",e=>f.note=e.target.value);$("#fDue").addEventListener("change",e=>f.due=e.target.value);
   fPerBox();
   if(!f.id)setTimeout(()=>ti.focus(),350);
 }
+/* тема по словам: «операция мамы» → Здоровье; значок — по теме. Только пока человек не выбрал сам */
+const CAT_ICON={"Семья":"🏠","Здоровье":"🩺","Друзья":"❤️","Работа":"💼","Служение":"⛪","Моя жизнь":"🌱","Страна и мир":"🌍","Другое":"🙏"};
+const CAT_RX=[["Здоровье",/здоров|болез|болен|болит|боль|операц|исцел|лечен|врач|больниц|онколог|анализ|травм|беремен|роды/],["Работа",/работ|деньг|долг|финанс|бизнес|зарплат|учёб|учеб|экзамен|сесси|поступ|ипотек|кредит|жиль|квартир|переезд/],
+  ["Служение",/служен|церк|пастор|проповед|мисси|евангел|молодёж|общин/],["Страна и мир",/стран|войн|народ|власт|президент|росси|город/],["Семья",/мам|пап|муж|жен[аеуы]|сын|доч|дет[иейя]|ребён|ребен|внук|внуч|брат|сестр|бабуш|дедуш|семь|родител|свадьб|брак/],
+  ["Друзья",/друг|подруг|коллег|сосед/],["Моя жизнь",/(^|\s)(я|мне|мой|моя|моё|мои|себе|себя)(\s|$)|вер[ауы](\s|$)|характер|грех|решени|воля|путь/]];
+function fAutoCat(){const f=ui.form;if(!f||f.id||f.catTouched)return;const t=((f.title||"")+" "+(f.who||"")).toLowerCase(),m=CAT_RX.find(([,r])=>r.test(t)),c=m?m[0]:"Другое";if(c===f.cat)return;
+  f.cat=c;const l=$("#fCatL");if(l)l.textContent=c;markPick($("#fCats"),c);if(!f.iconTouched){f.icon=/экзамен|учёб|учеб|сесси|поступ|школ|институт|универ/.test(t)?"🎓":CAT_ICON[c];const ic=$("#fIc");if(ic)ic.textContent=f.icon;markPick($("#fIcons"),f.icon)}}
+const moreSum=f=>[f.note&&f.note.trim()?"подробности":"",f.sched==="daily"?"каждый день":f.sched==="week"?"по дням недели":"",f.due?"до "+f.due.split("-").reverse().slice(0,2).join("."):"",f.pt&&f.pt.trim()?"обетование":"",f.personId&&f.personId!=="new"&&S.people[f.personId]?"👤 "+S.people[f.personId].name:""].filter(Boolean).join(" · ");
 function markPick(box,v){box.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.v===v))}
 
 function sheetDetail(){
@@ -2938,7 +2954,6 @@ function modeSheet(){const n=todaysList().length,more=!!ui.modeMore,bg=bgInfo(bg
   <div class="mode2"><button class="mode-sm" data-a="pmStart" data-v="cards"><span class="ms-e">🤲</span><b>Мои нужды</b><small>${n?n+" "+plural(n,"нужда","нужды","нужд")+" на сегодня":"по карточкам"}</small></button>
   <button class="mode-sm" data-a="pmStart" data-v="quick"><span class="ms-e">⚡</span><b>Коротко</b><small>3 шага · 2 минуты</small></button></div>
   <button class="set" style="width:100%;text-align:left;margin-top:12px" data-a="sitSheet"><div><b>🫶 Молитва по ситуации</b><span>Тревога, решение, болезнь, перед сном…</span></div>${ic("right")}</button>
-  <button class="set" style="width:100%;text-align:left;margin-top:12px" data-a="bgChoose"><div><b>${bg[1]} Фон: ${bg[2]}</b><span>${bg[3]?bg[3]+" · ":""}нажми, чтобы сменить</span></div>${ic("right")}</button>
   <button class="more-btn" data-a="modeMore">${more?"Скрыть":"Ещё способы молиться"} <span>${more?"▴":"▾"}</span></button>
   ${more?`<div class="mode-list">
     ${row("pmStart","walk","🚶","#43C985","Молитвенная прогулка","Молись на ходу — за то, что видишь")}
@@ -3552,8 +3567,10 @@ const act={
   calNav:d=>{let m=ui.calM+Number(d.v),y=ui.calY;if(m<0){m=11;y--}if(m>11){m=0;y++}ui.calM=m;ui.calY=y;render()},
   dNav:d=>{let m=ui.dM+Number(d.v),y=ui.dY;if(m<0){m=11;y--}if(m>11){m=0;y++}ui.dM=m;ui.dY=y;sheetDetail()},
   closeSheet:()=>closeSheet(),
-  fCat:d=>{ui.form.cat=d.v;markPick($("#fCats"),d.v)},
-  fIcon:d=>{ui.form.icon=d.v;markPick($("#fIcons"),d.v);$("#fIc").textContent=d.v},
+  fCat:d=>{const f=ui.form;f.cat=d.v;f.catTouched=true;markPick($("#fCats"),d.v);const l=$("#fCatL");if(l)l.textContent=d.v;if(!f.iconTouched&&!f.id){f.icon=CAT_ICON[d.v]||f.icon;$("#fIc").textContent=f.icon;markPick($("#fIcons"),f.icon)}$("#fCatBox").classList.add("hidden")},
+  fCatOpen:(d,el)=>{const b=$("#fCatBox"),o=b.classList.toggle("hidden");if(el)el.setAttribute("aria-expanded",String(!o))},
+  fWhoPick:d=>{const f=ui.form,x=S.people[d.v];if(!x)return;const on=f.personId===d.v;f.personId=on?"":d.v;const w=$("#fWho");if(!on){f.who=x.name;if(w)w.value=x.name}markPick($("#fWhoPick"),on?"":d.v);markPick($("#fPer"),f.personId);fPerBox();fAutoCat()},
+  fIcon:d=>{ui.form.icon=d.v;ui.form.iconTouched=true;markPick($("#fIcons"),d.v);$("#fIc").textContent=d.v},
   fColor:d=>{ui.form.color=d.v;markPick($("#fColors"),d.v);$("#fIc").style.setProperty("--c",d.v)},
   savePrayer:()=>{const f=ui.form;if(!f.title.trim())return;
     let chk=null;

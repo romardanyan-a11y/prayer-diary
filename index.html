@@ -487,6 +487,19 @@ input[type=time].in{width:auto;padding:9px 12px;font-weight:700}
 .tc-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 12px}.tc-h .btn.sm{white-space:nowrap;flex:none}
 .tog-start{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:4px 2px 16px}.tog-start span{font-size:13px;font-weight:700;color:var(--muted);margin-right:2px}
 .slot-x{position:relative}.slot-close{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--muted);background:var(--card2)}.slot-close svg.i{width:16px;height:16px}
+.moment{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;justify-content:flex-end;background:#070a1c;animation:moIn .45s ease-out both}
+.moment.out{animation:moOut .25s ease-in both}
+#momC{position:absolute;inset:0;width:100%;height:100%}
+.mo-x{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:2;background:rgba(255,255,255,.12);color:#F6F3EC}
+.mo-in{position:relative;z-index:1;margin:0 14px calc(16px + env(safe-area-inset-bottom,0px));padding:24px 22px 16px;border-radius:28px;background:#0b0d22;color:#F6F3EC;text-align:center;animation:moRise .7s .9s cubic-bezier(.2,.8,.2,1) both}
+.mo-h{font-family:var(--serif);font-style:italic;font-weight:600;font-size:clamp(38px,11vw,48px);line-height:1.05;margin:0 0 10px;color:#FFE2A6}
+.mo-t{font-size:17px;font-weight:700;margin:0 0 10px;color:#F6F3EC}
+.mo-q{font-family:var(--serif);font-style:italic;font-size:21px;line-height:1.35;margin:0 0 12px;color:#F6F3EC}
+.mo-m{font-size:14px;color:rgba(235,235,245,.72);margin:0 0 14px}
+.mo-v{font-size:14.5px;line-height:1.45;color:rgba(255,236,200,.9);margin:0 0 18px}.mo-v span{display:block;margin-top:4px;font-size:12.5px;font-weight:700;color:rgba(255,214,140,.85)}
+.mo-b{display:grid;gap:10px}.mo-b .textbtn{color:rgba(235,235,245,.8);padding:10px}
+@keyframes moIn{from{opacity:0}to{opacity:1}}@keyframes moOut{to{opacity:0}}@keyframes moRise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.moment,.moment.out,.mo-in{animation:none}}
 .jsum{width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px;margin:0 0 10px;border-radius:18px;background:var(--card);border:1px solid var(--stroke);text-align:left}.jsum b{flex:1;font-size:15px;font-weight:700}.jsum i{font-style:normal;color:var(--muted)}
 .tc-h small{display:block;font-size:12.5px;font-weight:700;color:var(--muted)}
 .tc-h b{display:block;font-size:20px;font-weight:800;letter-spacing:-.02em}
@@ -1069,7 +1082,7 @@ try{const r=localStorage.getItem(LSP);if(r)pending=new Set(JSON.parse(r))}catch(
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LSP,JSON.stringify([...pending]))}catch(e){}}
 function hasData(){return Object.keys(S.people||{}).length||Object.keys(S.marks||{}).length||Object.keys(S.prayers).length||Object.keys(S.entries).length||Object.keys(S.meta.days||{}).length}
 
-let col=null; const chains={},inflight={},busy={},bad={};const APPV="30";
+let col=null; const chains={},inflight={},busy={},bad={};const APPV="31";
 function current(id){if(id==="meta")return S.meta;return S.prayers[id]||S.entries[id]||S.marks[id]||S.people[id]||null}
 function write(id){
   pending.add(id);saveLocal();
@@ -1286,12 +1299,15 @@ function paintSky(ctx,w,h,t,opt){
   const S_=opt.scale||1;
   opt.stars.forEach(s=>{
     const tw=RM?1:(.62+.38*Math.sin(t*.0016*s.sp+s.tw));const x=s.x*w,y=s.y*h;
-    if(s.gold){const r=s.r*S_;const gg=ctx.createRadialGradient(x,y,0,x,y,r*7);gg.addColorStop(0,"rgba(255,214,140,.85)");gg.addColorStop(.25,"rgba(255,180,90,.28)");gg.addColorStop(1,"rgba(255,180,90,0)");
+    const bA=s.born&&!RM?(t-s.born)/2600:1;if(bA<0)return;/* ещё не родилась */
+    const grow=bA<1?1-Math.pow(1-bA,3):1;
+    if(bA<1){const R=(6+bA*34)*S_,hal=ctx.createRadialGradient(x,y,0,x,y,R);hal.addColorStop(0,`rgba(255,226,160,${.55*(1-bA)})`);hal.addColorStop(1,"rgba(255,226,160,0)");ctx.fillStyle=hal;ctx.beginPath();ctx.arc(x,y,R,0,7);ctx.fill()}
+    if(s.gold){const r=s.r*S_*grow;const gg=ctx.createRadialGradient(x,y,0,x,y,r*7);gg.addColorStop(0,"rgba(255,214,140,.85)");gg.addColorStop(.25,"rgba(255,180,90,.28)");gg.addColorStop(1,"rgba(255,180,90,0)");
       ctx.fillStyle=gg;ctx.beginPath();ctx.arc(x,y,r*7,0,7);ctx.fill();
       ctx.strokeStyle=`rgba(255,236,190,${.55*tw})`;ctx.lineWidth=1*S_;ctx.beginPath();ctx.moveTo(x-r*5*tw,y);ctx.lineTo(x+r*5*tw,y);ctx.moveTo(x,y-r*5*tw);ctx.lineTo(x,y+r*5*tw);ctx.stroke();
       ctx.fillStyle="#FFF4D8";ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();return}
-    ctx.fillStyle=s.bg?`rgba(220,225,255,${s.a*tw})`:`rgba(255,247,228,${s.a*tw})`;ctx.beginPath();ctx.arc(x,y,s.r*S_,0,7);ctx.fill();
-    if(s.born){const age=(t-s.born)/1600;if(age<1){ctx.strokeStyle=`rgba(255,220,150,${1-age})`;ctx.lineWidth=2*S_;ctx.beginPath();ctx.arc(x,y,(4+age*26)*S_,0,7);ctx.stroke();
+    ctx.fillStyle=s.bg?`rgba(220,225,255,${s.a*tw})`:`rgba(255,247,228,${s.a*tw})`;ctx.beginPath();ctx.arc(x,y,s.r*S_*(bA<1?grow*(1+.9*(1-bA)):1),0,7);ctx.fill();
+    if(s.born){const age=(t-s.born)/2600;if(age<1){ctx.strokeStyle=`rgba(255,220,150,${1-age})`;ctx.lineWidth=2*S_;ctx.beginPath();ctx.arc(x,y,(4+age*26)*S_,0,7);ctx.stroke();
       ctx.fillStyle=`rgba(255,230,170,${1-age})`;ctx.beginPath();ctx.arc(x,y,(2.5+(1-age)*2)*S_,0,7);ctx.fill()}}
   });
   // hills + cross
@@ -1308,9 +1324,31 @@ function makeStars(total,extraGold){
 const SKY={raf:0,stars:null,count:-1,ans:-1};
 function skyStars(){const tt=totalTimes(),an=answered().length;
   if(tt!==SKY.count||an!==SKY.ans){const prev=SKY.count;SKY.stars=makeStars(tt,answered());
-    if(prev>=0&&tt>prev){const now=performance.now();SKY.stars.filter(s=>!s.bg&&!s.gold).slice(Math.max(0,prev),tt).forEach(s=>s.born=now)}
+    const now=performance.now()+450;/* после того как экран молитвы погас */
+    if(prev>=0&&tt>prev)SKY.stars.filter(s=>!s.bg&&!s.gold).slice(Math.max(0,prev),tt).forEach(s=>s.born=now);
+    if(SKY.ans>=0&&an>SKY.ans){const g=SKY.stars.filter(s=>s.gold);g.slice(Math.max(0,SKY.ans)).forEach(s=>s.born=now)}
     SKY.count=tt;SKY.ans=an}
   return SKY.stars}
+/* «Бог ответил» — момент под тем же небом: золотая звезда загорается на глазах, свидетельство — словами Писания */
+const MOM={raf:0};
+function ansMoment(p){momClose(true);const waited=daysBetween(p.createdAt,p.answeredAt),t=total(p);
+  const meta=(waited>0?`Ответ пришёл через ${waited} ${plural(waited,"день","дня","дней")} молитвы`:"Ответ пришёл в тот же день")+(t?` · ${t} ${plural(t,"раз","раза","раз")} в молитве`:"");
+  document.body.insertAdjacentHTML("beforeend",`<div id="moment" class="moment" role="dialog" aria-modal="true" aria-labelledby="moH"><canvas id="momC" aria-hidden="true"></canvas>
+    <button class="pill icon mo-x" data-a="momClose" aria-label="Закрыть">${ic("x")}</button>
+    <div class="mo-in"><h2 class="mo-h" id="moH">Бог ответил</h2><p class="mo-t">«${esc(p.title)}»</p>
+      ${p.answer?`<p class="mo-q">${esc(p.answer)}</p>`:""}<p class="mo-m">${meta}</p>
+      <p class="mo-v">«Благословен Господь, ибо Он услышал голос молений моих»<span>Пс 27:6</span></p>
+      <div class="mo-b"><button class="btn wide" data-a="momThanks" data-id="${p.id}">🙌 Поблагодарить Бога</button>
+      ${tgOn()?`<button class="btn ghost wide" data-a="momShare" data-id="${p.id}">Поделиться свидетельством</button>`:""}
+      <button class="textbtn" data-a="momClose">Готово</button></div></div></div>`);
+  document.body.style.overflow="hidden";const cv=$("#momC"),dpr=Math.min(2,window.devicePixelRatio||1),r=cv.getBoundingClientRect();cv.width=r.width*dpr;cv.height=r.height*dpr;
+  const ctx=cv.getContext("2d");ctx.scale(dpr,dpr);const born=performance.now()+350;
+  const stars=makeStars(totalTimes(),[]).concat([{x:.5,y:.2,r:4.6,gold:true,tw:0,sp:.6,born}]);
+  /* холм с крестом стоит точно над карточкой, а не просвечивает сквозь неё */
+  const card=$("#moment .mo-in"),hillY=Math.max(.42,Math.min(.9,(card.offsetTop-10)/r.height));
+  const frame=tm=>{if(!document.body.contains(cv))return;paintSky(ctx,r.width,r.height,tm,{stars,hillY,crossS:18});if(!RM&&!document.hidden)MOM.raf=requestAnimationFrame(frame)};
+  MOM.raf=requestAnimationFrame(frame);setTimeout(()=>{const b=$("#moment [data-a=momThanks]");if(b)b.focus({preventScroll:true})},1200)}
+function momClose(now){cancelAnimationFrame(MOM.raf);const m=$("#moment");if(!m)return;document.body.style.overflow="";if(now||RM){m.remove();return}m.classList.add("out");setTimeout(()=>m.remove(),260)}
 function skyLoop(){
   cancelAnimationFrame(SKY.raf);const cv=$("#skyC");if(!cv)return;
   const dpr=Math.min(2,window.devicePixelRatio||1);const r=cv.getBoundingClientRect();cv.width=r.width*dpr;cv.height=r.height*dpr;const ctx=cv.getContext("2d");ctx.scale(dpr,dpr);
@@ -3136,7 +3174,7 @@ function remOffer(){if(!remDue())return "";const d=new Date(),t=pad(d.getHours()
 function drawPMDone(){
   const g=PM.endG,v=g||PM.endV||VERSES[5];if(PM.voice)pgSpeak(g?vName("done",PM.endGi,"m"):null,[v.t,g&&g.s]);
   $("#pmIn").innerHTML=`<div class="pm-top"><span></span>${musicBtn()}</div><div class="done-orb">🕊️</div><h2 style="text-align:center">Аминь</h2>
-  <div class="done-stats"><div><b>${PM.minutes}</b><span>мин с Богом</span></div><div><b>${PM.checked.size}</b><span>${plural(PM.checked.size,"нужда","нужды","нужд")}</span></div><div><b>${streak()}</b><span>${plural(streak(),"день","дня","дней")} подряд</span></div></div>
+  <div class="done-stats"><div><b>${PM.minutes}</b><span>мин с Богом</span></div>${PM.checked.size?`<div><b>${PM.checked.size}</b><span>${plural(PM.checked.size,"нужда","нужды","нужд")}</span></div>`:""}${streak()>1?`<div><b>${streak()}</b><span>${plural(streak(),"день","дня","дней")} подряд</span></div>`:""}</div>
   <p class="pv" style="text-align:center">${esc(v.t)}</p><div style="text-align:center"><span class="pvr">${esc(v.r)}</span></div>
   ${g?`<p class="pr pg-say" style="text-align:center">${esc(g.s)}</p>`:""}
   <p class="pr" style="text-align:center">На твоём небе зажглась новая звезда. Всё записано в дневник.</p>${(()=>{const ro=remOffer();return ro||plusTease()})()/* за раз — одно предложение */}
@@ -3544,7 +3582,11 @@ const act={
     p.status="answered";p.ansType=at;p.answer=txt;p.answeredAt=Date.now();p.wait=null;persist(p.id);dueSync(p);
     const eid=rid("e_");S.entries[eid]={kind:"entry",id:eid,type:"answer",text:(at==="no"?"✋ Бог сказал «нет»":at==="let"?"🕊 Отпустил":"")+(txt?(at==="yes"?"":": ")+txt:(at==="yes"?"Бог ответил на молитву: "+p.title:"")),prayerIds:[p.id],createdAt:Date.now()};persist(eid);
     if(at!=="yes"){render();ui.detail=p.id;ui.sheetKind="";sheetDetail();toast(at==="no"?"Его «нет» — тоже любовь 🤍":"Отпущено в Его руки 🕊");return}
-    render();ui.detail=p.id;ui.sheetKind="";sheetDetail();burst();buzz();toast("Слава Богу! На небе зажглась золотая звезда ✨");setTimeout(checkBadges,2800)},
+    closeSheet();render();buzz();ansMoment(p);setTimeout(checkBadges,4500)},
+  momThanks:d=>{const p=S.prayers[d.id];if(!p)return;const id=rid("e_");S.entries[id]={kind:"entry",id,type:"thanks",text:"Благодарю за ответ на молитву «"+p.title+"»"+(p.answer?" — "+p.answer:""),createdAt:Date.now()};persist(id);buzz();
+    const b=$("#moment [data-a=momThanks]");if(b){b.disabled=true;b.innerHTML="Записано в благодарности ✓"}},
+  momShare:d=>{const p=S.prayers[d.id];momClose();if(p)setTimeout(()=>testNewSheet({title:p.title,text:p.answer||""}),260)},
+  momClose:()=>momClose(),
   reopen:d=>{const p=S.prayers[d.id];p.status="active";persist(p.id);dueSync(p);render();sheetDetail()},
   dueStill:d=>{const p=S.prayers[d.id];if(!p)return;p.dueAsked=p.due;persist(p.id);render();toast("Продолжаем молиться 🤍")},
   newEntry:d=>entryForm(d.v),

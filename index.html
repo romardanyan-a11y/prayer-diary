@@ -1006,7 +1006,7 @@ const VERSES=[
 const MODES={
  cards:{name:"По карточкам",desc:"Нужды на сегодня — одна за другой",emoji:"🤲",c:"#FF6A8A",steps:[]},
  full:{name:"Время с Богом",desc:"6 шагов · около 10 минут",emoji:"🕯️",c:"#FF9E4D",steps:[
-  {k:"quiet",t:"Тишина",p:"Отложи всё на минуту. Сделай несколько медленных вдохов и выдохов. Ты пришёл к Отцу, Который ждёт тебя.",v:{t:"Остановитесь и познайте, что Я — Бог.",r:"Пс 45:11"}},
+  {k:"quiet",t:"Тишина",p:"Отложи всё на минуту. Сделай несколько медленных вдохов и выдохов. Ты у Отца, Который ждёт тебя.",v:{t:"Остановитесь и познайте, что Я — Бог.",r:"Пс 45:11"}},
   {k:"praise",t:"Хвала",p:"Прославь Бога за то, Кто Он: Отец, Спаситель, Утешитель. Пока ничего не проси — просто поклонись.",v:{t:"Благослови, душа моя, Господа, и вся внутренность моя — святое имя Его. Благослови, душа моя, Господа и не забывай всех благодеяний Его.",r:"Пс 102:1–2"}},
   {k:"repent",t:"Покаяние",p:"Есть ли что-то, что стоит между тобой и Богом? Назови это честно. Он ждёт не оправданий, а сердца.",v:{t:"Если исповедуем грехи наши, то Он, будучи верен и праведен, простит нам грехи наши и очистит нас от всякой неправды.",r:"1 Ин 1:9"}},
   {k:"thanks",t:"Благодарность",p:"Вспомни, что Бог сделал за последние дни. Запиши хотя бы одно.",input:"thanks",ph:"Благодарю Тебя за…",v:{t:"За всё благодарите: ибо такова о вас воля Божия во Христе Иисусе.",r:"1 Фес 5:18"}},
@@ -1093,7 +1093,7 @@ try{const r=localStorage.getItem(LSP);if(r)pending=new Set(JSON.parse(r))}catch(
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LSP,JSON.stringify([...pending]))}catch(e){}}
 function hasData(){return Object.keys(S.people||{}).length||Object.keys(S.marks||{}).length||Object.keys(S.prayers).length||Object.keys(S.entries).length||Object.keys(S.meta.days||{}).length}
 
-let col=null; const chains={},inflight={},busy={},bad={};const APPV="37";
+let col=null; const chains={},inflight={},busy={},bad={};const APPV="38";
 function current(id){if(id==="meta")return S.meta;return S.prayers[id]||S.entries[id]||S.marks[id]||S.people[id]||null}
 function write(id){
   pending.add(id);saveLocal();
@@ -1471,7 +1471,7 @@ function vHome(){
    (одно решение под одну проблему: раньше их могло быть пять-шесть подряд) */
 function homeSlot(h,wd,confDone){const m=new Date().getMonth(),d=new Date().getDate();
   const L=[answerCard,firstNeedCard,bdayCard,fastCard,dueCard,
-    ()=>h>=17&&!confDone&&S.meta.confSkip!==today()?`<div class="slot-x"><button class="confc" data-a="confStart"><span class="cf-orb">🤍</span><span><small>Вечерний разбор</small><b>Посмотри на день с Богом</b><span>Покайся — и засыпай прощённым</span></span>${ic("right")}</button><button class="slot-close" data-a="confSkip" aria-label="Не сегодня">${ic("x")}</button></div>`:"",
+    ()=>h>=17&&!confDone&&S.meta.confSkip!==today()?`<div class="slot-x"><button class="confc" data-a="confStart"><span class="cf-orb">🤍</span><span><small>Вечерний разбор</small><b>Посмотри на день с Богом</b><span>Покайся — и засыпай с миром в сердце</span></span>${ic("right")}</button><button class="slot-close" data-a="confSkip" aria-label="Не сегодня">${ic("x")}</button></div>`:"",
     forMeCard,
     ()=>(m===11&&d>=15)||(m===0&&d<=15)?`<button class="weekc" data-a="yearOpen" style="background:radial-gradient(100% 120% at 0% 0%,#FFB35C,transparent 60%),radial-gradient(100% 120% at 100% 100%,#6B5CF0,transparent 60%),#2A1030"><span class="wk-orb">🎆</span><span><small>Итоги года</small><b>Твой год с Богом</b></span>${ic("right")}</button>`:"",
     ()=>wd===0||wd===1?`<button class="weekc" data-a="storyOpen"><span class="wk-orb">✨</span><span><small>${wd===0?"Неделя подходит к концу":"Новая неделя"}</small><b>Твоя неделя с Богом</b></span>${ic("right")}</button>`:"",
@@ -1746,7 +1746,7 @@ function vConfess(){
     else{const open=ui.reveal===e.id;hist+=`<div class="cf-item kept ${open?"open":""}"><button class="cf-head" data-a="reveal" data-id="${e.id}"><span class="dv">🤍</span><span><b>Покаялся · ${(e.items||[]).length} ${plural((e.items||[]).length,"запись","записи","записей")}</b><span>${open?"Нажми, чтобы скрыть":"Скрыто · нажми, чтобы открыть"}</span></span></button>
       ${open?`<ul class="cf-list">${(e.items||[]).map(t=>`<li>${esc(t)}</li>`).join("")}</ul><div class="row2"><button class="btn sm ghost" data-a="confDel" data-id="${e.id}">Удалить</button><button class="btn sm ember" data-a="confBurn" data-id="${e.id}">🔥 Отпустить</button></div>`:""}</div>`}});
   return `<section class="conf-hero"><div class="ch-q">Он опять умилосердится над нами, изгладит беззакония наши. Ты ввергнешь в пучину морскую все грехи наши.<span>Мих 7:19</span></div>
-    <div class="ch-row"><div><b>${done?"Сегодня ты покаялся":"Посмотри на день с Богом"}</b><span>${done?"Ты прощён. Иди с миром 🤍":"Честно, без страха — к Отцу, Который любит"}</span></div></div>
+    <div class="ch-row"><div><b>${done?"Покаяние сегодня принесено":"Посмотри на день с Богом"}</b><span>${done?"Тебе прощено. Иди с миром 🤍":"Честно, без страха — к Отцу, Который любит"}</span></div></div>
     <button class="btn wide ch-btn" data-a="confStart">${ic("heart")}${done?"Покаяться ещё":"Начать покаяние"}</button>
     <div class="ch-stats"><div><b>${st}</b><span>${plural(st,"день","дня","дней")} подряд</span></div><div><b>${m30}</b><span>${plural(m30,"день","дня","дней")} за 30 дней</span></div><button data-a="pinSheet"><b>${ic("lock")}</b><span>${S.meta.pin?"Код включён":"Поставить код"}</span></button></div></section>
   ${steps.length?`<div class="card"><h2>Шаги исправления</h2><div class="small" style="margin-bottom:8px">Что ты решил сделать иначе</div>${steps.map(x=>`<button class="stp" data-a="stepDone" data-id="${x.e.id}" data-v="${x.i}"><span class="bx">${ic("check")}</span><span>${esc(x.s.t)}</span></button>`).join("")}</div>`:""}
@@ -1758,7 +1758,7 @@ const CSTEPS=[
  {t:"Назови",v:{t:"Если исповедуем грехи наши, то Он, будучи верен и праведен, простит нам грехи наши и очистит нас от всякой неправды.",r:"1 Ин 1:9"},p:"Запиши честно и коротко. Бог и так всё знает — это для твоего сердца. Подсказки помогут вспомнить день."},
  {t:"Исповедуй",v:{t:"Помилуй меня, Боже, по великой милости Твоей, и по множеству щедрот Твоих изгладь беззакония мои. Многократно омой меня от беззакония моего, и от греха моего очисти меня.",r:"Пс 50:3–4"},p:"Прочитай эти слова вслух или скажи Ему своими. Назови каждое и попроси прощения."},
  {t:"Исправь",v:{t:"Признавайтесь друг пред другом в проступках и молитесь друг за друга, чтобы исцелиться.",r:"Иак 5:16"},p:"Нужно ли у кого-то попросить прощения или что-то исправить? Запиши шаг — он появится в списке, пока не отметишь."},
- {t:"Прими прощение",v:{t:"Тогда придите — и рассудим, говорит Господь. Если будут грехи ваши, как багряное, — как снег убелю; если будут красны, как пурпур, — как волну убелю.",r:"Ис 1:18"},p:"Бог говорит: «грехов их и беззаконий их не воспомяну более». Можешь отпустить записи — они сотрутся навсегда, останется только отметка, что ты покаялся."}
+ {t:"Прими прощение",v:{t:"Тогда придите — и рассудим, говорит Господь. Если будут грехи ваши, как багряное, — как снег убелю; если будут красны, как пурпур, — как волну убелю.",r:"Ис 1:18"},p:"Бог говорит: «грехов их и беззаконий их не воспомяну более». Можешь отпустить записи — они сотрутся навсегда, останется только отметка о покаянии."}
 ];
 const AREAS=["Мысли","Слова","Поступки","Отношения","Упущенное добро","Сердце и мотивы"];
 function startConfess(){closeSheet();$("#toast").classList.remove("show");cancelAnimationFrame(SKY.raf);CF={step:0,items:[],steps:[],start:Date.now()};pmShow();document.body.style.overflow="hidden";drawCF()}
@@ -1767,7 +1767,7 @@ function drawCF(keep){
   const st=CSTEPS[CF.step],last=CF.step===CSTEPS.length-1;let mid="";
   if(CF.step===1)mid=`<div class="pick" style="margin-bottom:10px">${AREAS.map(a=>`<button data-a="cfArea" data-v="${a}">${a}</button>`).join("")}</div>
     <div class="cf-items">${CF.items.map((t,i)=>`<div class="cf-row"><span>${esc(t)}</span><button class="rb" data-a="cfDel" data-v="${i}" aria-label="Убрать">${ic("x")}</button></div>`).join("")}</div>
-    <div class="addline"><textarea class="in" id="cfIn" rows="2" style="min-height:0" placeholder="Например: сорвался на жену, осуждал коллегу…"></textarea><button class="btn ghost" data-a="cfAdd" aria-label="Добавить">${ic("plus")}</button></div>`;
+    <div class="addline"><textarea class="in" id="cfIn" rows="2" style="min-height:0" placeholder="Например: резкие слова близкому, осуждение коллеги…"></textarea><button class="btn ghost" data-a="cfAdd" aria-label="Добавить">${ic("plus")}</button></div>`;
   if(CF.step===2&&CF.items.length)mid=`<div class="cf-items">${CF.items.map(t=>`<div class="cf-row"><span>${esc(t)}</span></div>`).join("")}</div>`;
   if(CF.step===3)mid=`<div class="cf-items">${CF.steps.map((t,i)=>`<div class="cf-row step"><span>${esc(t)}</span><button class="rb" data-a="cfStepDel" data-v="${i}" aria-label="Убрать">${ic("x")}</button></div>`).join("")}</div>
     <div class="addline"><input class="in" id="cfStep" maxlength="120" placeholder="Например: извиниться перед женой"><button class="btn ghost" data-a="cfStepAdd" aria-label="Добавить шаг">${ic("plus")}</button></div>`;
@@ -1790,7 +1790,7 @@ function ember(){
 function drawCFDone(released){
   $("#pmIn").innerHTML=`<div class="pm-top"><span></span></div><div class="done-orb white">🕊️</div><h2 style="text-align:center;font-family:var(--serif);font-weight:600;font-size:56px;letter-spacing:-.01em">Прощено</h2>
   <p class="pv" style="text-align:center">Как далеко восток от запада, так удалил Он от нас беззакония наши.</p><div style="text-align:center"><span class="pvr">Пс 102:12</span></div>
-  <p class="pr" style="text-align:center">${released?"Записи отпущены навсегда. Бог не держит их против тебя — и ты не держи.":"Записи сохранены под замком. Ты прощён — иди с миром."}${CF&&CF.steps.length?" Шаги исправления ждут тебя во вкладке «Покаяние».":""}</p>
+  <p class="pr" style="text-align:center">${released?"Записи отпущены навсегда. Бог не держит их против тебя — и ты не держи.":"Записи сохранены под замком. Тебе прощено — иди с миром."}${CF&&CF.steps.length?" Шаги исправления ждут тебя во вкладке «Покаяние».":""}</p>
   <div class="pm-foot"><button class="btn" data-a="cfClose">Аминь</button></div>`;$("#pm").scrollTop=0}
 
 /* ---------- week story ---------- */
@@ -1925,7 +1925,7 @@ function vChurch(){
     <div class="row2"><button class="btn sm" data-a="chInvite">${ic("share")}Пригласить</button><button class="btn sm ghost" data-a="chMembers">${ic("users")}Участники</button></div></section>`
     :(!myCh().length?`<button class="chc" data-a="chAdd"><span class="be">⛪</span><span><b>Найди свою церковь</b><small>Поиск по названию и городу, вступление по коду — или создай свою: у вас будет своя стена молитв и планы чтения</small></span>${ic("plus")}</button>`:"");
   const seg=`<div class="seg s3 ${CH.seg==="plans"?"p1":CH.seg==="tog"?"p2":""}"><span class="knob"></span><button class="${CH.seg!=="plans"&&CH.seg!=="tog"?"on":""}" data-a="chSeg" data-v="wall">🙏 Стена</button><button class="${CH.seg==="plans"?"on":""}" data-a="chSeg" data-v="plans">📖 Чтение</button><button class="${CH.seg==="tog"?"on":""}" data-a="chSeg" data-v="tog">🤝 Вместе</button></div>`;
-  const bot=`<button class="set" style="width:100%;text-align:left" data-a="botSheet"><div><b>🔔 Сообщения от бота</b><span>${CH.me&&CH.me.remind?"Каждый день в "+CH.me.remind+(CH.me.chatOk?"":" · разреши боту писать"):"Стих дня, план чтения и кто молился за тебя"}</span></div>${ic("right")}</button>`;
+  const bot=`<button class="set" style="width:100%;text-align:left" data-a="botSheet"><div><b>🔔 Сообщения от бота</b><span>${CH.me&&CH.me.remind?"Каждый день в "+CH.me.remind+(CH.me.chatOk?"":" · разреши боту писать"):"Стих дня, план чтения и кто молится за тебя"}</span></div>${ic("right")}</button>`;
   const top=head+scopes+card+seg;
   if(CH.seg==="tog")return top+vTogether()+bot;
   if(CH.seg==="plans"){
@@ -2580,7 +2580,7 @@ function todaysList(){
 function todayCard(){
   const L=todaysList();if(!L.length)return "";const t=today(),done=L.filter(p=>(p.log||{})[t]).length;
   return `<section class="todayc"><div class="tc-h"><div><small>Сегодня в молитве</small><b>${done===L.length?"Все нужды дня ✓":done+" из "+L.length}</b></div><button class="btn sm" data-a="pmStart" data-v="cards">🤲 По карточкам</button></div>
-  <div class="tc-list">${L.map(p=>{const n=(p.log||{})[t]||0;return `<div class="tc-row" data-a="openPrayer" data-id="${p.id}" role="button" tabindex="0" style="--c:${p.color}"><span class="ic" aria-hidden="true">${p.icon}</span><span class="tx"><b>${esc(p.title)}</b><span>${esc((ui.why||{})[p.id]||"по очереди")}${p.promise&&p.promise.r?" · "+esc(p.promise.r):""}</span></span><span class="tap ${n?"done":""}" data-a="quick" data-id="${p.id}" role="button" aria-label="Помолился">${n?ic("check"):ic("plus")}</span></div>`}).join("")}</div></section>`}
+  <div class="tc-list">${L.map(p=>{const n=(p.log||{})[t]||0;return `<div class="tc-row" data-a="openPrayer" data-id="${p.id}" role="button" tabindex="0" style="--c:${p.color}"><span class="ic" aria-hidden="true">${p.icon}</span><span class="tx"><b>${esc(p.title)}</b><span>${esc((ui.why||{})[p.id]||"по очереди")}${p.promise&&p.promise.r?" · "+esc(p.promise.r):""}</span></span><span class="tap ${n?"done":""}" data-a="quick" data-id="${p.id}" role="button" aria-label="Отметить молитву">${n?ic("check"):ic("plus")}</span></div>`}).join("")}</div></section>`}
 function bdayCard(){const soon=peopleArr().map(p=>[p,bdayIn(p)]).filter(([,d])=>d!==null&&d<=3).sort((a,b)=>a[1]-b[1]);if(!soon.length)return "";const [p,d]=soon[0];
   return `<button class="bdc" data-a="openPerson" data-id="${p.id}"><span class="bd-e">🎂</span><span><small>${d===0?"Сегодня":d===1?"Завтра":"Через "+d+" "+plural(d,"день","дня","дней")}</small><b>День рождения · ${esc(p.name)}</b><span>Помолись и поблагодари Бога за этого человека</span></span>${ic("right")}</button>`}
 /* people views */
@@ -2773,7 +2773,7 @@ function dayVerse(){
   if(BIB&&S.meta.votd!=="prayer"){for(let k=0;k<VOTD.length;k++){const [b,c,v]=VOTD[(dayNum()+ui.vOff+k)%VOTD.length],ch=BIB[b]&&BIB[b][c-1];let t=ch&&ch[v-1],e=v;if(t){while(/[,;:—–-]\s*$/.test(t)&&e-v<3&&ch[e]){t+=" "+ch[e];e++}/* «…милосердие, вера,» → до конца фразы */ui.dvs={t,r:BOOKS[b][1]+" "+c+":"+v+(e>v?"–"+e:""),b,c,v};return ui.dvs}}}
   ui.dvs=null;return VERSES[(dayNum()+ui.vOff)%VERSES.length]}
 /* answer types */
-const ANS={yes:["🙌","Да, ответил","Как Господь ответил?","Опиши, что произошло. Это свидетельство ты будешь перечитывать."],no:["✋","Сказал «нет»","Что Бог закрыл и чему научил?","Иногда «нет» — это защита. Чему это научило?"],wait:["⏳","Сказал «подожди»","Что Он говорит сейчас?","Нужда останется в молитве с пометкой «жду»."],let:["🕊","Отпускаю","Почему отпускаешь?","Например: отдал это Богу, больше не держусь"]};
+const ANS={yes:["🙌","Да, ответил","Как Господь ответил?","Опиши, что произошло. Это свидетельство ты будешь перечитывать."],no:["✋","Сказал «нет»","Что Бог закрыл и чему научил?","Иногда «нет» — это защита. Чему это научило?"],wait:["⏳","Сказал «подожди»","Что Он говорит сейчас?","Нужда останется в молитве с пометкой «жду»."],let:["🕊","Отпускаю","Почему отпускаешь?","Например: это в Божьих руках, больше не держусь"]};
 const ansLabel=p=>p.ansType==="no"?"Бог сказал «нет»":p.ansType==="let"?"Отпущено Богу":"Бог ответил";
 /* daily hours (Daniel 6:10) */
 const HOURS=[["m","Утро","🌅","Господи! рано услышь голос мой, — рано предстану пред Тобою, и буду ожидать.","Пс 5:4","Посвяти день Богу: планы, встречи, силы. Попроси вести тебя."],
@@ -2804,7 +2804,7 @@ function capLocked(e){return e.type==="capsule"&&e.openAt>today()}
 function capsuleForm(){ui.cap={m:6};
   openSheet(`<div class="sh-top"><button class="pill icon" data-a="closeSheet" aria-label="Отмена">${ic("x")}</button><h2>Капсула времени</h2><button class="pill pri" data-a="capSave">Запечатать</button></div>
   <div class="hero" style="--c:#8B7CFF"><span class="ic" aria-hidden="true">📬</span><h3>Письмо в будущее</h3><p>Напиши себе, Богу или о том, во что веришь сейчас. Откроется только в выбранный день.</p></div>
-  <textarea class="in" id="capT" style="min-height:180px" placeholder="Дорогой я через полгода… Сейчас я молюсь о…"></textarea>
+  <textarea class="in" id="capT" style="min-height:180px" placeholder="Мне через полгода… Сейчас я молюсь о…"></textarea>
   <label class="l">Открыть через</label><div class="pick" id="capP">${[[1,"1 месяц"],[3,"3 месяца"],[6,"полгода"],[12,"1 год"]].map(([m,l])=>`<button class="${m===6?"on":""}" data-a="capM" data-v="${m}">${l}</button>`).join("")}</div>`,"cap");setTimeout(()=>$("#capT").focus(),350)}
 function capsuleHome(){const ready=Object.values(S.entries).filter(e=>e.type==="capsule"&&!capLocked(e)&&!e.opened);if(!ready.length)return "";const e=ready[0];
   return `<button class="weekc" data-a="capOpen" data-id="${e.id}" style="background:radial-gradient(100% 120% at 0% 0%,#8B7CFF,transparent 60%),radial-gradient(100% 120% at 100% 100%,#3CC8B4,transparent 60%),#141234"><span class="wk-orb">📬</span><span><small>Капсула открылась</small><b>Письмо от тебя из ${fDayY.format(new Date(e.createdAt))}</b></span>${ic("right")}</button>`}
@@ -2925,8 +2925,8 @@ function sheetDetail(){
   ${p.promise&&p.promise.t?`<div class="prom"><small>Обетование · молись Словом</small><p>«${esc(p.promise.t)}»</p><span>${esc(p.promise.r||"")}</span></div>`:p.status!=="answered"?(()=>{const v=autoPromise(p);return `<div class="prom"><small>Слово для молитвы · тема «${esc(p.cat||"Другое")}»</small><p>«${esc(v.t)}»</p><span>${esc(v.r)}</span></div>`})():""}
   ${p.personId&&S.people[p.personId]?`<button class="pc" data-a="openPerson" data-id="${p.personId}" style="--c:${S.people[p.personId].color};margin-bottom:14px"><span class="pav" style="width:40px;height:40px;font-size:20px">${S.people[p.personId].ava||""}</span><span class="tx"><b>${esc(S.people[p.personId].name)}</b><span>Открыть карточку человека</span></span>${ic("right")}</button>`:""}
   ${p.wait&&p.status!=="answered"?`<div class="answer-box gold"><div class="k">⏳ Бог сказал «подожди» · ${fDayY.format(new Date(p.wait.at))}</div>${p.wait.text?`<p>${esc(p.wait.text)}</p>`:""}</div>`:""}${p.status==="answered"?`<div class="answer-box"><div class="k">${ic("ok")}${ansLabel(p)} · ${fDayY.format(new Date(p.answeredAt))}</div><p>${esc(p.answer||"")}</p></div>`:""}
-  <div class="trio"><div class="tile"><b>${t}</b><span>${plural(t,"раз","раза","раз")} молился</span></div><div class="tile"><b>${dn}</b><span>${plural(dn,"день","дня","дней")} в молитве</span></div><div class="tile"><b>${since}</b><span>${p.status==="answered"?"дней до ответа":plural(since,"день","дня","дней")+" жду"}</span></div></div>
-  ${p.status!=="answered"?`<div class="row2" style="margin-bottom:14px"><button class="btn" data-a="quick" data-f="1" data-id="${p.id}">${ic("check")}${todayN?"Ещё раз":"Помолился"}</button><button class="btn green" data-a="answerForm" data-id="${p.id}">${ic("ok")}Бог ответил</button></div>${todayN?`<button class="textbtn" data-a="unquick" data-id="${p.id}" style="display:block;margin:-6px auto 14px;color:var(--muted)">↩︎ Отменить одну отметку за сегодня</button>`:""}`:
+  <div class="trio"><div class="tile"><b>${t}</b><span>${plural(t,"раз","раза","раз")} в молитве</span></div><div class="tile"><b>${dn}</b><span>${plural(dn,"день","дня","дней")} в молитве</span></div><div class="tile"><b>${since}</b><span>${p.status==="answered"?"дней до ответа":plural(since,"день","дня","дней")+" жду"}</span></div></div>
+  ${p.status!=="answered"?`<div class="row2" style="margin-bottom:14px"><button class="btn" data-a="quick" data-f="1" data-id="${p.id}">${ic("check")}${todayN?"Ещё раз":"Отметить"}</button><button class="btn green" data-a="answerForm" data-id="${p.id}">${ic("ok")}Бог ответил</button></div>${todayN?`<button class="textbtn" data-a="unquick" data-id="${p.id}" style="display:block;margin:-6px auto 14px;color:var(--muted)">↩︎ Отменить одну отметку за сегодня</button>`:""}`:
     `<button class="btn ghost wide" style="margin-bottom:14px" data-a="reopen" data-id="${p.id}">Продолжить молиться об этом</button>`}
   <div class="card"><div class="cal-h"><button class="nav" data-a="dNav" data-v="-1" aria-label="Предыдущий месяц">${ic("left")}</button><b>${fMonth.format(new Date(ui.dY,ui.dM,1))}</b><button class="nav" data-a="dNav" data-v="1" aria-label="Следующий месяц">${ic("right")}</button></div>${calendar(ui.dY,ui.dM,k=>(p.log||{})[k]||0,p.color)}</div>
   ${notes.length?`<h2 style="margin:20px 4px 10px;font-size:17px">Записи об этом</h2>${notes.map(entryCard).join("")}`:""}`;
